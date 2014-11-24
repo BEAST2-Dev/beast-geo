@@ -1,0 +1,72 @@
+<beast version='2.0'
+       namespace='beast.app.beauti:beast.core:beast.evolution.branchratemodel:beast.evolution.speciation:beast.evolution.Tree.t:coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution:beast.math.distributions'>
+
+
+<mergewith point='aux-partitions-panels'>
+		<alignmentProvider id="Add Spherical Geography" spec='BeautiSLocationTraitProvider' template='@SLocationTrait'/>
+
+        <subtemplate id='SLocationTrait' class='beast.evolution.alignment.AlignmentFromTraitMap' mainid='$(n)'
+suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.frequencies,
+				beast.math.distributions.MultivariateNormalDistribution.arg'>
+<![CDATA[
+	<parameter id="sprecision.s:$(n)" minordimension="1" estimate="true" value="100.0" lower="0.0"/>
+
+	<distribution id="slocationtreeLikelihood.$(n)" spec='sphericalGeo.ApproxMultivariateTraitLikelihood' tree='@Tree.t:$(n)'>
+	    <data spec='beast.evolution.alignment.AlignmentFromTraitMap' id='$(n)'>
+			<userDataType spec='beast.evolution.datatype.LocationDataType'/>
+			<traitMap id='traitmap.s:$(n)' spec='beast.evolution.tree.TreeTraitMap' tree='@Tree.t:$(n)' traitName='location' 
+				randomizeupper="90 180" randomizelower="-90 -180"  initByMean="true">
+				<parameter id="location.$(n)" minordimension='2' value='0.0 0.0'/>
+			</traitMap>
+		</data>
+
+		<siteModel spec='SiteModel' id="geoContSiteModel.s:$(n)">
+			<substModel id="sdiffusionModel.s:$(n)" spec="sphericalGeo.SphericalDiffusionModel" fast='true'>
+    		    <precision idref="sprecision.s:$(n)"/>
+			</substModel>
+		</siteModel>
+
+        <branchRateModel spec='beast.evolution.branchratemodel.StrictClockModel' id='StrictClock.c:$(n)'>
+            <clock.rate id='clockRate.c:$(n)' spec='parameter.RealParameter' value='1.0' estimate='false'/>
+        </branchRateModel>
+
+    </distribution>
+
+    <prior id="sprecisionPrior.s:$(n)" x="@sprecision.s:$(n)" name="distribution">
+        <Uniform id="Uniform.1" name="distr" lower='0' upper="1e10"/>
+    </prior>
+
+    <plugin id='ClockPrior.c:$(n)' spec='beast.math.distributions.Prior' x='@clockRate.c:$(n)'>
+        <distr spec="beast.math.distributions.Uniform" upper='Infinity'/>
+    </plugin>
+
+    <operator id='StrictClockRateScaler.c:$(n)' spec='ScaleOperator' scaleFactor="0.75" weight="3" parameter='@clockRate.c:$(n)'/>
+
+    <operator id="sprecisionScaler.s:$(n)" spec="ScaleOperator" parameter="@sprecision.s:$(n)" weight="5" scaleFactor="0.7"/>
+
+	<metadata id="location" spec='sphericalGeo.TraitFunction' likelihood='@slocationtreeLikelihood.$(n)' value="0.0"/>
+]]>
+
+         <connect srcID='slocationtreeLikelihood.$(n)'      targetID='likelihood' inputName='distribution' if="isInitializing"/>
+
+
+         <connect srcID='sprecision.s:$(n)'                targetID='state' inputName='stateNode' if='inlikelihood(sprecision.s:$(n)) and sprecision.s:$(n)/estimate=true'/>
+         <connect srcID='clockRate.c:$(n)'                 targetID='state' inputName='stateNode' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
+
+         <connect srcID='sprecisionPrior.$(n)'             targetID='prior' inputName='distribution' if='inposterior(sprecision.$(n)) and sprecision.s:$(n)/estimate=true'/>
+         <connect srcID='ClockPrior.c:$(n)'                targetID='prior' inputName='distribution' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
+
+         <connect srcID='sprecisionScaler.s:$(n)'          targetID='mcmc' inputName='operator' if='inlikelihood(sprecision.s:$(n)) and sprecision.s:$(n)/estimate=true'>Scale precision for diffusion of partition s:$(n)</connect>
+         <connect srcID='StrictClockRateScaler.c:$(n)'     targetID='mcmc' inputName='operator' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'>Scale clock rate of partition c:$(n)</connect>
+
+         <connect srcID='locationtreeLikelihood.$(n)'      targetID='tracelog' inputName='log' if='inlikelihood(locationtreeLikelihood.$(n))'/>
+         <connect srcID='sprecision.s:$(n)'                targetID='tracelog' inputName='log' if='inlikelihood(precisionMatrix.s:$(n)) and sprecision.s:$(n)/estimate=true'/>
+         <connect srcID='clockRate.c:$(n)'                 targetID='tracelog' inputName='log' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
+
+         <connect srcID='location'		                   targetID='TreeWithMetaDataLogger.t:$(n)' inputName='metadata' if='inposterior(slocationtreeLikelihood.$(n))'/>
+	</subtemplate>
+
+</mergewith>
+
+</beast>
+
