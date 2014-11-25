@@ -30,6 +30,7 @@ import beast.app.draw.ListInputEditor;
 import beast.app.draw.SmallLabel;
 import beast.continuous.SampledMultivariateTraitLikelihood;
 import beast.core.BEASTInterface;
+import beast.core.Description;
 import beast.core.Input;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.AlignmentFromTraitMap;
@@ -38,7 +39,7 @@ import beast.evolution.tree.TreeInterface;
 import beast.evolution.tree.TreeTraitMap;
 
 
-
+@Description("Location editor for BEAUti template to set up spherical diffusion models")
 public class SLocationInputEditor extends ListInputEditor {
 	private static final long serialVersionUID = 1L;
 

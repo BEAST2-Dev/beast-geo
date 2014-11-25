@@ -13,6 +13,7 @@ import beast.app.beauti.BeautiAlignmentProvider;
 import beast.app.beauti.BeautiDoc;
 import beast.app.beauti.PartitionContext;
 import beast.core.BEASTInterface;
+import beast.core.Description;
 import beast.core.State;
 import beast.core.StateNode;
 import beast.evolution.alignment.Alignment;
@@ -20,6 +21,7 @@ import beast.evolution.tree.Tree;
 
 
 /** trait provided for spherical diffusion model **/
+@Description("Location provider for BEAUti template to set up spherical diffusion models")
 public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
 
 	@Override
