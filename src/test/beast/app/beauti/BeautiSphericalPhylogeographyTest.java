@@ -1,6 +1,7 @@
 package test.beast.app.beauti;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.swing.edt.GuiActionRunner.execute;
 import static org.fest.swing.finder.JFileChooserFinder.findFileChooser;
 
 import java.awt.Component;
@@ -13,6 +14,7 @@ import javax.swing.JOptionPane;
 
 import org.fest.swing.core.GenericTypeMatcher;
 import org.fest.swing.data.Index;
+import org.fest.swing.edt.GuiTask;
 import org.fest.swing.fixture.JComboBoxFixture;
 import org.fest.swing.fixture.JFileChooserFixture;
 import org.fest.swing.fixture.JOptionPaneFixture;
@@ -20,6 +22,8 @@ import org.fest.swing.fixture.JTabbedPaneFixture;
 import org.fest.swing.fixture.JTableFixture;
 import org.fest.swing.image.ScreenshotTaker;
 import org.junit.Test;
+
+import com.sun.javafx.Utils;
 
 import test.beast.app.beauti.BeautiBase;
 
@@ -47,18 +51,19 @@ public class BeautiSphericalPhylogeographyTest extends BeautiBase {
 			warning("0. Load RABV.nex");
 			//importAlignment("doc/tutorial/phylogeography_continuous/data/", new File("RacRABV.nex"));
 			
-			beautiFrame.button("+").click();
-
-			// importAlignment("examples/nexus/", new File("RacRABV.nex"));
-			dialog = new JOptionPaneFixture(robot());
-			dialog.comboBox("OptionPane.comboBox").selectItem("Add Alignment");
-			dialog.okButton().click();
-			JFileChooserFixture fileChooser = findFileChooser().using(robot());
-			fileChooser.setCurrentDirectory(new File("examples/nexus/"));
-			fileChooser.selectFiles(new File("RacRABV.nex")).approve();
-			// close down any popup message
-			robot().pressKey(KeyEvent.VK_ESCAPE);
-
+			if (Utils.isMac()) {
+				importAlignment("examples/nexus/", new File("RacRABV.nex"));
+			} else {
+				beautiFrame.button("+").click();
+				dialog = new JOptionPaneFixture(robot());
+				dialog.comboBox("OptionPane.comboBox").selectItem("Add Alignment");
+				dialog.okButton().click();
+				JFileChooserFixture fileChooser = findFileChooser().using(robot());
+				fileChooser.setCurrentDirectory(new File("examples/nexus/"));
+				fileChooser.selectFiles(new File("RacRABV.nex")).approve();
+				// close down any popup message
+				robot().pressKey(KeyEvent.VK_ESCAPE);
+			}
 
 			JTabbedPaneFixture f = beautiFrame.tabbedPane();
 			f.requireVisible();
