@@ -423,7 +423,9 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
       
 	  	JFrame frame = new JFrame();
 	  	JPanel panel= new JPanel() {
-	  		protected void paintComponent(java.awt.Graphics g) {
+			private static final long serialVersionUID = 1L;
+
+			protected void paintComponent(java.awt.Graphics g) {
 	  			double scaleX = getWidth() / 360.0;
 	  			double scaleY = getHeight() / 180.0;
 	  			for (int i = 0; i < NR_OF_POINTS; i++) {
