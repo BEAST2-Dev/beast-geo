@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 
 import beast.core.BEASTObject;
 import beast.core.Description;
+import beast.util.Randomizer;
 
 @Description("Defines a geographical region")
 public class Region extends BEASTObject {
@@ -27,8 +28,19 @@ public class Region extends BEASTObject {
 			return false;
 		}
 		// check bitmap
-		int color = image.getRGB(iLat, iLong) & 0xFFFFFF;
+		int color = image.getRGB(iLong, iLat) & 0xFFFFFF;
 		return (color == regionColor);
 	}
 
+	public double [] sample() {
+		int i;
+		do {
+			i = Randomizer.nextInt(width * height);
+		} while ((image.getRGB(i % width , i / width) & 0xFFFFFF) != regionColor);
+
+		double [] location = new double[2];
+		location[0] = minLat + (maxLat - minLat) * i /(width * height);
+		location[1] = minLong + (maxLong - minLong) * (i%width)/width;
+		return location;
+	}
 }
