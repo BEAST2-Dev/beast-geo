@@ -2,8 +2,13 @@ package sphericalGeo;
 
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import beast.core.Description;
 import beast.core.Input;
+import beast.core.Input.Validate;
+import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.AlignmentFromTraitMap;
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.likelihood.GenericTreeLikelihood;
@@ -15,6 +20,11 @@ import beast.evolution.tree.TreeTraitMap;
 @Description("Approximate likelihood by MAP approximation of internal states")
 public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	public Input<Boolean> scaleByBranchLengthInput = new Input<Boolean>("scale", "scale by branch lengths for initial position", true);
+	public Input<List<GeoPrior>> geopriorsInput = new Input<List<GeoPrior>>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<>());
+	public Input<RealParameter> locationInput = new Input<RealParameter>("location",
+			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree", Validate.REQUIRED);
+
+	
 	
 	SphericalDiffusionModel substModel;
 	TreeInterface tree;
@@ -30,6 +40,10 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	boolean scaleByBranchLength;
 	
 	PFApproxMultivariateTraitLikelihood loggerLikelihood;
+	
+	RealParameter sampledLocations;
+	boolean [] isSampled;
+	List<Integer> sampleNumber;
 	
 	@Override
 	public void initAndValidate() throws Exception {
@@ -58,15 +72,39 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		sumLengths = new double[tree.getNodeCount()];
 		parentweight = new double[tree.getNodeCount()];
 	
+		List<GeoPrior> geopriors = geopriorsInput.get();
+		boolean [] isSampled = new boolean[tree.getNodeCount()];
+		sampleNumber = new ArrayList<Integer>();
+		if (geopriors.size() > 0) {
+			sampledLocations = locationInput.get();
+			for (GeoPrior prior : geopriors) {
+				isSampled[prior.taxonNr] = true;
+				sampleNumber.add(prior.taxonNr);
+			}
+		}
+		
 		loggerLikelihood = new PFApproxMultivariateTraitLikelihood();
 		loggerLikelihood.initByName("scale", scaleByBranchLength, "tree", tree, "siteModel", siteModel, 
-				"branchRateModel", clockModel, "data", data);
+				"branchRateModel", clockModel, "data", data, "location", sampledLocations,
+				"geoprior", geopriors);
 	}
 	
 	@Override
     public double getCurrentLogP() {
         double logP = Double.NaN;
 		try {
+			// check prior
+			if (sampledLocations != null) {
+				for (GeoPrior prior : geopriorsInput.get()) {
+					if (prior.calculateLogP() != 0) {
+						logP = Double.NEGATIVE_INFINITY;
+						return logP;
+					}
+				}
+			}
+			
+			
+			// calc likelihood
 			logP = calculateLogP();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -148,6 +186,18 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	
 	void caclPositions() {
 		final double EPSILON = 1e-8;
+		
+		// process sampled locations
+		for (int i : sampleNumber) {
+			double lat1 = sampledLocations.getMatrixValue(i, 0);
+			double long1 = sampledLocations.getMatrixValue(i, 1);
+			if (position[i][0] != lat1 || position[i][1] != long1) {
+				position[i][0] = lat1;
+				position[i][1] = long1;
+				sphereposition[i] = SphericalDiffusionModel.spherical2Cartesian(position[i][0], position[i][1]);
+			}
+		}
+		
 		initByMean(tree.getRoot());
 		resetMeanDown(tree.getRoot());
 		
@@ -283,7 +333,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			int nodeNr = node.getNr();
 			int child1 = node.getLeft().getNr();
 			int child2 = node.getRight().getNr();
-			setHalfWayPosition(nodeNr, child1, child2);
+			if (!isSampled[nodeNr]) {
+				setHalfWayPosition(nodeNr, child1, child2);
+			}
 		}
 	}		
 	
@@ -297,10 +349,14 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			int child1 = node.getLeft().getNr();
 			int child2 = node.getRight().getNr();
 			if (node.isRoot()) {
-				setHalfWayPosition(nodeNr, child1, child2);
+				if (!isSampled[nodeNr]) {
+					setHalfWayPosition(nodeNr, child1, child2);
+				}
 			} else {
-				int parent = node.getParent().getNr();
-				setHalfWayPosition(nodeNr, child1, child2, parent);
+				if (!isSampled[nodeNr]) {
+					int parent = node.getParent().getNr();
+					setHalfWayPosition(nodeNr, child1, child2, parent);
+				}
 			}
 		}
 	}
