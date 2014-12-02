@@ -22,7 +22,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	public Input<Boolean> scaleByBranchLengthInput = new Input<Boolean>("scale", "scale by branch lengths for initial position", true);
 	public Input<List<GeoPrior>> geopriorsInput = new Input<List<GeoPrior>>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<>());
 	public Input<RealParameter> locationInput = new Input<RealParameter>("location",
-			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree", Validate.REQUIRED);
+			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree");
 
 	
 	
@@ -73,7 +73,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		parentweight = new double[tree.getNodeCount()];
 	
 		List<GeoPrior> geopriors = geopriorsInput.get();
-		boolean [] isSampled = new boolean[tree.getNodeCount()];
+		isSampled = new boolean[tree.getNodeCount()];
 		sampleNumber = new ArrayList<Integer>();
 		if (geopriors.size() > 0) {
 			sampledLocations = locationInput.get();
@@ -87,9 +87,14 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		}
 		
 		loggerLikelihood = new PFApproxMultivariateTraitLikelihood();
-		loggerLikelihood.initByName("scale", scaleByBranchLength, "tree", tree, "siteModel", siteModel, 
-				"branchRateModel", clockModel, "data", data, "location", sampledLocations,
-				"geoprior", geopriors);
+		if (geopriors.size() > 0) {
+			loggerLikelihood.initByName("scale", scaleByBranchLength, "tree", tree, "siteModel", siteModel, 
+				"branchRateModel", clockModel, "data", data,
+				"geoprior", geopriors, "location", sampledLocations);
+		} else {
+			loggerLikelihood.initByName("scale", scaleByBranchLength, "tree", tree, "siteModel", siteModel, 
+					"branchRateModel", clockModel, "data", data);
+		}
 	}
 	
 	@Override

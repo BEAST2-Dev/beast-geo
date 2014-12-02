@@ -28,7 +28,7 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 
 	public Input<List<GeoPrior>> geopriorsInput = new Input<List<GeoPrior>>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<>());
 	public Input<RealParameter> locationInput = new Input<RealParameter>("location",
-			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree", Validate.REQUIRED);
+			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree");
 
 	double epsilon = 2.0;
 	boolean scaleByBranchLength;
@@ -196,7 +196,7 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		}
 		
 		List<GeoPrior> geopriors = geopriorsInput.get();
-		boolean [] isSampled = new boolean[tree.getNodeCount()];
+		isSampled = new boolean[tree.getNodeCount()];
 		sampleNumber = new ArrayList<Integer>();
 		if (geopriors.size() > 0) {
 			sampledLocations = locationInput.get();

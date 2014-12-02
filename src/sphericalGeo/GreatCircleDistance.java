@@ -9,7 +9,7 @@ import beast.evolution.alignment.distance.Distance;
 import beast.evolution.tree.TreeInterface;
 import beast.evolution.tree.TreeTraitMap;
 
-@Description("Distance between points on a globe")
+@Description("Distance between points on a globe") 
 public class GreatCircleDistance extends BEASTObject implements Distance {
 	public Input<TreeTraitMap> traitInput = new Input<TreeTraitMap>("trait", "trait specifying latitude/longitude locations", Validate.REQUIRED);
 			
