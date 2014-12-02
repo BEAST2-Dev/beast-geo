@@ -187,9 +187,11 @@
 		<copy todir="${Add_on_dir}/lib">
 			<fileset dir="${distGEO}" includes="GEO.addon.jar" />
 		</copy>
-		<copy todir="${Add_on_dir}/doc">
+		<!--
+        <copy todir="${Add_on_dir}/doc">
 			<fileset dir="doc/tutorial" includes="phylogeography_s.pdf" />
 		</copy>
+		-->
 		<copy todir="${Add_on_dir}">
 			<fileset dir="${distGEO}" includes="GEO.src.jar" />
 		</copy>
@@ -198,7 +200,7 @@
 			<fileset file="templates/AutoPartition.xml" />
 		</copy>
 
-		<jar jarfile="${distGEO}/GEO.addon.v${version}.zip">
+		<jar jarfile="${distGEO}/GEO_SPHERE.addon.v${version}.zip">
 			<fileset dir="${Add_on_dir}">
 				<include name="**/*" />
 			</fileset>
