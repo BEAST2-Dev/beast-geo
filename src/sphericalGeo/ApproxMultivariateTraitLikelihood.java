@@ -7,8 +7,8 @@ import java.util.List;
 
 import beast.core.Description;
 import beast.core.Input;
-import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
+import beast.core.util.Log;
 import beast.evolution.alignment.AlignmentFromTraitMap;
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.likelihood.GenericTreeLikelihood;
@@ -77,13 +77,22 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		sampleNumber = new ArrayList<Integer>();
 		if (geopriors.size() > 0) {
 			sampledLocations = locationInput.get();
+			if (sampledLocations == null) {
+				Log.warning.println("'location' needs to be specified when geopriors are defined, but location=null");
+			}
+			Double [] d = new Double[sampledLocations.getDimension()];
+			for (int i = 0; i < d.length; i++) {
+				d[i] = sampledLocations.getValue(i);
+			}
 			for (GeoPrior prior : geopriors) {
 				isSampled[prior.taxonNr] = true;
 				sampleNumber.add(prior.taxonNr);
 				double [] location = prior.region.sample();
-				sampledLocations.setValue(prior.taxonNr * 2, location[0]);
-				sampledLocations.setValue(prior.taxonNr * 2 + 1, location[1]);
+				d[prior.taxonNr * 2] = location[0];
+				d[prior.taxonNr * 2 + 1] = location[1];
 			}
+			RealParameter tmp = new RealParameter(d);
+			sampledLocations.assignFromWithoutID(tmp);
 		}
 		
 		loggerLikelihood = new PFApproxMultivariateTraitLikelihood();
@@ -617,7 +626,8 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	protected boolean requiresRecalculation() {
 		needsUpdate = true;
 		loggerLikelihood.needsUpdate = true;
-		return super.requiresRecalculation();
+		super.requiresRecalculation();
+		return true;
 	}
 	
 }

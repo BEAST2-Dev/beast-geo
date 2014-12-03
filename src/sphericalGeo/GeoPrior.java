@@ -10,6 +10,7 @@ import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.State;
 import beast.core.parameter.RealParameter;
+import beast.core.util.Log;
 import beast.evolution.alignment.Taxon;
 import beast.evolution.alignment.TaxonSet;
 import beast.evolution.tree.Node;
@@ -21,7 +22,7 @@ public class GeoPrior extends Distribution {
 	public Input<Boolean> isInsideInput = new Input<Boolean>("isInside", "whether the prior is for being inside the region, instead of outside", true);
 	public Input<RealParameter> locationInput = new Input<RealParameter>("location",
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree", Validate.REQUIRED);
-	public Input<Tree> treeInput = new Input<Tree>("tree", "beast tree (from which to get the taxon set)");
+	public Input<Tree> treeInput = new Input<Tree>("tree", "beast tree (from which to get the taxon set)", Validate.REQUIRED);
 
 	public Input<Taxon> taxonInput = new Input<Taxon>("taxon", "taxon associated with this region, if only a tip is restricted. Otherwise use 'taxonset'");
 	public Input<TaxonSet> taxonSetInput = new Input<TaxonSet>("taxonset",
@@ -51,8 +52,9 @@ public class GeoPrior extends Distribution {
 		tree = treeInput.get();
 		taxonSet = tree.getTaxonset();
 		if (location.getDimension() != taxonSet.getTaxonCount() * 4 - 2) {
-			throw new RuntimeException("expected that location parameter to have dimension 2 time number of taxa - 1 = " + (taxonSet.getTaxonCount() * 4 - 2)
-					+ " not " + location.getDimension());
+			Log.warning.println("Setting dimension of location parameter to have dimension 2 time number of taxa - 1 = " + (taxonSet.getTaxonCount() * 4 - 2)
+					+ " (from " + location.getDimension() +")");
+			location.setDimension(taxonSet.getTaxonCount() * 4 - 2);
 		}
 
 		if (taxonInput.get() != null) {
