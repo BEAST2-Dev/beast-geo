@@ -407,6 +407,11 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 				pposition[i][0] = position[i][0];
 				pposition[i][1] = position[i][1];
 			}
+			for (int i : sampleNumber) {
+				pposition[i][0] = position[i][0];
+				pposition[i][1] = position[i][1];
+				
+			}
 		}
 	}
 	

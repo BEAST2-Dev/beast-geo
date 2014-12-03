@@ -5,6 +5,7 @@ import java.io.File;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
+import beast.core.util.Log;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -24,14 +25,44 @@ public class KMLRegion extends Region {
 
 	@Override
 	public void initAndValidate() throws Exception {
+		Log.info.println("Processing " + kmlFileInput.get());
 		List<List<Double>> coordinates = parseKML();
 		calcAdmissableNodes(coordinates);
 	}
 
 	private void calcAdmissableNodes(List<List<Double>> coordinates) throws Exception {
 		boolean debug = true;// Boolean.valueOf(System.getProperty("beast.debug"));
+		boolean traversesMapCenter = false;
+		for (List<Double> coords : coordinates) {
+			for (int i = 0; i < coords.size() - 2; i += 2) {
+				double longitude = coords.get(i + 1);
+				double longitude2 = coords.get(i + 3);
+				if ((longitude > 150 && longitude2 < 150) ||
+					(longitude2 > 150 && longitude < 150)) {
+					traversesMapBoundary = true;
+				}
+				if ((longitude > -30 && longitude < 0 && longitude2 > 0 && longitude2 < 30 ) ||
+						(longitude2 > -30 && longitude2 < 0 && longitude > 0 && longitude < 30 )) {
+					traversesMapCenter = true;
+				}
+			}
+		}
+		if (traversesMapBoundary) {
+			if (traversesMapCenter) {
+				Log.warning.println("region too large: it crosses both center (long=0) and map boundary (long=180), expect problems");
+			} else {
+				for (List<Double> coords : coordinates) {
+					for (int i = 0; i < coords.size(); i += 2) {
+						double longitude = coords.get(i + 1);
+						if (longitude < 0) {
+							coords.set(i + 1, longitude + 360);
+						}
+					}
+				}
+			}
+		}
 
-		minLong = 360; maxLong = -360; maxLat = -90; minLat = 180;
+		minLong = 360 * 2; maxLong = -360; maxLat = -90; minLat = 180;
 		for (List<Double> coords : coordinates) {
 			for (int i = 0; i < coords.size(); i += 2) {
 				double latitude = coords.get(i);

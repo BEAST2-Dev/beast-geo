@@ -59,8 +59,8 @@ suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.freq
          <connect srcID='sprecisionScaler.s:$(n)'          targetID='mcmc' inputName='operator' if='inlikelihood(sprecision.s:$(n)) and sprecision.s:$(n)/estimate=true'>Scale precision for diffusion of partition s:$(n)</connect>
          <connect srcID='StrictClockRateScaler.c:$(n)'     targetID='mcmc' inputName='operator' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'>Scale clock rate of partition c:$(n)</connect>
 
-         <connect srcID='locationtreeLikelihood.$(n)'      targetID='tracelog' inputName='log' if='inlikelihood(locationtreeLikelihood.$(n))'/>
-         <connect srcID='sprecision.s:$(n)'                targetID='tracelog' inputName='log' if='inlikelihood(precisionMatrix.s:$(n)) and sprecision.s:$(n)/estimate=true'/>
+         <connect srcID='slocationtreeLikelihood.$(n)'     targetID='tracelog' inputName='log' if='inlikelihood(slocationtreeLikelihood.$(n))'/>
+         <connect srcID='sprecision.s:$(n)'                targetID='tracelog' inputName='log' if='inlikelihood(sprecision.s:$(n)) and sprecision.s:$(n)/estimate=true'/>
          <connect srcID='clockRate.c:$(n)'                 targetID='tracelog' inputName='log' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
 
          <connect srcID='location'		                   targetID='TreeWithMetaDataLogger.t:$(n)' inputName='metadata' if='inposterior(slocationtreeLikelihood.$(n))'/>
