@@ -91,9 +91,11 @@ public class KMLRegion extends Region {
 			System.err.println((int) (worldimage.getWidth() * (180 + maxLong) / 360.0));
 			System.err.println((int) (worldimage.getHeight() * (90 + maxLat) / 180.0));
 
-			g.drawImage(worldimage, 0, 0, width, height, (int) (worldimage.getWidth() * (180 + minLong) / 360.0),
-					(int) (worldimage.getHeight() * (minLat) / 180.0), (int) (worldimage.getWidth() * (180 + maxLong) / 360.0), (int) (worldimage.getHeight()
-							* (maxLat) / 180.0), null);
+			g.drawImage(worldimage, 0, 0, width, height, 
+					(int) (worldimage.getWidth() * (180 + minLong) / 360.0),
+					(int) (worldimage.getHeight() * (90 - maxLat) / 180.0), 
+					(int) (worldimage.getWidth() * (180 + maxLong) / 360.0), 
+					(int) (worldimage.getHeight() * (90 - minLat) / 180.0), null);
 			ImageIO.write(image, "png", new File("/tmp/kmlrange" + getID() + ".png"));
 		}
 
@@ -103,7 +105,7 @@ public class KMLRegion extends Region {
 			int[] yPoints = new int[nPoints];
 			for (int i = 0; i < coords.size(); i += 2) {
 				xPoints[i / 2] = (int) ((coords.get(i + 1) - minLong) * w);
-				yPoints[i / 2] = (int) ((coords.get(i) - minLat) * h);
+				yPoints[i / 2] = height - (int) ((coords.get(i) - minLat) * h);
 			}
 			g.setColor(new Color(regionColor));
 			g.fillPolygon(xPoints, yPoints, nPoints);
@@ -133,7 +135,7 @@ public class KMLRegion extends Region {
 			for (String sStr : sStrs) {
 				if (sStr.contains(",")) {
 					String[] sCoords = sStr.split(",");
-					polygon.add(90 - Double.parseDouble(sCoords[1].trim()));
+					polygon.add(Double.parseDouble(sCoords[1].trim()));
 					polygon.add(Double.parseDouble(sCoords[0].trim()));
 				}
 			}
