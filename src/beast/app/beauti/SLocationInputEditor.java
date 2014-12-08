@@ -407,7 +407,13 @@ public class SLocationInputEditor extends ListInputEditor {
     		String value = strs2[1].trim();
     		for (int i = 0; i < tableData.length; i++) {
     			if (tableData[i][0].equals(taxon)) {
-    				tableData[i][column] = value;
+    				if (value.contains("\t")) {
+    					String [] values = value.split("\\t");
+    					tableData[i][1] = values[0];
+    					tableData[i][2] = values[1];    					
+    				} else {
+    					tableData[i][column] = value;
+    				}
     				break;
     			}
     		}
