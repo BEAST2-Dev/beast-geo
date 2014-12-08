@@ -9,13 +9,13 @@ import beast.core.Description;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
-import beast.evolution.alignment.AlignmentFromTraitMap;
+//import beast.evolution.alignment.AlignmentFromTraitMap;
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.likelihood.GenericTreeLikelihood;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TreeInterface;
-import beast.evolution.tree.TreeTraitMap;
+//import beast.evolution.tree.TreeTraitMap;
 
 @Description("Approximate likelihood by MAP approximation of internal states")
 public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {

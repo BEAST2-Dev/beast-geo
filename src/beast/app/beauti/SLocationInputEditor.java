@@ -28,15 +28,15 @@ import beast.app.beauti.BeautiDoc;
 import beast.app.beauti.GuessPatternDialog;
 import beast.app.draw.ListInputEditor;
 import beast.app.draw.SmallLabel;
-import beast.continuous.SampledMultivariateTraitLikelihood;
+//import beast.continuous.SampledMultivariateTraitLikelihood;
 import beast.core.BEASTInterface;
 import beast.core.Description;
 import beast.core.Input;
 import beast.evolution.alignment.Alignment;
-import beast.evolution.alignment.AlignmentFromTraitMap;
+import sphericalGeo.AlignmentFromTraitMap;
 import beast.evolution.alignment.TaxonSet;
 import beast.evolution.tree.TreeInterface;
-import beast.evolution.tree.TreeTraitMap;
+import sphericalGeo.TreeTraitMap;
 
 
 @Description("Location editor for BEAUti template to set up spherical diffusion models")
@@ -49,7 +49,7 @@ public class SLocationInputEditor extends ListInputEditor {
 
 	@Override
 	public Class<?> baseType() {
-		return SampledMultivariateTraitLikelihood.class;
+		return ApproxMultivariateTraitLikelihood.class;
 	}
 
 	ApproxMultivariateTraitLikelihood likelihood;

@@ -5,16 +5,16 @@
 <mergewith point='aux-partitions-panels'>
 		<alignmentProvider id="Add Spherical Geography" spec='BeautiSLocationTraitProvider' template='@SLocationTrait'/>
 
-        <subtemplate id='SLocationTrait' class='beast.evolution.alignment.AlignmentFromTraitMap' mainid='$(n)'
+        <subtemplate id='SLocationTrait' class='sphericalGeo.AlignmentFromTraitMap' mainid='$(n)'
 suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.frequencies,
 				beast.math.distributions.MultivariateNormalDistribution.arg'>
 <![CDATA[
 	<parameter id="sprecision.s:$(n)" minordimension="1" estimate="true" value="100.0" lower="0.0"/>
 
 	<distribution id="slocationtreeLikelihood.$(n)" spec='sphericalGeo.ApproxMultivariateTraitLikelihood' tree='@Tree.t:$(n)'>
-	    <data spec='beast.evolution.alignment.AlignmentFromTraitMap' id='$(n)'>
-			<userDataType spec='beast.evolution.datatype.LocationDataType'/>
-			<traitMap id='traitmap.s:$(n)' spec='beast.evolution.tree.TreeTraitMap' tree='@Tree.t:$(n)' traitName='location' 
+	    <data spec='sphericalGeo.AlignmentFromTraitMap' id='$(n)'>
+			<userDataType spec='sphericalGeo.LocationDataType'/>
+			<traitMap id='traitmap.s:$(n)' spec='sphericalGeo.TreeTraitMap' tree='@Tree.t:$(n)' traitName='location' 
 				randomizeupper="90 180" randomizelower="-90 -180"  initByMean="true">
 				<parameter id="location.$(n)" minordimension='2' value='0.0 0.0'/>
 			</traitMap>
