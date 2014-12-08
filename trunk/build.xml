@@ -31,7 +31,7 @@
 		<fileset dir="${libBeast2}" includes="junit-4.8.2.jar"/>
 		<fileset dir="${libBeast2}" includes="fest.jar"/>
 		<pathelement path="${beast2classpath}"/>
-		<pathelement path="${beast_classic_path}"/>
+		<!--pathelement path="${beast_classic_path}"/-->
 	</path>
 
 	<!-- start -->

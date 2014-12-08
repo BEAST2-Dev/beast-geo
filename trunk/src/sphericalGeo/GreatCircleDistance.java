@@ -7,7 +7,7 @@ import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.evolution.alignment.distance.Distance;
 import beast.evolution.tree.TreeInterface;
-import beast.evolution.tree.TreeTraitMap;
+//import beast.evolution.tree.TreeTraitMap;
 
 @Description("Distance between points on a globe") 
 public class GreatCircleDistance extends BEASTObject implements Distance {
