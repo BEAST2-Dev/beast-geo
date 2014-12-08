@@ -12,12 +12,17 @@ import beast.evolution.tree.TreeInterface;
 import beast.util.Randomizer;
 
 @Description("Maps nodes in a tree to entries of a parameter")
-public class TreeTraitMap extends CalculationNode implements TreeTrait<double[]> {
+public class TreeTraitMap extends CalculationNode /* implements TreeTrait<double[]>*/ {
 	public Input<TreeInterface> treeInput = new Input<TreeInterface>("tree", "tree for which to map the nodes", Validate.REQUIRED);
 	public Input<RealParameter> parameterInput = new Input<RealParameter>("parameter",
 			"paramater for which to map entries for", Validate.REQUIRED);
 	public Input<String> traitName = new Input<String>("traitName", "name of the trait", "unnamed");
-	public Input<Intent> intent = new Input<Intent>("intent", "intent of the trait, one of " + Intent.values()
+    public enum Intent {
+        NODE,
+        BRANCH,
+        WHOLE_TREE
+    }
+    public Input<Intent> intent = new Input<Intent>("intent", "intent of the trait, one of " + Intent.values()
 			+ " (Default whole tree)", Intent.WHOLE_TREE);
 	public Input<String> value = new Input<String>("value","initialisation values for traits in the form of " +
 			"a comma separated string of taxon-name, value pairs. For example, for a two-dimensional trait " +
@@ -208,12 +213,12 @@ public class TreeTraitMap extends CalculationNode implements TreeTrait<double[]>
 		}
 	}
 
-	@Override
+	//@Override
 	public Class<?> getTraitClass() {
 		return double[].class;
 	}
 
-	@Override
+	//@Override
 	public String getTraitString(TreeInterface tree, Node node) {
 		double [] values = getTrait(tree, node);
         if (values == null || values.length == 0) return null;
