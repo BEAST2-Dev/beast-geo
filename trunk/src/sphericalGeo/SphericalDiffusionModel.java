@@ -64,7 +64,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 		frequenciesInput.setRule(Validate.OPTIONAL);
 	}
 
-    RealParameter precision;
+    protected RealParameter precision;
     boolean fast = false;
 
     @Override
