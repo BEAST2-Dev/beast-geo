@@ -78,10 +78,14 @@
 		       fork="true"
 		       memoryinitialsize="256m"
 		       memorymaximumsize="256m">
-			<include name="beast/**/**" />
+			<include name="**/**" />
 			<!-- compile JUnit test classes -->
 			<include name="test/beast/**" />
 		</javac>
+        <copy todir="${buildGEO}">
+            <fileset dir="${srcGEO}" includes="**/*.properties" />
+            <fileset dir="${srcGEO}" includes="**/*.png" />
+        </copy>
 		<echo message="Successfully compiled." />
 	</target>
 
@@ -119,8 +123,8 @@
 				<attribute name="Built-By" value="${user.name}" />
 			</manifest>
 			<fileset dir="${buildGEO}">
-				<include name="beast/**/*.class" />
-				<include name="util/**/*.class" />
+				<include name="**/*.class" />
+				<include name="**/*.png" />
 				<include name="**/*.properties" />
 			</fileset>
 		</jar>

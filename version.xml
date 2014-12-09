@@ -1,3 +1,8 @@
 <addon name='GEO_SPHERE' version='0.0.1'>
 	<depends on='beast2' atleast='2.2.0'/>
+    <addonapp description="HeatMapMaker"
+              class="sphericalGeo.util.HeatMapMaker"
+              args=""
+              icon="sphericalGeo/util/heatmapicon.png"
+            />
 </addon>
