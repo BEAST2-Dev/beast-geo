@@ -50,8 +50,7 @@ public class Region extends BEASTObject {
 
 		// sanity check
 		if (!isInside(location[0], location[1])) {
-			System.err.println("Failed to sample region!");
-			isInside(location[0], location[1]);
+			location = sample();
 		}
 		
 		return location;
