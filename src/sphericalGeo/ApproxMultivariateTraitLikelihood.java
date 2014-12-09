@@ -107,8 +107,8 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	}
 	
 	@Override
-    public double getCurrentLogP() {
-        double logP = Double.NaN;
+	public double calculateLogP() throws Exception {
+        logP = Double.NaN;
 		try {
 			// check prior
 			if (sampledLocations != null) {
@@ -122,22 +122,15 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			
 			
 			// calc likelihood
-			logP = calculateLogP();
+			logP = 0.0;
+			calcBranchLengths();
+			caclPositions();
+			logP = calcLogP();
+			needsUpdate = false;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        return logP;
-    }
-
-	
-	@Override
-	public double calculateLogP() throws Exception {
-		logP = 0.0;
-		calcBranchLengths();
-		caclPositions();
-		logP = calcLogP();
-		needsUpdate = false;
 		return logP;
 	}
 
@@ -615,6 +608,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		loggerLikelihood.needsUpdate = true;
 		super.store();
 	}
+	
 	@Override
 	public void restore() {
 		needsUpdate = true;
