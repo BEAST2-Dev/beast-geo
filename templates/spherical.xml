@@ -16,7 +16,7 @@ suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.freq
 			<userDataType spec='sphericalGeo.LocationDataType'/>
 			<traitMap id='traitmap.s:$(n)' spec='sphericalGeo.TreeTraitMap' tree='@Tree.t:$(n)' traitName='location' 
 				randomizeupper="90 180" randomizelower="-90 -180"  initByMean="true">
-				<parameter id="location.$(n)" minordimension='2' value='0.0 0.0'/>
+				<parameter id="location.s:$(n)" minordimension='2' value='0.0 0.0'/>
 			</traitMap>
 		</data>
 
@@ -32,9 +32,13 @@ suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.freq
 
     </distribution>
 
+<!-- NB precision and clock rate are non-identifiable, so fix one of the two. Easiest to fix precision
+	
     <prior id="sprecisionPrior.s:$(n)" x="@sprecision.s:$(n)" name="distribution">
         <Uniform id="Uniform.1" name="distr" lower='0' upper="1e10"/>
     </prior>
+    <operator id="sprecisionScaler.s:$(n)" spec="ScaleOperator" parameter="@sprecision.s:$(n)" weight="5" scaleFactor="0.7"/>
+-->
 
     <plugin id='ClockPrior.c:$(n)' spec='beast.math.distributions.Prior' x='@clockRate.c:$(n)'>
         <distr spec="beast.math.distributions.Uniform" upper='Infinity'/>
@@ -42,9 +46,8 @@ suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.freq
 
     <operator id='StrictClockRateScaler.c:$(n)' spec='ScaleOperator' scaleFactor="0.75" weight="3" parameter='@clockRate.c:$(n)'/>
 
-    <operator id="sprecisionScaler.s:$(n)" spec="ScaleOperator" parameter="@sprecision.s:$(n)" weight="5" scaleFactor="0.7"/>
 
-	<metadata id="location" spec='sphericalGeo.TraitFunction' likelihood='@slocationtreeLikelihood.$(n)' value="0.0"/>
+	<metadata id="location.$(n)" spec='sphericalGeo.TraitFunction' likelihood='@slocationtreeLikelihood.$(n)' value="0.0"/>
 ]]>
 
          <connect srcID='slocationtreeLikelihood.$(n)'      targetID='likelihood' inputName='distribution' if="isInitializing"/>
@@ -53,17 +56,21 @@ suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.freq
          <connect srcID='sprecision.s:$(n)'                targetID='state' inputName='stateNode' if='inlikelihood(sprecision.s:$(n)) and sprecision.s:$(n)/estimate=true'/>
          <connect srcID='clockRate.c:$(n)'                 targetID='state' inputName='stateNode' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
 
+<!--
          <connect srcID='sprecisionPrior.$(n)'             targetID='prior' inputName='distribution' if='inposterior(sprecision.$(n)) and sprecision.s:$(n)/estimate=true'/>
+-->
          <connect srcID='ClockPrior.c:$(n)'                targetID='prior' inputName='distribution' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
 
+<!--
          <connect srcID='sprecisionScaler.s:$(n)'          targetID='mcmc' inputName='operator' if='inlikelihood(sprecision.s:$(n)) and sprecision.s:$(n)/estimate=true'>Scale precision for diffusion of partition s:$(n)</connect>
+-->
          <connect srcID='StrictClockRateScaler.c:$(n)'     targetID='mcmc' inputName='operator' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'>Scale clock rate of partition c:$(n)</connect>
 
          <connect srcID='slocationtreeLikelihood.$(n)'     targetID='tracelog' inputName='log' if='inlikelihood(slocationtreeLikelihood.$(n))'/>
          <connect srcID='sprecision.s:$(n)'                targetID='tracelog' inputName='log' if='inlikelihood(sprecision.s:$(n)) and sprecision.s:$(n)/estimate=true'/>
          <connect srcID='clockRate.c:$(n)'                 targetID='tracelog' inputName='log' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
 
-         <connect srcID='location'		                   targetID='TreeWithMetaDataLogger.t:$(n)' inputName='metadata' if='inposterior(slocationtreeLikelihood.$(n))'/>
+         <connect srcID='location.$(n)'                    targetID='TreeWithMetaDataLogger.t:$(n)' inputName='metadata' if='inposterior(slocationtreeLikelihood.$(n))'/>
 	</subtemplate>
 
 </mergewith>
