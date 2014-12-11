@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage{url,graphicx}
+\usepackage{url,graphicx,color}
 
 \newcommand{\BEASTVersion}{2.2}
 \newcommand{\TracerVersion}{1.6}
@@ -16,13 +16,13 @@
 \section{Introduction}
 
 
-In this tutorial we describe a full Bayesian framework for phylogeography, similar to the one developed in  \cite{Lemey:2009uq}.
+In this tutorial we describe a full Bayesian framework for phylogeography as described in  \cite{sphericalgeo}.
  
 You will need the following software at your disposal:
 
 \begin{itemize}
 
-\item {\bf BEAST} - this package contains the BEAST program, BEAUti, TreeAnnotator and other utility programs. This tutorial is written for BEAST v{\BEASTVersion}, which has support for multiple partitions. It is available for download from \\* \texttt{http://beast2.cs.auckland.ac.nz/}.
+\item {\bf BEAST} - this package contains the BEAST program, BEAUti, TreeAnnotator and other utility programs. This tutorial is written for BEAST v{\BEASTVersion}. It is available for download from \\* \texttt{http://beast2.org/}.
 \item {\bf Tracer} - this program is used to explore the output of BEAST (and other Bayesian MCMC programs). It graphically and
 quantitively summarizes the distributions of continuous parameters and provides diagnostic information. At the time of
 writing, the current version is v{\TracerVersion}. It is available for download from \texttt{http://beast.bio.ed.ac.uk/}.
@@ -33,19 +33,18 @@ BEAST. At the time of writing, the current version is v{\FigTreeVersion}. It is 
 \end{itemize}
 
 
-This tutorial guides you through a continuous phylogegraphy analysis of a rabies epidemic spread though a raccoon population from the north-east of the united states. The original data comes from
-\cite{biek:2007hi} and was used in a phylogeographic analysis before in \cite{Lemey:2010hc}. It consists of 47 sequences of 2811 characters.
+This tutorial guides you through a continuous phylogegraphy analysis of a Hepatitis B Virus (HBV) throughout Eurasia and Africa. The data is described in \cite{sphericalgeo}, but only a subset is used in order to let the analysis run in a short time. The alignment consists of 17 sequences of  3221 characters.
 
 We go through the following steps:
 \begin{itemize}
-\item The first step is to install the \beast-geo{} package that contains the phylogegraphic models. 
+\item The first step is to install the \beast-geo{} package that contains the phylogegraphic model. 
 \item Then, we use BEAUti to set up the analysis, and write it to an XML file.
 \item We use BEAST to run the MCMC analysis based on the XML file.
 \item The results will need to be checked for convergence using Tracer.
 \item Finally, we post-process the output of the MCMC so we can visualise the geographical dispersion.
 \end{itemize}
 
-\subsubsection*{Set up BEAUti for phylogeography}
+\subsection*{Install \beast-geo\ package}
 
 Phylogeography as described in this tutorial is part of the {\tt \beast-geo} package.
 If you not already have it installed, you can install the package through BEAUti. Start BEAUti by double clicking on its icon. 
@@ -56,41 +55,34 @@ Select the File/Manage packages menu. A dialog pops up showing the packages alre
 \end{center}
 
 Select the \beast-geo{} entry in the list, and click the Install button. After a little while the dialog is updated and it shows that the package is now installed.
-\beast-geo{} requires BEAST\_CLASSIC and BEASTlabs, so if you have not already installed BEASTlabs and BEAST\_CLASSIC, these will be automatically installed as well.
-\begin{center}
-\includegraphics[scale=0.4]{figures/addonmgr2.png}
-\end{center}
-
 
 \subsection*{BEAUti}
 
 
 \subsubsection*{Loading the NEXUS file }
 
-To load a NEXUS format alignment, simply select the \texttt{Import
-Alignment} option from the File menu: 
+To load a NEXUS format alignment, simply select the \texttt{Import Alignment} option from the File menu. A dialog allows you to choose the kind of data to import, select "Add alignment"
 
-Select the file called \texttt{RacRABV.nex}, which is located in the place where the \beast-geo{} package is installed 
+\includegraphics[scale=0.4]{figures/BEAUti_DataPartitions}
+
+Select the file called \texttt{HBV.nex}, which is located in the place where the \beast-geo{} package is installed 
 under the {\tt examples/nexus} directory. Typically, packages are installed in different places, depending on your operating system:
 \begin{itemize}
 \item for Windows, in your home directory (e.g. {\tt c:$\backslash$Users$\backslash$joe}) under the {\tt BEAST} directory,
 \item for Mac, in the {\tt Library/Application Support/BEAST} directory in your home directory (e.g. {\tt /Users/joe}),
 \item for Linux, in the {\tt .beast} directory in your home directory (e.g {\tt /home/joe}).
 \end{itemize}
-The file contains an alignment of sequences. The \texttt{RacRABV.nex} looks like this (content has been truncated):
+The file contains an alignment of sequences. The \texttt{HBV.nex} looks like this (content has been truncated):
 
 \begin{verbatim}
-#NEXUS
+#NEXSUS
 BEGIN DATA;
-       DIMENSIONS  NTAX =47 NCHAR=2811;
+       DIMENSIONS  NTAX =17 NCHAR=3224;
        FORMAT DATATYPE = DNA GAP = - MISSING = ?;
        MATRIX   
-hOH10_97.2_41.053_80.706  TTCCCTATCTACACAATACCAGAC...
-hWVa01_93.2_40.505_80.575 TTCCCTATCTACACAATACCAGAC...
-NY01_03.4_41.057_73.794   TTCCCTATCTACACAATACCAGAC...
-NY03_03.4_42.934_76.565   TTCCCTATCTACACAATACCAGAC...
-         ... ...
-
+AB033550_1988_33.3431887795_134.9307404236		CTCCACCACATTCCACCAAGCTCTGCTAGATCCCAGAGTGAGGGGCCTATATTT
+AB033554_1985_-2.3045941592_118.5275669247		CTCCACCACGTTCCACCAAACTCTTCAAGATCCCAGAGTCAGGGCTCTGTACTT
+AB111946_1998_15.880672531_106.7863444469		CTCAAGCACATTCCACCAAGCTCTGCTAGATCCCAAAGTGAGGGGCCTATACCT
 ;
 END;
 \end{verbatim}
@@ -117,9 +109,7 @@ Select the 'Tip Dates' tab, and click the 'Use tip dates' check box.
 
 Since we can derive the date from the taxon names, click the 'Guess' button.
 
-A dialog pops up, where we can specify the dates as follows: the dates are encoded between underscores in the name, and it is the second part. So, we want to split on character (select this box) and take group 2.
-
-Dates can be in the late 1990s and early 2000s, but the 19 and 20 are not in the name. So, we have to add 1900 if the date is a high number and 2000 if it is a low number (say 13). Enter this information at the bottom of the dialog, and it should now look like this:
+A dialog pops up, where we can specify the dates as follows: the dates are encoded between underscores in the name, and it is the second part. So, we want to split on character (select this box) and take group 2. It should now look like this:
 
 \includegraphics[scale=0.4]{figures/BEAUti_dates.png}
 
@@ -152,7 +142,7 @@ and click `OK'.
 \includegraphics[scale=0.4]{figures/BEAUti_geography1.png}
 
 A new window pops up where you can choose the tree where you want to add geography.
-Also, you can change the trait name to `coords';
+Also, you can change the trait name to `geo';
 
 \includegraphics[scale=0.4,clip=true,trim=300 200 300 200]{figures/BEAUti_geography2.png}
 
@@ -170,14 +160,14 @@ Click `Guess longitude', and again a dialog is shown. Choose `split on character
 
 \includegraphics[scale=0.4]{figures/BEAUti_geography5.png}
 
-When you click OK, the table is completely populated. However, longitudes are taken to be 
-east instead of west, so we have to make all longitudes negative. The easiest way to do this
-is to press the 'Manipulate longitude' button. An optionpane pops up where you can enter
-a formula that is applied to all longitude values, like so:
+When you click OK, the table is completely populated. 
 
-\includegraphics[scale=0.4]{figures/BEAUti_geography5a.png}
+{\bf Note  1}: when you have longitudes on the eastern side of the hemisphere  instead of west you may need to make all longitudes negative. The easiest way to do this is to press the 'Manipulate longitude' button. An optionpane pops up where you can enter a formula that is applied to all longitude values, like so:
+Key in, '-\$x', and press OK. 
 
-Key in, '-\$x', and press OK. Now, the longitudes and latitudes are properly populated, like so:
+{\bf Note  2}: instead of encoding location information and dates in the name, you can also create a tab-delimited file containing a column with taxon names and latitude/longitude pairs and import them using the  `read from file' entry in the Guess dialog shown aboce. In the \beast-geo/examples/nexus folder, there are two examples, one for time ({\tt HBV\_dates.dat}) and one with geography info ({\tt HBV\_locations.dat}).
+
+Now, the longitudes and latitudes are properly populated, like so:
 
 \includegraphics[scale=0.4]{figures/BEAUti_geography6.png}
 
@@ -188,8 +178,9 @@ Click close, and a second data partition is created.
 The clock model now looks like this:
 
 \includegraphics[scale=0.4,clip=true,trim=0 300 0 0]{figures/BEAUti_clockmodel2.png}
+In order to speed up convergence, you can set the clock rate to 2e-5 and uncheck the `estimate' checkbox. Initially, it is disabled since by default, whether clock rates are estimated is left to BEAUti. If you uncheck the `Mode/Automatic set clock rates' menu item, you can change the `estimate' checkbox.
 
-For the location, we select a relaxed clock with log-normal distribution.
+For the geography, we select a relaxed clock with log-normal distribution. 
 
 \includegraphics[scale=0.4,clip=true,trim=0 300 0 0]{figures/BEAUti_clockmodel3.png}
 
@@ -210,8 +201,8 @@ steps the MCMC will make in the chain before finishing. The appropriate length o
 model and the accuracy of the answer required. The default value of 10,000,000
 is entirely arbitrary and should be adjusted according to the size
 of your data set. For this data set let's initially set the chain
-length to 20,000,000 as this will run reasonably quickly on most modern
-computers (less than 20 minutes).
+length to 1,000,000 as this will run reasonably quickly on most modern
+computers (less than 5 minutes).
 
 The next options specify how often the parameter values in the Markov
 chain should be displayed on the screen and recorded in the log file.
@@ -226,7 +217,7 @@ contain much information about the distributions of the parameters.
 You probably want to aim to store no more than 10,000 samples so this should be
 set to no less than chain length / 10,000.
 
-For this exercise we will set the screen log to 100000 and the file log to 20000. The final two
+For this exercise we will set the screen log to 10000 and leave the file log to 1000. The final two
 options give the file names of the log files for the sampled parameters and
 the trees. These will be set to a default based on the name of the
 imported NEXUS file. 
@@ -237,12 +228,12 @@ imported NEXUS file.
 \includegraphics[scale=0.4]{figures/BEAUti_MCMC}
 
 \end{center}
-\caption{\label{fig.MCMC} Setting up the MCMC paremeters.}
+\caption{\label{fig.MCMC} Setting up the MCMC parameters.}
 \end{figure}
 
 
 If you are using windows then we suggest you add the suffix \texttt{.txt} to both of these (so,
-\texttt{gopher.log.txt} and \texttt{gopher.trees.txt}) so that Windows recognizes
+\texttt{gopher.log.txt} and \texttt{gopher.trees.txt}) so that Windows recognises
 these as text files. 
 
 \subsubsection*{Generating the BEAST XML file }
@@ -272,66 +263,64 @@ look something like this:
 {\scriptsize   
 \begin{verbatim}
 
-          BEAST v2.0.e Prerelease r794, 2002-2011
-       Bayesian Evolutionary Analysis Sampling Trees
-                 Designed and developed by
-Remco Bouckaert, Alexei J. Drummond, Andrew Rambaut and Marc A. Suchard
-                              
-               Department of Computer Science
-                   University of Auckland
-                  remco@cs.auckland.ac.nz
-                  alexei@cs.auckland.ac.nz
-                              
-             Institute of Evolutionary Biology
-                  University of Edinburgh
-                     a.rambaut@ed.ac.uk
-                              
-              David Geffen School of Medicine
-           University of California, Los Angeles
-                     msuchard@ucla.edu
-                              
-                Downloads, Help & Resources:
-              	http://beast2.cs.auckland.ac.nz
-                              
-Source code distributed under the GNU Lesser General Public License:
-              	http://code.google.com/p/beast2
-                              
-                     BEAST developers:
-	Alex Alekseyenko, Trevor Bedford, Erik Bloomquist, Joseph Heled, 
-	Sebastian Hoehna, Denise Kuehnert, Philippe Lemey, Wai Lok Sibon Li, 
-	Gerton Lunter, Sidney Markowitz, Vladimir Minin, Michael Defoin Platel, 
-          	Oliver Pybus, Chieh-Hsi Wu, Walter Xie
-                              
-                         Thanks to:
-    	Roald Forsberg, Beth Shapiro and Korbinian Strimmer
+                   BEAST v2.2.0 Prerelease, 2002-2014
+             Bayesian Evolutionary Analysis Sampling Trees
+                       Designed and developed by
+ Remco Bouckaert, Alexei J. Drummond, Andrew Rambaut & Marc A. Suchard
+                                    
+                     Department of Computer Science
+                         University of Auckland
+                        remco@cs.auckland.ac.nz
+                        alexei@cs.auckland.ac.nz
+                                    
+                   Institute of Evolutionary Biology
+                        University of Edinburgh
+                           a.rambaut@ed.ac.uk
+                                    
+                    David Geffen School of Medicine
+                 University of California, Los Angeles
+                           msuchard@ucla.edu
+                                    
+                      Downloads, Help & Resources:
+                           http://beast2.org/
+                                    
+  Source code distributed under the GNU Lesser General Public License:
+                   http://github.com/CompEvol/beast2
+                                    
+                           BEAST developers:
+   Alex Alekseyenko, Trevor Bedford, Erik Bloomquist, Joseph Heled, 
+ Sebastian Hoehna, Denise Kuehnert, Philippe Lemey, Wai Lok Sibon Li, 
+Gerton Lunter, Sidney Markowitz, Vladimir Minin, Michael Defoin Platel, 
+                 Oliver Pybus, Chieh-Hsi Wu, Walter Xie
+                                    
+                               Thanks to:
+          Roald Forsberg, Beth Shapiro and Korbinian Strimmer
 
-File: RacRABC.xml seed: 1347411445277 threads: 1
+Random number seed: 1418328679458
 
-Random number seed: 1347411445277
-
-Skip loading file:/home/remco/workspace/beast2/lib/fest-swing-1.2.jar: contains classs org.fest.swing.annotation.GUITest that is already loaded
-Loaded URL file:/home/remco/workspace/beast2/lib/fest-util-1.1.2-sources.jar
-Skip loading file:/home/remco/workspace/beast2/lib/junit-4.8.2.jar: contains classs junit.extensions.ActiveTestSuite$1 that is already loaded
-Loaded URL file:/home/remco/workspace/beast2/lib/fest-assert-1.2-sources.jar
-Skip loading file:/home/remco/workspace/beast2/lib/fest-swing-junit-4.
-... ...
+File: HBVtutorial.xml seed: 1418328679458 threads: 1
+Probing: beagle.jar Skip loading file:/Users/remco/workspace/beast2/lib/beagle.jar: contains classs beagle.Beagle that is already loaded
+Probing: colt.jar Skip loading file:/Users/remco/workspace/beast2/lib/colt.jar: contains classs cern.clhep.PhysicalConstants that is already loaded
+Probing: commons-math3-3.1.1.jar Skip loading file:/Users/remco/workspace/beast2/lib/commons-math3-3.1.1.jar: contains classs org.apache.commons.math3.linear.OpenMapRealVector$OpenMapEntry that is already loaded
+Probing: debug-1.0.jar Skip loading file:/Users/remco/workspace/beast2/lib/debug-1.0.jar: contains classs org.jdesktop.swinghelper.debug.CheckThreadViolationRepaintManager$1 that 
+...
 
 \end{verbatim}}
 
-\subsection*{Analyzing the results}
+\subsection*{Analysing the results}
 
-Run the program called {\bf Tracer} to analyze the output of BEAST. When the main
+Run the program called {\bf Tracer} to analyse the output of BEAST. When the main
 window has opened, choose {\bf Import Trace File...} from the {\bf File} menu and select the file that
-BEAST has created called \texttt{RacRABV.123123.log} where 123123 is the seed you used.
+BEAST has created called \texttt{HV.log}.
 You should now see a window like in Figure \ref{fig.tracer1}.
 
 \begin{figure}
 \begin{center}
 
-\frame{\includegraphics[scale=0.4]{figures/Tracer}}
+\includegraphics[width=\textwidth]{figures/Tracer}
 
 \end{center}
-\caption{\label{fig.tracer1} Tracer with the rabbies data.}
+\caption{\label{fig.tracer1} Tracer with the HBV data.}
 \end{figure}
 
 
@@ -368,12 +357,13 @@ node. Run the {\bf TreeAnnotator} program and set it up to look like in Figure \
 \begin{figure}
 \begin{center}
 
-\frame{\includegraphics[scale=0.4]{figures/TreeAnnotator}}
+\includegraphics[width=0.75\textwidth]{figures/TreeAnnotator}
 
 \end{center}
 \caption{\label{fig.TreeAnnotator} Using TreeAnnotator to summarise the tree set.}
 \end{figure}
 
+{\color{red}TODO: what about  TreeAnnotator.processBivariateAttributes?}
 
 The burnin is the number of trees to remove from the start of the sample. Unlike {\bf Tracer} which specifies the number of steps as a burnin, in {\bf TreeAnnotator} you need to specify the actual number of trees. For this run, we use the default setting.
 
@@ -383,11 +373,11 @@ For {\bf Target tree type} you can either choose a specific tree from a file or 
 
 Choose {\bf Mean heights} for node heights. This sets the heights (ages) of each node in the tree to the mean height across the entire sample of trees for that clade.
 
-For the input file, select the trees file that BEAST created (by default this will be called \texttt{gopher.species.trees}) and select a file for the output (here we called it \texttt{gopher.species.tree}).
+For the input file, select the trees file that BEAST created (by default this will be called \texttt{HBV.trees}) and select a file for the output (here we called it \texttt{HBV.tree}).
 
 Now press \texttt{Run} and wait for the program to finish.
 
-\subsection*{Viewing the Sprecies Tree}
+\subsection*{Viewing the Tree}
 
 We can look at the tree in another program called {\bf FigTree}. Run this program, and open
 the \texttt{gopher.species.tree} file by using the Open command in the File menu. The tree should appear.
@@ -400,7 +390,7 @@ You should end up with something like Figure \ref{fig.figtree}.
 \begin{figure}
 \begin{center}
 
-\frame{\includegraphics[scale=0.4]{figures/figtree.png}}
+\includegraphics[width=\textwidth]{figures/figtree.png}
 
 \end{center}
 \caption{\label{fig.figtree} Figtree representation of the summary tree. Branch colours represent diffusion rates.}
@@ -410,17 +400,17 @@ You should end up with something like Figure \ref{fig.figtree}.
 Alternatively, you can load the species tree set (note this is NOT the summary tree, but the complete set) into DensiTree and set it up as follows.
 
 \begin{itemize}
-\item Set burn-in to 1000. The tree should not be collapsed any more.
 \item Show a root-canal tree to guide the eye. Perhaps, the intensity of the trees is not large enough, so you might want to increase the intensity by clicking the icon in the button bar. If the root canal tree has negative branch lengths, this is an indication that there is little support for the clade under the branch that goes into the wrong direction. You can experiment with a few different root canal trees to solve this problem. Potentially, you need to reorder the taxa (choose something under the Edit/Shuffle submenu) to make the root canal tree look good.
-\item Show a grid, and play with the grid options to only show lines at 5 year intervals covering round numbers (that is, 2000, instead of 2001.22).
+\item Show a grid, and play with the grid options to only show labels in years (revers order, set origin to 2000).
 \end{itemize}
+
 
 The image should look something like Figure \ref{fig.DensiTree}
 
 \begin{figure}
 \begin{center}
 
-\frame{\includegraphics[scale=0.4]{figures/DensiTree.pdf}}
+\includegraphics[width=\textwidth]{figures/DensiTree}
 
 \end{center}
 \caption{\label{fig.DensiTree} DensiTree representation of the species tree.}
@@ -434,15 +424,56 @@ Select the 'continuous' tab.
 
 Click the load-button and select the summary tree file.
 
+Select location.geo1 as latitude attribute and location.geo2 as longitude attribute.
+
 Now, open the 'Output' tab in the panel on the left hand side. Here, you can choose where to save the kml file (default {\tt output.kml}).
 
 Click the plot button, and a world map appears with the tree superimposed onto the area where the rabies epidemic occurred.
 
-\frame{\includegraphics[scale=0.4]{figures/spread.png}}
+\includegraphics[width=\textwidth]{figures/spread.png}
 
 The KML file can be read into google earth. Here, the spread of the epidemic can be animated through time. The coloured areas represent the 95\% HPD regions of the locations of the internal nodes of the summary tree.
 
-\frame{\includegraphics[scale=0.4]{figures/google-earth.png}}
+\includegraphics[width=\textwidth]{figures/google-earth.png}
+
+
+You can use the HeatMapMaker utilty that comes with GEO\_SPHERE to create an image where each dot represents a locati
+on of an internal node and the color represents the age. To start HeatMapMaker, start the BEAST-AppStore (double clic
+k the AppStore icon in the BEAST-folder), and a window appears like so:
+
+\includegraphics[scale=0.4]{figures/AppStore}
+
+Select HeatMapMaker, then click the launch button and the HeatMapMaker interface appears.
+
+\includegraphics[scale=0.4]{figures/HeatMapMaker}
+
+You can change the following options:
+
+\begin{itemize}
+\item tree Set: file containing tree set annotated with locations
+\item background: image file with a map for the background
+\item bounding Box: bounding box of the background image, default -90 -180 90 180
+\item tag: tag used in annotated of locations
+\item width: width of the heat map, default 1024
+\item height: heightof the heat map, default 1024
+\item max Time: maximum time (all older nodes will be coloured red 
+\item output: where to save the file, default /tmp/heatmap.png
+\item disc Size: size of the dots used to draw heat map
+\item translucency: translucency of the dots used to draw heat map (a number between 0=invisible and 1=solid)
+\item saturation: saturation of colour for the dots
+\item brightness: brightnessof colour for the dots 
+\end{itemize}
+
+\includegraphics[width=0.8\textwidth]{figures/heatmap}
+\includegraphics[width=0.19\textwidth]{figures/legend}
+
+
+\subsection*{Advanced}
+\subsubsection*{Sampling tip locations}
+
+\subsubsection*{Putting a prior on the root locations}
+
+\subsubsection*{Putting a prior on a monophyletic clade}
 
 \bibliographystyle{plain}
 
