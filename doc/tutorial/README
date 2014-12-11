@@ -1,6 +1,0 @@
-To create the tutorial:
-
-o run test.beast.app.beauti.BeautiSphericalPhylogeographyTest which generates some of the figures
-
-o run latex on phylogeography_s.tex
-
