@@ -48,11 +48,11 @@ public class BeautiSphericalPhylogeographyTest extends BeautiBase {
 			}
 
 			// 0. Load primate-mtDNA.nex
-			warning("0. Load RABV.nex");
+			warning("0. Load HBV.nex");
 			//importAlignment("doc/tutorial/phylogeography_continuous/data/", new File("RacRABV.nex"));
 			
 			if (Utils.isMac()) {
-				importAlignment("examples/nexus/", new File("RacRABV.nex"));
+				importAlignment("examples/nexus/", new File("HBV.nex"));
 			} else {
 				beautiFrame.button("+").click();
 				dialog = new JOptionPaneFixture(robot());
