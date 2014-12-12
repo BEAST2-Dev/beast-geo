@@ -41,7 +41,7 @@ public class FileInputEditor2 extends InputEditor.Base {
 				} else {
 					defaultFile = new File(Beauti.g_sDir);
 				}
-				File file = Utils.getLoadFile(m_input.getTipText(), defaultFile, "BEAST files", "xml");
+				File file = Utils.getLoadFile(m_input.getTipText(), defaultFile, "All files", "");
 				try {
 					m_entry.setText(file.getName());
 					m_input.setValue(file, m_plugin);
