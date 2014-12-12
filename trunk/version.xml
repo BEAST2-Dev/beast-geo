@@ -5,4 +5,9 @@
               args=""
               icon="sphericalGeo/util/heatmapicon.png"
             />
+    <addonapp description="MapMaker"
+              class="sphericalGeo.util.MapMaker"
+              args=""
+              icon="sphericalGeo/util/heatmapicon.png"
+            />
 </addon>
