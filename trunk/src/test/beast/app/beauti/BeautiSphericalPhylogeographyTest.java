@@ -49,7 +49,7 @@ public class BeautiSphericalPhylogeographyTest extends BeautiBase {
 
 			// 0. Load primate-mtDNA.nex
 			warning("0. Load HBV.nex");
-			//importAlignment("doc/tutorial/phylogeography_continuous/data/", new File("RacRABV.nex"));
+			//importAlignment("doc/tutorial/phylogeography_continuous/data/", new File("HBV.nex"));
 			
 			if (Utils.isMac()) {
 				importAlignment("examples/nexus/", new File("HBV.nex"));
@@ -60,7 +60,7 @@ public class BeautiSphericalPhylogeographyTest extends BeautiBase {
 				dialog.okButton().click();
 				JFileChooserFixture fileChooser = findFileChooser().using(robot());
 				fileChooser.setCurrentDirectory(new File("examples/nexus/"));
-				fileChooser.selectFiles(new File("RacRABV.nex")).approve();
+				fileChooser.selectFiles(new File("HBV.nex")).approve();
 				// close down any popup message
 				robot().pressKey(KeyEvent.VK_ESCAPE);
 			}
@@ -78,7 +78,7 @@ public class BeautiSphericalPhylogeographyTest extends BeautiBase {
 			// check table
 			JTableFixture t = beautiFrame.table();
 			printTableContents(t);
-			checkTableContents(t, "[RacRABV, RacRABV, 47, 2811, nucleotide, RacRABV, RacRABV, RacRABV, false]");
+			checkTableContents(t, "[HBV, HBV, 47, 2811, nucleotide, HBV, HBV, HBV, false]");
 
 			assertThat(f).isNotNull();
 			printBeautiState(f);
@@ -122,15 +122,15 @@ public class BeautiSphericalPhylogeographyTest extends BeautiBase {
 			printBeautiState(f);
 			screenshotTaker.saveComponentAsPng(beauti.frame, PREFIX + "priors.png");
 
-			assertStateEquals("Tree.t:RacRABV", "clockRate.c:RacRABV", "kappa.s:RacRABV", "popSize.t:RacRABV");
-			assertOperatorsEqual("treeScaler.t:RacRABV", "treeRootScaler.t:RacRABV", "UniformOperator.t:RacRABV",
-					"SubtreeSlide.t:RacRABV", "narrow.t:RacRABV", "wide.t:RacRABV", "WilsonBalding.t:RacRABV",
-					"StrictClockRateScaler.c:RacRABV", "strictClockUpDownOperator.c:RacRABV", "KappaScaler.s:RacRABV",
-					"PopSizeScaler.t:RacRABV");
-			assertPriorsEqual("CoalescentConstant.t:RacRABV", "ClockPrior.c:RacRABV", "KappaPrior.s:RacRABV",
-					"PopSizePrior.t:RacRABV");
-			assertTraceLogEqual("posterior", "likelihood", "prior", "treeLikelihood.RacRABV", "TreeHeight.t:RacRABV",
-					"clockRate.c:RacRABV", "kappa.s:RacRABV", "popSize.t:RacRABV", "CoalescentConstant.t:RacRABV");
+			assertStateEquals("Tree.t:HBV", "clockRate.c:HBV", "kappa.s:HBV", "popSize.t:HBV");
+			assertOperatorsEqual("treeScaler.t:HBV", "treeRootScaler.t:HBV", "UniformOperator.t:HBV",
+					"SubtreeSlide.t:HBV", "narrow.t:HBV", "wide.t:HBV", "WilsonBalding.t:HBV",
+					"StrictClockRateScaler.c:HBV", "strictClockUpDownOperator.c:HBV", "KappaScaler.s:HBV",
+					"PopSizeScaler.t:HBV");
+			assertPriorsEqual("CoalescentConstant.t:HBV", "ClockPrior.c:HBV", "KappaPrior.s:HBV",
+					"PopSizePrior.t:HBV");
+			assertTraceLogEqual("posterior", "likelihood", "prior", "treeLikelihood.HBV", "TreeHeight.t:HBV",
+					"clockRate.c:HBV", "kappa.s:HBV", "popSize.t:HBV", "CoalescentConstant.t:HBV");
 
 			// 5. Set up location trait
 			warning("5. Set up location trait");
@@ -257,9 +257,9 @@ public class BeautiSphericalPhylogeographyTest extends BeautiBase {
 			beautiFrame.textBox("logEvery").selectAll().setText("100000");
 			beautiFrame.button("screenlog.editButton").click();
 
-			beautiFrame.button("treelog.t:RacRABV.editButton").click();
+			beautiFrame.button("treelog.t:HBV.editButton").click();
 			beautiFrame.textBox("logEvery").selectAll().setText("20000");
-			beautiFrame.button("treelog.t:RacRABV.editButton").click();
+			beautiFrame.button("treelog.t:HBV.editButton").click();
 
 			printBeautiState(f);
 			screenshotTaker.saveComponentAsPng(beauti.frame, PREFIX + "MCMC.png");
@@ -267,7 +267,7 @@ public class BeautiSphericalPhylogeographyTest extends BeautiBase {
 			
 			// 9. Run MCMC and look at results in Tracer, TreeAnnotator->FigTree
 			warning("9. Run MCMC and look at results in Tracer, TreeAnnotator->FigTree");
-			File fout = new File(org.fest.util.Files.temporaryFolder() + "/RacRABV.xml");
+			File fout = new File(org.fest.util.Files.temporaryFolder() + "/HBV.xml");
 			if (fout.exists()) {
 				fout.delete();
 			}
