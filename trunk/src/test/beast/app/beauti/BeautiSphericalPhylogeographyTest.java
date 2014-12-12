@@ -78,7 +78,7 @@ public class BeautiSphericalPhylogeographyTest extends BeautiBase {
 			// check table
 			JTableFixture t = beautiFrame.table();
 			printTableContents(t);
-			checkTableContents(t, "[HBV, HBV, 47, 2811, nucleotide, HBV, HBV, HBV, false]");
+			checkTableContents(t, "[HBV, HBV, 17, 3221, nucleotide, HBV, HBV, HBV, false]");
 
 			assertThat(f).isNotNull();
 			printBeautiState(f);
@@ -198,29 +198,29 @@ public class BeautiSphericalPhylogeographyTest extends BeautiBase {
 			
 			System.err.println("\n\n\n\nTESTING NOW");
 
-			dialog.button("Manipulate longitude").click();
-			GenericTypeMatcher<JOptionPane> matcher2 = new GenericTypeMatcher<JOptionPane>(JOptionPane.class) {
-			protected boolean isMatching(JOptionPane optionPane) {
-				Component o = optionPane;
-				while (o != null) {
-					System.err.print(">" + o.getName() + "< ");
-					if (o instanceof JDialog && ((JDialog)o).getTitle().equals("Manipulate longitude")) {
-						System.err.println("true");
-						return o.isShowing();
-					}
-					o = o.getParent();
-				}
-				System.err.println();
-				return false;
-			}
-			};
-			c = robot().finder().find(matcher2);
-			optionPane = new JOptionPaneFixture(robot(), (JOptionPane) c);//JOptionPaneFinder.findOptionPane(matcher).using(robot());
-			//optionPane = JOptionPaneFinder.findOptionPane(matcher2).using(robot());
-			
-			optionPane.textBox().setText("-$x");
-			screenshotTaker.saveComponentAsPng(beauti.frame, PREFIX + "geography5a.png");
-			optionPane.okButton().click();
+//			dialog.button("Manipulate longitude").click();
+//			GenericTypeMatcher<JOptionPane> matcher2 = new GenericTypeMatcher<JOptionPane>(JOptionPane.class) {
+//			protected boolean isMatching(JOptionPane optionPane) {
+//				Component o = optionPane;
+//				while (o != null) {
+//					System.err.print(">" + o.getName() + "< ");
+//					if (o instanceof JDialog && ((JDialog)o).getTitle().equals("Manipulate longitude")) {
+//						System.err.println("true");
+//						return o.isShowing();
+//					}
+//					o = o.getParent();
+//				}
+//				System.err.println();
+//				return false;
+//			}
+//			};
+//			c = robot().finder().find(matcher2);
+//			optionPane = new JOptionPaneFixture(robot(), (JOptionPane) c);//JOptionPaneFinder.findOptionPane(matcher).using(robot());
+//			//optionPane = JOptionPaneFinder.findOptionPane(matcher2).using(robot());
+//			
+//			optionPane.textBox().setText("-$x");
+//			screenshotTaker.saveComponentAsPng(beauti.frame, PREFIX + "geography5a.png");
+//			optionPane.okButton().click();
 
 			screenshotTaker.saveComponentAsPng(beauti.frame, PREFIX + "geography6.png");
 			dialog.button("OptionPane.button").click();
