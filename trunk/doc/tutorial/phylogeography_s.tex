@@ -7,6 +7,9 @@
 
 
 \def\beast-geo{GEO\_SPHERE}
+\def\lt{\textless}
+\def\gt{\textgreater}
+
 
 \begin{document}
     \title{Spherical Phylogeography with BEAST \BEASTVersion}
@@ -26,8 +29,8 @@ You will need the following software at your disposal:
 \item {\bf Tracer} - this program is used to explore the output of BEAST (and other Bayesian MCMC programs). It graphically and
 quantitively summarizes the distributions of continuous parameters and provides diagnostic information. At the time of
 writing, the current version is v{\TracerVersion}. It is available for download from \texttt{http://beast.bio.ed.ac.uk/}.
-\item {\bf FigTree} - this is an application for displaying and printing molecular phylogenies, in particular those obtained using
-BEAST. At the time of writing, the current version is v{\FigTreeVersion}. It is available for download from \texttt{http://tree.bio.ed.ac.uk/}.
+%\item {\bf FigTree} - this is an application for displaying and printing molecular phylogenies, in particular those obtained using
+%BEAST. At the time of writing, the current version is v{\FigTreeVersion}. It is available for download from \texttt{http://tree.bio.ed.ac.uk/}.
 \item {\bf Spread} for summarysing the geographic spread in a KML file (available from \url{http://www.kuleuven.ac.be/aidslab/phylogeography/SPREAD.html}.
 \item {\bf google-earth} for displaying the KML file (just google for it, if you have not already have it installed).
 \end{itemize}
@@ -144,7 +147,7 @@ and click `OK'.
 A new window pops up where you can choose the tree where you want to add geography.
 Also, you can change the trait name to `geo';
 
-\includegraphics[scale=0.4,clip=true,trim=300 200 300 200]{figures/BEAUti_geography2.png}
+\includegraphics[scale=0.4]{figures/BEAUti_geography2.png}
 
 When you click OK, a dialog is shown where you can enter latitude and longitude for each taxon.
 In this tutorial, this information is encoded in the taxon name, so we can guess it from the name. 
@@ -233,12 +236,12 @@ imported NEXUS file.
 
 
 If you are using windows then we suggest you add the suffix \texttt{.txt} to both of these (so,
-\texttt{gopher.log.txt} and \texttt{gopher.trees.txt}) so that Windows recognises
+\texttt{HBV.log.txt} and \texttt{HBV.trees.txt}) so that Windows recognises
 these as text files. 
 
 \subsubsection*{Generating the BEAST XML file }
 
-We are now ready to create the BEAST XML file. To do this, either select the {\bf File/Save} or {\bf File/Save As} option from the \textbf{File} menu. Check the default priors setting and click \textbf{Continue}. Save the file with an appropriate name (we usually end the filename with \texttt{.xml}, i.e., \texttt{RacRABC.xml}). We are now ready to run the file through BEAST. 
+We are now ready to create the BEAST XML file. To do this, either select the {\bf File/Save} or {\bf File/Save As} option from the \textbf{File} menu. Check the default priors setting and click \textbf{Continue}. Save the file with an appropriate name (we usually end the filename with \texttt{.xml}, i.e., \texttt{HBV.xml}). We are now ready to run the file through BEAST. 
 
 \subsection*{Running BEAST }
 
@@ -379,8 +382,9 @@ Now press \texttt{Run} and wait for the program to finish.
 
 \subsection*{Viewing the Tree}
 
+\if0
 We can look at the tree in another program called {\bf FigTree}. Run this program, and open
-the \texttt{gopher.species.tree} file by using the Open command in the File menu. The tree should appear.
+the \texttt{HBV.tree} file by using the Open command in the File menu. The tree should appear.
 You can now try selecting some of the options in the control panel on the left. Try selecting
 {\bf Node Bars} to get node age error bars. Also turn on {\bf Branch Labels} and select {\bf posterior} to get
 it to display the posterior probability for each node. Under {\bf Appearance} you can also tell FigTree
@@ -395,9 +399,10 @@ You should end up with something like Figure \ref{fig.figtree}.
 \end{center}
 \caption{\label{fig.figtree} Figtree representation of the summary tree. Branch colours represent diffusion rates.}
 \end{figure}
+\fi
 
-
-Alternatively, you can load the species tree set (note this is NOT the summary tree, but the complete set) into DensiTree and set it up as follows.
+We can look at the tree posterior in another program called {\bf DensiTree}.
+You can load the tree set (note this is NOT the summary tree, but the complete set) into DensiTree and set it up as follows.
 
 \begin{itemize}
 \item Show a root-canal tree to guide the eye. Perhaps, the intensity of the trees is not large enough, so you might want to increase the intensity by clicking the icon in the button bar. If the root canal tree has negative branch lengths, this is an indication that there is little support for the clade under the branch that goes into the wrong direction. You can experiment with a few different root canal trees to solve this problem. Potentially, you need to reorder the taxa (choose something under the Edit/Shuffle submenu) to make the root canal tree look good.
@@ -413,7 +418,7 @@ The image should look something like Figure \ref{fig.DensiTree}
 \includegraphics[width=\textwidth]{figures/DensiTree}
 
 \end{center}
-\caption{\label{fig.DensiTree} DensiTree representation of the species tree.}
+\caption{\label{fig.DensiTree} DensiTree representation of the tree.}
 \end{figure}
 
 \subsection*{Post processing geography}
@@ -470,10 +475,93 @@ You can change the following options:
 
 \subsection*{Advanced}
 \subsubsection*{Sampling tip locations}
+At this point in time, there is no BEAUti support to allow sampling of tip locations, but it can be done by editing the XML once it is produced by BEAUti.
+
+First, you have to define a set of regions, either by KML or by colouring a bitmap image in Mercatore projection. KML regions can be drawn in google-earth and bitmap images in Mercator projection can be produced using the MapMaker utility that you can start from the BEAST AppStore. Once you created a world map with MapMaker, you can colour in the region you want to sample from.
+
+To specify a KML region, add the following fragment to the XML at the top level (just under the alignment, but above the run element would be a good place).
+
+\begin{verbatim}
+<region id='China' spec='sphericalGeo.region.KMLRegion' kml='kml/China.kml'/>
+\end{verbatim}
+
+This creates a KMLRegion with id China, and reads in the kml file in the folder kml from file China.kml. To create a bitmap region from a bitmap file stored in say regions/China.png, you can use
+
+\begin{verbatim}
+<region id='China' spec='sphericalGeo.region.BitMapRegion'
+	file='regions/China.png'/>
+\end{verbatim}
+There is an extra option to specify a bounding box by two latitude/longitude pairs if the bitmap only covers a small region of the map instead of the whole world:
+\begin{verbatim}
+<region id='China' spec='sphericalGeo.region.BitMapRegion'
+	file='regions/China.png' bbox=''/>
+\end{verbatim}
+
+
+
+Now we defined a region, suppose you want to sample taxon AF182802 from the region of China, you add
+
+\begin{verbatim}
+<geoprior location='@location.geo' tree='@Tree.t:hbv' region='@China'
+	spec='sphericalGeo.GeoPrior'>
+	<taxon id='AF182802' spec='Taxon'/> 
+<geoprior>
+\end{verbatim}
+
+inside the element with id="slocationtreeLikelihood.geo" (where 'geo' is the name of the partition for spherical geography, and 'hbv' the name of the partition with the alignment).
+
+
+If you have many regions and tips you want to sample, to prettify the XML and make it somewhat more readable, you can create these maps:
+
+\begin{verbatim}
+<map name="region">sphericalGeo.region.KMLRegion</map>
+<map name="geoprior">sphericalGeo.GeoPrior</map>
+\end{verbatim}
+
+and then you can leave out the spec attribute and instead of the above use
+
+\begin{verbatim}
+<region id='China' kml='kml/China.kml'/>
+\end{verbatim}
+
+and 
+
+\begin{verbatim}
+<geoprior location='@location.geo' tree='@Tree.t:hbv' region='@China'>
+	<taxon id='AF182802' spec='Taxon'/>
+<geoprior>
+\end{verbatim}
+
 
 \subsubsection*{Putting a prior on the root locations}
 
+Putting a prior on the root means we have to sample the root location, which essentially follows the recipe for sampling tips, but instead of specifying a single taxon, we specify a taxon set containing all taxa. If we want to restrict the root location to China, as specified above, this can be done for example like so:
+
+\begin{verbatim}
+<geoprior location='@location.geo' tree='@Tree.t:hbv' region='@China'>
+	<taxonset id='all.taxa' spec='TaxonSet' alignment='@hbv'/>
+<geoprior>
+\end{verbatim}
+
+
 \subsubsection*{Putting a prior on a monophyletic clade}
+
+First, specify a monophyletic clade in the priors panel in BEAUti; hit the little '+' button at the bottom, and a dialog pops up where you can specify a taxon set. Once you have given the clade a name (say "myclade") and close the dialog, in the proirs panel a new entry appears for the clade. Select the 'monophyletic' check box. Note that the clade must be monophyletic, otherwise the sampler does not work.
+
+To specify the prior, add the following to the element with id="slocationtreeLikelihood.geo"
+
+\begin{verbatim}
+<geoprior location='@location.geo' tree='@Tree.t:hbv' region='@China'>
+	<taxonset idref='myclade'/>
+<geoprior>
+\end{verbatim}
+
+\subsubsection*{Trouble shooting}
+\begin{itemize}
+\item the taxon may already be specified somewhere in the XML if for example you are running a *BEAST analysis. In that case, replace {\tt $<$taxon id='AF182802' spec='Taxon'/$>$ } with {\tt$<$taxon idref='AF182802'/$>$ }.
+\item "location.geo" cannot be found, if you named your spherical diffusion partition something else than "geo". Just replace location.geo with location.your\_partition\_name.
+\item "Tree.t:hbv" cannot be found, if you named your tree in the data partition something else than "hbv". Again, just replace "hbv" with whatever the tree partition is called.
+\end{itemize}
 
 \bibliographystyle{plain}
 

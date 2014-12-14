@@ -269,7 +269,7 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		// randomize
 		double [][] newPosition = new double[rangeSize][2];
 		for (int i = 0; i < rangeSize; i++) {
-			if (!isSampled[i]) {
+			if (!isSampled[nodeNr]) {
 				newPosition[i][0] = pposition[nodeNr][0] + Randomizer.nextDouble() * epsilon - epsilon / 2.0;			
 				newPosition[i][1] = pposition[nodeNr][1] + Randomizer.nextDouble() * epsilon - epsilon / 2.0;
 			} else {
