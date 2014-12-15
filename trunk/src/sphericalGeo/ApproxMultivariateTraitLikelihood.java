@@ -87,7 +87,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			for (GeoPrior prior : geopriors) {
 				isSampled[prior.taxonNr] = true;
 				sampleNumber.add(prior.taxonNr);
-				double [] location = prior.region.sample();
+				double [] location = prior.sample();
 				d[prior.taxonNr * 2] = location[0];
 				d[prior.taxonNr * 2 + 1] = location[1];
 			}
