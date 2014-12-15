@@ -35,7 +35,7 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
                     trees.add(BeautiDoc.parsePartition(((Tree) node).getID()));
                 }
             }
-            TraitDialog dlg = new TraitDialog(doc, trees);
+            TraitDialog2 dlg = new TraitDialog2(doc, trees);
             if (dlg.showDialog("Create new location")) {
             	String tree = dlg.tree;
             	String name = dlg.name;
