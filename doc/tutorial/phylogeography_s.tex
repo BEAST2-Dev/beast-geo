@@ -477,7 +477,26 @@ You can change the following options:
 \subsubsection*{Sampling tip locations}
 At this point in time, there is no BEAUti support to allow sampling of tip locations, but it can be done by editing the XML once it is produced by BEAUti.
 
-First, you have to define a set of regions, either by KML or by colouring a bitmap image in Mercatore projection. KML regions can be drawn in google-earth and bitmap images in Mercator projection can be produced using the MapMaker utility that you can start from the BEAST AppStore. Once you created a world map with MapMaker, you can colour in the region you want to sample from.
+
+
+
+First, you need to add an entry to the state, and add operators.
+Second, you have to define a set of regions, either by KML or by colouring a bitmap image in Mercatore projection. KML regions can be drawn in google-earth and bitmap images in Mercator projection can be produced using the MapMaker utility that you can start from the BEAST AppStore. Once you created a world map with MapMaker, you can colour in the region you want to sample from.
+
+To set up the state, add the following line (where "geo" is the name used for the geography partition)
+
+\begin{verbatim}
+<stateNode idref="location.geo"/>
+\end{verbatim}
+
+Next, add a LocationOperator to the set of operators (inside the MCMC element, where the other operators are):
+
+\begin{verbatim}
+<operator id='location.sampler' spec='sphericalGeo.LocationOperator' 
+    location='@location.geo' 
+    likelihood='@slocationtreeLikelihood.geo' weight='30'/>
+\end{verbatim}
+
 
 To specify a KML region, add the following fragment to the XML at the top level (just under the alignment, but above the run element would be a good place).
 
