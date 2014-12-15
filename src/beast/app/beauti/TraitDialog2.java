@@ -18,7 +18,7 @@ import beast.app.beauti.BeautiDoc;
 import java.awt.Insets;
 import java.util.List;
 
-public class TraitDialog extends JPanel {
+public class TraitDialog2 extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
 	private JTextField txtTraitname;
@@ -26,7 +26,7 @@ public class TraitDialog extends JPanel {
 	String tree;
 	String name;
 	
-	public TraitDialog(BeautiDoc doc, List<String> trees) {
+	public TraitDialog2(BeautiDoc doc, List<String> trees) {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWeights = new double[]{1.0, 0.0};
 		setLayout(gridBagLayout);
