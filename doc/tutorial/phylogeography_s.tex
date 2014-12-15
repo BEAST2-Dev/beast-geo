@@ -497,6 +497,7 @@ Next, add a LocationOperator to the set of operators (inside the MCMC element, w
     likelihood='@slocationtreeLikelihood.geo' weight='30'/>
 \end{verbatim}
 
+Also, add a reference to {\tt location.geo} in ApproxMultivariateTraitLikelihood by adding the attribute {\tt location="@location.geo"} to the element with {\tt id="slocationtreeLikelihood.geo"}.
 
 To specify a KML region, add the following fragment to the XML at the top level (just under the alignment, but above the run element would be a good place).
 
