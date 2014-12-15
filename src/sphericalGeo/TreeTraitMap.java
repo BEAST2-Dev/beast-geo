@@ -7,6 +7,7 @@ import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
+import beast.core.util.Log;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TreeInterface;
 import beast.util.Randomizer;
@@ -111,22 +112,23 @@ public class TreeTraitMap extends CalculationNode /* implements TreeTrait<double
 		            sTrait = sTrait.replaceAll("\\s+", " ");
 		            String[] sStrs = sTrait.split("=");
 		            if (sStrs.length != 2) {
-		                throw new Exception("could not parse trait: " + sTrait);
+		                Log.warning.println("could not parse trait: >>" + sTrait + "<<");
+		            } else {
+			            String sTaxonID = normalize(sStrs[0]);
+			            int iTaxon = sTaxa.indexOf(sTaxonID);
+			            if (iTaxon < 0) {
+			                throw new Exception("Trait (" + sTaxonID + ") is not a known taxon. Spelling error perhaps?");
+			            }
+			            String sTraitValue = normalize(sStrs[1]);
+			            String [] sTraitValues = sTraitValue.split("\\s");
+			            for (int i = 0; i < sTraitValues.length; i++) {
+			            	values[iTaxon * dim + i] = Double.parseDouble(sTraitValues[i]);
+			            }
+			            if (bDone[iTaxon]) {
+			            	throw new Exception("Trait for taxon " + sTaxa.get(iTaxon)+ " defined twice");
+			            }
+			            bDone[iTaxon] = true;
 		            }
-		            String sTaxonID = normalize(sStrs[0]);
-		            int iTaxon = sTaxa.indexOf(sTaxonID);
-		            if (iTaxon < 0) {
-		                throw new Exception("Trait (" + sTaxonID + ") is not a known taxon. Spelling error perhaps?");
-		            }
-		            String sTraitValue = normalize(sStrs[1]);
-		            String [] sTraitValues = sTraitValue.split("\\s");
-		            for (int i = 0; i < sTraitValues.length; i++) {
-		            	values[iTaxon * dim + i] = Double.parseDouble(sTraitValues[i]);
-		            }
-		            if (bDone[iTaxon]) {
-		            	throw new Exception("Trait for taxon " + sTaxa.get(iTaxon)+ " defined twice");
-		            }
-		            bDone[iTaxon] = true;
 		        }
 			}
 	        // sanity check: did we cover all taxa?
