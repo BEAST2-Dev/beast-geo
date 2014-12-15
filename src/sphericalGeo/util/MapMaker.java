@@ -21,11 +21,13 @@ import beast.app.draw.BEASTObjectDialog;
 import beast.app.draw.BEASTObjectPanel;
 import beast.core.Description;
 import beast.core.Input;
+import beast.core.Input.Validate;
 import beast.core.Runnable;
+import beast.core.util.Log;
 
 @Description("Creates a map in mercator projection from a KML file")
 public class MapMaker extends Runnable {
-	Input<File> kmlFileInput = new Input<>("kmlfile", "kml file contiaining polygons to draw", new File("/home/remco/data/map/borders/KML_zip_20141212060828.kml"));
+	public Input<File> kmlFileInput = new Input<>("kmlfile", "kml file contiaining polygons to draw", Validate.REQUIRED);
 	public Input<Integer> widthInput = new Input<>("width","width of the map", 8000);
 	public Input<Integer> heightInput = new Input<>("height","heightof the map", 4000);
 	public Input<File> outputInput = new Input<>("output","where to save the file", new File("/tmp/map.png"));
@@ -40,11 +42,16 @@ public class MapMaker extends Runnable {
 
 	@Override
 	public void initAndValidate() throws Exception {
+		if (!kmlFileInput.get().exists()) {
+			throw new RuntimeException("kml file " + kmlFileInput.get().getPath() + "does not exist");
+		}
+		parseBBox();
 	}
 	
 	public void run() throws Exception {
-		parseBBox();
+		Log.info.println("Parsing KML file...");
 		List<List<Double>> coordinates = parseKML();
+		Log.info.println("Creating map...");
 		
 		Color fillColour = fillColorInput.get();
 		Color lineColour = lineColorInput.get();
@@ -76,6 +83,7 @@ public class MapMaker extends Runnable {
 		}
 
 		
+		Log.info.println("Saving KML...");
 		ImageIO.write(image, "png", outputInput.get());
 	}
 
@@ -129,6 +137,7 @@ public class MapMaker extends Runnable {
 
 	public static void main(String[] args) throws Exception {
 		MapMaker mm = new MapMaker();
+		mm.initByName("kmlfile", "/home/remco/data/map/borders/KML_zip_20141212060828.kml");
 		
 		if (args.length == 0) {
 			// create BeautiDoc and beauti configuration
@@ -150,6 +159,7 @@ public class MapMaker extends Runnable {
 				mm.initAndValidate();
 				mm.run();
 			}
+			Log.info.println("Done");
 			return;
 		}
 
@@ -157,6 +167,7 @@ public class MapMaker extends Runnable {
 		main.parseArgs(args, false);
 		mm.initAndValidate();
 		mm.run();
+		Log.info.println("Done");
 
 	}
 }

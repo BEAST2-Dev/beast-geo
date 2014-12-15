@@ -39,7 +39,7 @@ public class LocationOperator extends Operator {
 		}
 		int i = Randomizer.nextInt(sampleNumber.size());
 		GeoPrior prior = geopriors.get(i);
-		double [] location = prior.region.sample();
+		double [] location = prior.sample();
 		i = sampleNumber.get(i);
 		sampledLocations.setValue(i * 2, location[0]);
 		sampledLocations.setValue(i * 2 + 1, location[1]);

@@ -165,4 +165,8 @@ public class GeoPrior extends Distribution {
 	public void sample(State state, Random random) {
 	}
 
+	public double[] sample() {
+		return region.sample(isInsideInput.get());
+	}
+
 }

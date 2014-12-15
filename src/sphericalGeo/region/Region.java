@@ -38,19 +38,31 @@ public class Region extends BEASTObject {
 		return (color == regionColor);
 	}
 
-	public double [] sample() {
+	public double [] sample(boolean isInside) {
 		int i;
-		do {
-			i = Randomizer.nextInt(width * height);
-		} while ((image.getRGB(i % width , i / width) & 0xFFFFFF) != regionColor);
+		if (isInside) {
+			do {
+				i = Randomizer.nextInt(width * height);
+			} while ((image.getRGB(i % width , i / width) & 0xFFFFFF) != regionColor);
+		} else {
+			do {
+				i = Randomizer.nextInt(width * height);
+			} while ((image.getRGB(i % width , i / width) & 0xFFFFFF) == regionColor);
+		}
 
 		double [] location = new double[2];
 		location[0] = maxLat - (maxLat - minLat) * (i - 0.5) /(width * height);
 		location[1] = minLong + (maxLong - minLong) * (i % width + 0.5)/width;
 
 		// sanity check
-		if (!isInside(location[0], location[1])) {
-			location = sample();
+		if (isInside) {
+			if (!isInside(location[0], location[1])) { 
+				location = sample(isInside);
+			}
+		} else {
+			if (isInside(location[0], location[1])) { 
+				location = sample(isInside);
+			}
 		}
 		
 		return location;
