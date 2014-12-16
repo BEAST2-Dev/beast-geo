@@ -75,6 +75,9 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
         super.initAndValidate();
     }
 
+    // assumes start = {latitude, longitude}
+    //         stop  = {latitude, longitude}
+    // and -90 < latitude < 90, -180 < longitude < 180
     public double getLogLikelihood(double[] start, double[] stop, double time) {
     	if (fast) {
     		return getLogLikelihood2(start, stop, time);
@@ -87,9 +90,6 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
                     return -1e100;
             }
            
-            // assumes start = {latitude, longitude}
-            // assumes stop = {latitude, longitude}
-            // and -90 < latitude < 90, -180 < longitude < 180
            
             double latitude1 = start[0];
             double longitude1 = start[1];
@@ -114,7 +114,8 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
             double logN = calcLogN(inverseVariance);
             double logP = 0.5 * Math.log(angle * Math.sin(angle)) + 0.5 * Math.log(inverseVariance) -0.5 * angle*angle * inverseVariance;
             //double logP = - 0.5 * angle*angle * inverseVariance;
-//          System.err.println(start[0] + " " + start[1] + " -> " + stop[0] + " " + stop[1] + " => " + logP);
+            System.err.println(start[0] + " " + start[1] + " -> " + stop[0] + " " + stop[1] + " => " + logP + " " + angle + " " + 
+            		(0.5 * Math.log(angle * Math.sin(angle))) + " " + ( -0.5 * angle*angle * inverseVariance) + " " + logN);
             return logP - logN;
     }
 
@@ -202,9 +203,11 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
         }
 
         final double inverseVariance = precision.getValue(0) / time;
+        double logN = calcLogN(inverseVariance);
         final double logP = -angle * angle * inverseVariance / 2.0 + 0.5 * Math.log(angle * sin(angle) * inverseVariance);
+        
 //		System.err.println(start[0] + " " + start[1] + " -> " + stop[0] + " " + stop[1] + " => " + logP);
-        return logP;
+        return logP - logN;
 
     }
 
@@ -271,6 +274,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 	public static double [] spherical2Cartesian(double fLat, double fLong) {
 		double fPhi = (fLong * Math.PI / 180.0);
 		double fTheta = (90 - fLat) * Math.PI / 180.0;
+		//double fTheta = (fLat) * Math.PI / 180.0;
 	    //{x}=\rho \, \sin\theta \, \cos\phi  
 	    //{y}=\rho \, \sin\theta \, \sin\phi  
 	    //{z}=\rho \, \cos\theta 
@@ -291,7 +295,9 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 
 	public static double [] reverseMap(double fLat, double fLong, double fLatT, double fLongT) {
 		// from spherical to Cartesian coordinates
-		double [] f3DPoint = spherical2Cartesian(fLong, fLat);
+		double [] f3DPoint = spherical2Cartesian(fLat, fLong);
+
+		double [] p = cartesian2Sperical(f3DPoint);
 		// rotate, first latitude, then longitude
 		double [] f3DRotated = new double[3];
 		double fC = Math.cos(fLongT * Math.PI / 180);
@@ -311,6 +317,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 		f3DRotated2[2] = f3DRotated[2]; 
 
 		double [] point = cartesian2Sperical(f3DRotated2); 
+		System.err.println(Arrays.toString(point) + " " + Arrays.toString(f3DRotated2) + " " + Arrays.toString(f3DRotated));
 		return point;
 	} // map
 	
@@ -326,7 +333,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 	 */
 	public static double [] map(double fLat, double fLong, double fLatT, double fLongT) {
 		// from spherical to Cartesian coordinates
-		double [] f3DPoint = spherical2Cartesian(fLong, fLat);
+		double [] f3DPoint = spherical2Cartesian(fLat, fLong);
 		// rotate, first longitude, then latitude
 		double [] f3DRotated = new double[3];
 		double fC = Math.cos(-fLongT * Math.PI / 180);
@@ -346,6 +353,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 		f3DRotated2[1] = f3DRotated[1];
 		f3DRotated2[2] = -f3DRotated[0] * fS2 + f3DRotated[2] * fC2;
 		
+		System.err.println(Arrays.toString(f3DPoint) + " " + Arrays.toString(f3DRotated) + " " + Arrays.toString(f3DRotated2));
 		// translate back to (longitude, latitude)
 		double [] point = cartesian2Sperical(f3DRotated2); 
 		return point;
@@ -390,56 +398,6 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
         }
     }
     
-    public static void main(String[] args) throws Exception {
-    	double [] start = new double[]{0,0};
-    	double time = 1;
-    	double precision = 10;
-    	
-    	final int NR_OF_POINTS = 1024;
-    	final double[][] points = new double[NR_OF_POINTS][];
-    	SphericalDiffusionModel s = new SphericalDiffusionModel();
-    	
-      for (int i = 0; i < NR_OF_POINTS; i++) {
-//    	double angle = 15.0;
-//    	
-//    	// now we have an angle, use this to rotate the point [0,0] over
-//		// this angle in a random direction angle2
-//		double angle2 = Randomizer.nextDouble() * 360;
-//		double _angle = angle * Math.PI / 180;
-//		double _angle2 = angle2 * Math.PI / 180;
-//	    double [] xC = new double[] {Math.cos(_angle), Math.sin(_angle)*Math.cos(_angle2), Math.sin(_angle)*Math.sin(_angle2)};
-//
-//	    // convert back to latitude, longitude
-//		double [] xL = cartesian2Sperical(xC);
-//	    //double [] sC = spherical2Cartesian(start[0], start[1]);
-//		double [] target = reverseMap(xL[0], xL[1], start[0], start[1]);
-//		
-//		//System.err.println(target[0] + "," + target[1]+ ",0");
-    	
-    	
-		points[i] = s.sample(start, time, precision);
-      }
-
-      
-	  	JFrame frame = new JFrame();
-	  	JPanel panel= new JPanel() {
-			private static final long serialVersionUID = 1L;
-
-			protected void paintComponent(java.awt.Graphics g) {
-	  			double scaleX = getWidth() / 360.0;
-	  			double scaleY = getHeight() / 180.0;
-	  			for (int i = 0; i < NR_OF_POINTS; i++) {
-	  				g.drawRect((int) ((points[i][1]+180) * scaleX), (int) ((points[i][0]+90) * scaleY), 3, 3);
-	  			}
-	  		};
-	  	};
-	  	frame.add(panel);
-	  	frame.setSize(1024, 768);
-	  	frame.setVisible(true);
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-    }
-
 	@Override
 	public void getTransitionProbabilities(Node node, double fStartTime, double fEndTime, double fRate, double[] matrix) {
 		// TODO Auto-generated method stub
