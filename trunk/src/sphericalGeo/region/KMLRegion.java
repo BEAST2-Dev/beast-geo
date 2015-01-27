@@ -23,6 +23,9 @@ import org.w3c.dom.NodeList;
 public class KMLRegion extends Region {
 	public Input<File> kmlFileInput = new Input<File>("kml", "kml file with polygons over admissable locations.", Validate.REQUIRED);
 
+	public KMLRegion() {}
+	public KMLRegion(String kmlFile) throws Exception {initByName("kml", kmlFile);}
+	
 	@Override
 	public void initAndValidate() throws Exception {
 		Log.info.println("Processing " + kmlFileInput.get());
