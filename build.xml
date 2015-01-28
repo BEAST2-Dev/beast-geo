@@ -19,7 +19,7 @@
 	<property name="beast_classic_path" location="../beast-classic/build" />
 	<property name="beast2classpath" location="${beast2path}/build" />
 	<property name="Add_on_dir" value="${release_dir}/add-on" />
-        <property name="version" value="0.0.2" />
+        <property name="version" value="0.0.4" />
 
     <import file="${beast2path}/build.xml" />
 
@@ -190,6 +190,9 @@
 		</copy>
 		<copy todir="${Add_on_dir}/examples/nexus">
 			<fileset dir="examples/nexus" />
+		</copy>
+		<copy todir="${Add_on_dir}/templates">
+			<fileset dir="templates" />
 		</copy>
 		<copy todir="${Add_on_dir}/lib">
 			<fileset dir="${distGEO}" includes="GEO.addon.jar" />
