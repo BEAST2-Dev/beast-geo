@@ -101,7 +101,7 @@
 				<attribute name="Main-Class" value="${main_class_BEAST}" />
 			</manifest>
 			<fileset dir="${buildGEO}">
-				<include name="beast/**/*.class" />
+				<include name="**/*.class" />
 			</fileset>
 			<fileset dir="${beast2classpath}">
 				<include name="beast/**/*.class" />
@@ -113,7 +113,7 @@
 		</jar>
 		<jar jarfile="${distGEO}/GEO.src.jar">
 			<fileset dir="${srcGEO}">
-				<include name="beast/**/*.java" />
+				<include name="**/*.java" />
 				<include name="beast/**/*.png" />
 				<include name="beast/**/*.xsl" />
 			</fileset>
