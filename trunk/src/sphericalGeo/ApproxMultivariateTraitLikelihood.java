@@ -590,6 +590,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		return true;
 	}
 
+	/** return randomized position **/
 	public double[] getPostion(int iDim) {
 		return loggerLikelihood.getPostion(iDim);
 //		if (needsUpdate) {
@@ -601,6 +602,12 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 //		}
 //		return position[iDim];
 	}
+
+	/** return non-randomized positions **/
+	public double [][] getPositions() {
+		return position;
+	}
+
 	
 	@Override
 	public void store() {
@@ -623,5 +630,6 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		super.requiresRecalculation();
 		return true;
 	}
+	
 	
 }
