@@ -5,6 +5,7 @@ package sphericalGeo;
 import java.util.ArrayList;
 import java.util.List;
 
+import beast.core.Citation;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
@@ -18,6 +19,7 @@ import beast.evolution.tree.TreeInterface;
 //import beast.evolution.tree.TreeTraitMap;
 
 @Description("Approximate likelihood by MAP approximation of internal states")
+@Citation("Remco R. Bouckaert. Phylogeography by diffusion on a sphere. bioRxiv, BIORXIV/2015/016311, 2015.")
 public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	public Input<Boolean> scaleByBranchLengthInput = new Input<Boolean>("scale", "scale by branch lengths for initial position", true);
 	public Input<List<GeoPrior>> geopriorsInput = new Input<List<GeoPrior>>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<>());
