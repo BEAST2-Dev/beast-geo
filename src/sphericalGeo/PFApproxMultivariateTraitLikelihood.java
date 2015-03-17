@@ -29,6 +29,8 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	public Input<RealParameter> locationInput = new Input<RealParameter>("location",
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree");
 
+	public Input<Transformer> transformerInput = new Input<Transformer>("transformer","landscape transformer to capture some inheterogenuity in the diffusion process");
+
 	double epsilon = 2.0;
 	boolean scaleByBranchLength;
 
@@ -137,6 +139,7 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	SphericalDiffusionModel substModel;
 	TreeInterface tree;
 	BranchRateModel clockModel;
+	Transformer transformer;
 	int particleCount;
 	int iterationCount;
 	int rangeSize;
@@ -160,6 +163,8 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		substModel = (SphericalDiffusionModel) siteModel.substModelInput.get();
 		tree = treeInput.get();
 		
+		transformer = transformerInput.get();
+		
 		// initialise leaf positions
 		position = new double[tree.getNodeCount()][2];
 		AlignmentFromTraitMap data = (AlignmentFromTraitMap) dataInput.get();
@@ -167,6 +172,10 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		Node [] nodes = tree.getNodesAsArray();
 		for (int i = 0; i < tree.getLeafNodeCount(); i++) {
 			position[i] = traitMap.getTrait(tree, nodes[i]);
+			if (transformer != null) {
+				position[i] = transformer.project(position[i][0], position[i][1]);
+			}
+			
 		}
 		branchLengths = new double[tree.getNodeCount()];
 		sumLengths = new double[tree.getNodeCount()];
@@ -394,8 +403,13 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	void setUpInitialPositions() {
 		// process sampled locations
 		for (int i : sampleNumber) {
-			position[i][0] = sampledLocations.getMatrixValue(i, 0);;
-			position[i][1] = sampledLocations.getMatrixValue(i, 1);;
+			position[i][0] = sampledLocations.getMatrixValue(i, 0);
+			position[i][1] = sampledLocations.getMatrixValue(i, 1);
+			if (transformer != null) {
+				double [] t = transformer.project(position[i][0], position[i][1]);
+				position[i][0] = t[0];
+				position[i][1] = t[1];
+			}
 		}
 		
 		initByMean(tree.getRoot());
@@ -519,6 +533,10 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+		if (transformer != null) {
+			double [] pos = transformer.projectInverse(particlePosition[0][iDim][0], particlePosition[0][iDim][1]);
+			return pos;
 		}
 		return particlePosition[0][iDim];
 	}
