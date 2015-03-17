@@ -26,11 +26,12 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	public Input<RealParameter> locationInput = new Input<RealParameter>("location",
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree");
 
-	
+	public Input<Transformer> transformerInput = new Input<Transformer>("transformer","landscape transformer to capture some inheterogenuity in the diffusion process");
 	
 	SphericalDiffusionModel substModel;
 	TreeInterface tree;
 	BranchRateModel clockModel;
+	Transformer transformer;
 	
 	double [][] position;
 	double [][] sphereposition;
@@ -55,6 +56,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		substModel = (SphericalDiffusionModel) siteModel.substModelInput.get();
 		tree = treeInput.get();
 		scaleByBranchLength = scaleByBranchLengthInput.get();
+		transformer = transformerInput.get();
 		
 		// initialise leaf positions
 		position = new double[tree.getNodeCount()][2];
@@ -63,6 +65,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		Node [] nodes = tree.getNodesAsArray();
 		for (int i = 0; i < tree.getLeafNodeCount(); i++) {
 			position[i] = traitMap.getTrait(tree, nodes[i]);
+			if (transformer != null) {
+				position[i] = transformer.project(position[i][0], position[i][1]);
+			}
 		}
 		
 		sphereposition = new double[position.length][3];
@@ -101,10 +106,10 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		if (geopriors.size() > 0) {
 			loggerLikelihood.initByName("scale", scaleByBranchLength, "tree", tree, "siteModel", siteModel, 
 				"branchRateModel", clockModel, "data", data,
-				"geoprior", geopriors, "location", sampledLocations);
+				"geoprior", geopriors, "location", sampledLocations, "transformer", transformer);
 		} else {
 			loggerLikelihood.initByName("scale", scaleByBranchLength, "tree", tree, "siteModel", siteModel, 
-					"branchRateModel", clockModel, "data", data);
+					"branchRateModel", clockModel, "data", data, "transformer", transformer);
 		}
 	}
 	
@@ -203,6 +208,11 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		for (int i : sampleNumber) {
 			double lat1 = sampledLocations.getMatrixValue(i, 0);
 			double long1 = sampledLocations.getMatrixValue(i, 1);
+			if (transformer != null) {
+				double [] t = transformer.project(lat1, long1);
+				lat1 = t[0];
+				long1 = t[1];
+			}
 			if (position[i][0] != lat1 || position[i][1] != long1) {
 				position[i][0] = lat1;
 				position[i][1] = long1;
@@ -607,6 +617,13 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 
 	/** return non-randomized positions **/
 	public double [][] getPositions() {
+		if (transformer != null) {
+			double [][] position0 = new double[position.length][];
+			for (int i = 0; i < position.length; i++) {
+				position0[i] = transformer.projectInverse(position[i][0], position[i][1]);
+			}
+			return position0;
+		}
 		return position;
 	}
 
