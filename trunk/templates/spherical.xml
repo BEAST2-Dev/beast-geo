@@ -52,8 +52,9 @@ suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.freq
 
          <connect srcID='slocationtreeLikelihood.$(n)'      targetID='likelihood' inputName='distribution' if="isInitializing"/>
 
-
+<!-- clockRate already takes care of estimate of diffusion parameter, no need to have precission as well
          <connect srcID='sprecision.s:$(n)'                targetID='state' inputName='stateNode' if='inlikelihood(sprecision.s:$(n)) and sprecision.s:$(n)/estimate=true'/>
+-->
          <connect srcID='clockRate.c:$(n)'                 targetID='state' inputName='stateNode' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
 
 <!--
