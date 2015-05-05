@@ -7,7 +7,8 @@
 
         <subtemplate id='SLocationTrait' class='sphericalGeo.AlignmentFromTraitMap' mainid='$(n)'
 suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.frequencies,
-				beast.math.distributions.MultivariateNormalDistribution.arg'>
+				beast.math.distributions.MultivariateNormalDistribution.arg,
+				sphericalGeo.ApproxMultivariateTraitLikelihood.siteModel'>
 <![CDATA[
 	<parameter id="sprecision.s:$(n)" minordimension="1" estimate="true" value="100.0" lower="0.0"/>
 
@@ -72,6 +73,9 @@ suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.freq
          <connect srcID='clockRate.c:$(n)'                 targetID='tracelog' inputName='log' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
 
          <connect srcID='location.$(n)'                    targetID='TreeWithMetaDataLogger.t:$(n)' inputName='metadata' if='inposterior(slocationtreeLikelihood.$(n))'/>
+         <!-- for *BEAST analysis -->
+         <connect srcID='location.$(n)'                    targetID='SpeciesTreeLoggerX' inputName='metadata' if='inposterior(speciescoalescent)'/>
+         
 	</subtemplate>
 
 </mergewith>
