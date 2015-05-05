@@ -1,7 +1,6 @@
 package test.beast.app.beauti;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.fest.swing.edt.GuiActionRunner.execute;
 import static org.fest.swing.finder.JFileChooserFinder.findFileChooser;
 
 import java.awt.Component;
@@ -9,12 +8,10 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.Arrays;
 
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 import org.fest.swing.core.GenericTypeMatcher;
 import org.fest.swing.data.Index;
-import org.fest.swing.edt.GuiTask;
 import org.fest.swing.fixture.JComboBoxFixture;
 import org.fest.swing.fixture.JFileChooserFixture;
 import org.fest.swing.fixture.JOptionPaneFixture;
@@ -123,8 +120,8 @@ public class BeautiSphericalPhylogeographyTest extends BeautiBase {
 			screenshotTaker.saveComponentAsPng(beauti.frame, PREFIX + "priors.png");
 
 			assertStateEquals("Tree.t:HBV", "clockRate.c:HBV", "kappa.s:HBV", "popSize.t:HBV");
-			assertOperatorsEqual("treeScaler.t:HBV", "treeRootScaler.t:HBV", "UniformOperator.t:HBV",
-					"SubtreeSlide.t:HBV", "narrow.t:HBV", "wide.t:HBV", "WilsonBalding.t:HBV",
+			assertOperatorsEqual("CoalescentConstantTreeScaler.t:HBV", "CoalescentConstantTreeRootScaler.t:HBV", "CoalescentConstantUniformOperator.t:HBV",
+					"CoalescentConstantSubtreeSlide.t:HBV", "CoalescentConstantNarrow.t:HBV", "CoalescentConstantWide.t:HBV", "CoalescentConstantWilsonBalding.t:HBV",
 					"StrictClockRateScaler.c:HBV", "strictClockUpDownOperator.c:HBV", "KappaScaler.s:HBV",
 					"PopSizeScaler.t:HBV");
 			assertPriorsEqual("CoalescentConstant.t:HBV", "ClockPrior.c:HBV", "KappaPrior.s:HBV",
