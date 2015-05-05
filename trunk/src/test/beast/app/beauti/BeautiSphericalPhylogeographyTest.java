@@ -104,7 +104,7 @@ public class BeautiSphericalPhylogeographyTest extends BeautiBase {
 			// 2. Set the site model to HKY (empirical)
 			warning("2. Set the site model to HKY (empirical)");
 			f.selectTab("Site Model");
-			JComboBoxFixture substModel = beautiFrame.comboBox();
+			JComboBoxFixture substModel = beautiFrame.comboBox("substModel");
 			substModel.selectItem("HKY");
 			beautiFrame.comboBox("frequencies").selectItem("Empirical");
 			printBeautiState(f);
