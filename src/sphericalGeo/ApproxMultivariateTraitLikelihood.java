@@ -12,6 +12,7 @@ import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
 //import beast.evolution.alignment.AlignmentFromTraitMap;
 import beast.evolution.branchratemodel.BranchRateModel;
+import beast.evolution.branchratemodel.StrictClockModel;
 import beast.evolution.likelihood.GenericTreeLikelihood;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.Node;
@@ -52,6 +53,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	public void initAndValidate() throws Exception {
 		super.initAndValidate();
 		clockModel = branchRateModelInput.get();
+		if (clockModel == null) {
+			clockModel = new StrictClockModel();
+		}
 		SiteModel siteModel = (SiteModel) siteModelInput.get();
 		substModel = (SphericalDiffusionModel) siteModel.substModelInput.get();
 		tree = treeInput.get();
