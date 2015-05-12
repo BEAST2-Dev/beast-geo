@@ -29,14 +29,12 @@ package sphericalGeo;
 
 import java.util.Arrays;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
 import org.apache.commons.math.ConvergenceException;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.analysis.UnivariateRealFunction;
 import org.apache.commons.math.analysis.integration.TrapezoidIntegrator;
 import org.apache.commons.math.analysis.integration.UnivariateRealIntegrator;
+import org.apache.commons.math3.util.FastMath;
 
 import beast.core.Description;
 import beast.core.Input;
@@ -133,19 +131,24 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 		maxin = in[in.length - 1];
 	}
 	
-    private double calcLogN(double tau) {
+    double calcLogN(double tau) {
     	if (tau < minin) {
     		return 0;
     	}
     	if (tau > maxin) {
-    		return Math.log(2.888266/tau);
+    		return FastMath.log(2.888266/tau);
     	}
-    	int i = Arrays.binarySearch(in, tau);
-    	if (i >= 0) {
-    		// found exact match
+    	
+    	int i = (int) ((FastMath.log(tau)-FastMath.log(minin))/0.3465735);
+    	if (i == in.length-1) {
     		return logout[i];
     	}
-    	i = - i - 2;
+//      int i = Arrays.binarySearch(in, tau);
+//    	if (i >= 0) {
+//    		// found exact match
+//    		return logout[i];
+//    	}
+//    	i = - i - 2;
     	// interpolation needed to reconstruct trans prob
     	//double fiTime = CACHE_SIZE * fTime / m_fMaxTime; 
     	//int iTime =  (int) fiTime;
@@ -297,7 +300,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 		// from spherical to Cartesian coordinates
 		double [] f3DPoint = spherical2Cartesian(fLat, fLong);
 
-		double [] p = cartesian2Sperical(f3DPoint);
+		// double [] p = cartesian2Sperical(f3DPoint);
 		// rotate, first latitude, then longitude
 		double [] f3DRotated = new double[3];
 		double fC = Math.cos(fLongT * Math.PI / 180);
