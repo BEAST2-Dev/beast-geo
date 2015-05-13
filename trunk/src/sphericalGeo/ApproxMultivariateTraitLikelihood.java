@@ -28,7 +28,8 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree");
 
 	public Input<Transformer> transformerInput = new Input<Transformer>("transformer","landscape transformer to capture some inheterogenuity in the diffusion process");
-	
+	public Input<Boolean> logAverageInput = new Input<Boolean>("logAverage", "when logging, use average position instead of sample from particle filter. "
+			+ "This is faster, but also artificially reduces uncertainty in locations. ", false);
 	SphericalDiffusionModel substModel;
 	TreeInterface tree;
 	BranchRateModel clockModel;
@@ -42,6 +43,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 
 	boolean needsUpdate = true;
 	boolean scaleByBranchLength;
+	boolean logAverage;
 	
 	PFApproxMultivariateTraitLikelihood loggerLikelihood;
 	
@@ -115,6 +117,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			loggerLikelihood.initByName("scale", scaleByBranchLength, "tree", tree, "siteModel", siteModel, 
 					"branchRateModel", clockModel, "data", data, "transformer", transformer);
 		}
+		logAverage = logAverageInput.get();
 	}
 	
 	@Override
@@ -608,15 +611,18 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 
 	/** return randomized position **/
 	public double[] getPostion(int iDim) {
-		return loggerLikelihood.getPostion(iDim);
-//		if (needsUpdate) {
-//			try {
-//				calculateLogP();
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		return position[iDim];
+		if (!logAverage) {
+			return loggerLikelihood.getPostion(iDim);
+		} else {
+			if (needsUpdate) {
+				try {
+					calculateLogP();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			return position[iDim];
+		}
 	}
 
 	/** return non-randomized positions **/
