@@ -106,14 +106,17 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
             // See http://en.wikipedia.org/wiki/Great-circle_distance#Formulas
             double angle = Math.acos(Math.sin(theta1) * Math.sin(theta2) + Math.cos(theta1) * Math.cos(theta2) * Math.cos(Deltalambda));
 
-            double inverseVariance = precision.getValue(0) / time;
-            // See Equation (8) from http://arxiv.org/pdf/1303.1278v1.pdf
-            // logN normalising 'constant'
-            double logN = calcLogN(inverseVariance);
-            double logP = 0.5 * Math.log(angle * Math.sin(angle)) + 0.5 * Math.log(inverseVariance) -0.5 * angle*angle * inverseVariance;
-            //double logP = - 0.5 * angle*angle * inverseVariance;
-            System.err.println(start[0] + " " + start[1] + " -> " + stop[0] + " " + stop[1] + " => " + logP + " " + angle + " " + 
-            		(0.5 * Math.log(angle * Math.sin(angle))) + " " + ( -0.5 * angle*angle * inverseVariance) + " " + logN);
+            final double tau = time / precision.getValue(0);
+            double logN = calcLogN(tau);
+            final double logP = 0.5 * Math.log(angle * sin(angle)) - Math.log(tau) + -angle * angle / (tau * 2.0);
+
+//            double inverseVariance = precision.getValue(0) / time;
+//            // See Equation (8) from http://arxiv.org/pdf/1303.1278v1.pdf
+//            // logN normalising 'constant'
+//            double logP = 0.5 * Math.log(angle * Math.sin(angle)) + 0.5 * Math.log(inverseVariance) -0.5 * angle*angle * inverseVariance;
+//            //double logP = - 0.5 * angle*angle * inverseVariance;
+//            System.err.println(start[0] + " " + start[1] + " -> " + stop[0] + " " + stop[1] + " => " + logP + " " + angle + " " + 
+//            		(0.5 * Math.log(angle * Math.sin(angle))) + " " + ( -0.5 * angle*angle * inverseVariance) + " " + logN);
             return logP - logN;
     }
 
@@ -205,9 +208,18 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
            angle = acos(x);
         }
 
-        final double inverseVariance = precision.getValue(0) / time;
-        double logN = calcLogN(inverseVariance);
-        final double logP = -angle * angle * inverseVariance / 2.0 + 0.5 * Math.log(angle * sin(angle) * inverseVariance);
+//        final double inverseVariance = precision.getValue(0) / time;
+        final double tau = time/precision.getValue(0);
+        double logN = calcLogN(tau);
+        //final double logP = -angle * angle * inverseVariance / 2.0 + 0.5 * Math.log(angle * sin(angle)) + Math.log(inverseVariance);
+
+        //final double logP = Math.log(Math.sqrt(angle * sin(angle)) / tau * exp(-angle * angle / (tau * 2.0));
+        //                  = Math.log(Math.sqrt(angle * sin(angle)) / tau) + log(exp(-angle * angle / (tau * 2.0));
+        //                  = Math.log(Math.sqrt(angle * sin(angle)) - Math.log(tau) + -angle * angle / (tau * 2.0);
+        //                  = 0.5 * Math.log(angle * sin(angle)) - Math.log(tau) + -angle * angle / (tau * 2.0);
+        //                  = 0.5 * Math.log(angle * sin(angle)) + Math.log(inverseVariance) + -angle * angle * inverseVariance / 2.0;
+        final double logP = 0.5 * Math.log(angle * sin(angle)) - Math.log(tau) + -angle * angle / (tau * 2.0);
+
         
 //		System.err.println(start[0] + " " + start[1] + " -> " + stop[0] + " " + stop[1] + " => " + logP);
         return logP - logN;
