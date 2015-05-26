@@ -627,6 +627,13 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 
 	/** return non-randomized positions **/
 	public double [][] getPositions() {
+		if (needsUpdate) {
+			try {
+				calculateLogP();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		if (transformer != null) {
 			double [][] position0 = new double[position.length][];
 			for (int i = 0; i < position.length; i++) {

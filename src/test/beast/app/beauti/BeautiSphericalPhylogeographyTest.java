@@ -53,7 +53,7 @@ public class BeautiSphericalPhylogeographyTest extends BeautiBase {
 			} else {
 				beautiFrame.button("+").click();
 				dialog = new JOptionPaneFixture(robot());
-				dialog.comboBox("OptionPane.comboBox").selectItem("Add Alignment");
+				dialog.comboBox("OptionPane.comboBox").selectItem("Import Alignment");
 				dialog.okButton().click();
 				JFileChooserFixture fileChooser = findFileChooser().using(robot());
 				fileChooser.setCurrentDirectory(new File("examples/nexus/"));
