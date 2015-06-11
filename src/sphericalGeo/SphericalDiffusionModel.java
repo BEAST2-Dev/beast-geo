@@ -29,12 +29,13 @@ package sphericalGeo;
 
 import java.util.Arrays;
 
+import org.apache.commons.math3.util.FastMath;
+
 import org.apache.commons.math.ConvergenceException;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.analysis.UnivariateRealFunction;
 import org.apache.commons.math.analysis.integration.TrapezoidIntegrator;
 import org.apache.commons.math.analysis.integration.UnivariateRealIntegrator;
-import org.apache.commons.math3.util.FastMath;
 
 import beast.core.Description;
 import beast.core.Input;
@@ -294,20 +295,133 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 	    //{y}=\rho \, \sin\theta \, \sin\phi  
 	    //{z}=\rho \, \cos\theta 
 		double [] fNorm = new double[3];
-		fNorm[0] = Math.sin(fTheta) * Math.cos(fPhi);
-		fNorm[1] = Math.sin(fTheta) * Math.sin(fPhi);
-		fNorm[2] = Math.cos(fTheta);
+		fNorm[0] = FastMath.sin(fTheta) * FastMath.cos(fPhi);
+		fNorm[1] = FastMath.sin(fTheta) * FastMath.sin(fPhi);
+		fNorm[2] = FastMath.cos(fTheta);
+//		fNorm[0] = Math.sin(fTheta) * Math.cos(fPhi);
+//		fNorm[1] = Math.sin(fTheta) * Math.sin(fPhi);
+//		fNorm[2] = Math.cos(fTheta);
 		return fNorm;
 	} // spherical2Cartesian
-	
+
 	/** inverse of spherical2Cartesian **/
 	public static double [] cartesian2Sperical(double[] f3dRotated2) {
 		return 	new double[]{
-				Math.acos(-f3dRotated2[2]) * 180/Math.PI - 90,
-				Math.atan2(f3dRotated2[1], f3dRotated2[0]) * 180.0/Math.PI
+				//Math.acos(-f3dRotated2[2]) * 180/Math.PI - 90,
+				FastMath.acos(-f3dRotated2[2]) * 180/Math.PI - 90,
+				//acos_fast7(-f3dRotated2[2]) * 180/Math.PI - 90, // <- faster but considerably less accurate
+				//Math.atan2(f3dRotated2[1], f3dRotated2[0]) * 180.0/Math.PI
+				//FastMath.atan2(f3dRotated2[1], f3dRotated2[0]) * 180.0/Math.PI
+				fast_atan2(f3dRotated2[1], f3dRotated2[0]) * 180.0/Math.PI
+				
 		};
 	}
 
+	// from http://stackoverflow.com/questions/523531/fast-transcendent-trigonometric-functions-for-java
+	/** Fast approximation of 1.0 / sqrt(x).
+	   * See <a href="http://www.beyond3d.com/content/articles/8/">http://www.beyond3d.com/content/articles/8/</a>
+	   * @param x Positive value to estimate inverse of square root of
+	   * @return Approximately 1.0 / sqrt(x)
+	   **/
+	  public static double
+	  invSqrt(double x)
+	  {
+	    double xhalf = 0.5 * x; 
+	    long i = Double.doubleToRawLongBits(x);
+	    i = 0x5FE6EB50C7B537AAL - (i>>1); 
+	    x = Double.longBitsToDouble(i);
+	    x = x * (1.5 - xhalf*x*x); 
+	    return x; 
+	  }
+
+	  /** Approximation of arctangent.
+	   *  Slightly faster and substantially less accurate than
+	   *  {@link Math#atan2(double, double)}.
+	   **/
+	  public static double fast_atan2(double y, double x)
+	  {
+	    double d2 = x*x + y*y;
+
+	    // Bail out if d2 is NaN, zero or subnormal
+	    if (Double.isNaN(d2) ||
+	        (Double.doubleToRawLongBits(d2) < 0x10000000000000L))
+	    {
+	      return Double.NaN;
+	    }
+
+	    // Normalise such that 0.0 <= y <= x
+	    boolean negY = y < 0.0;
+	    if (negY) {y = -y;}
+	    boolean negX = x < 0.0;
+	    if (negX) {x = -x;}
+	    boolean steep = y > x;
+	    if (steep)
+	    {
+	      double t = x;
+	      x = y;
+	      y = t;
+	    }
+
+	    // Scale to unit circle (0.0 <= y <= x <= 1.0)
+	    double rinv = invSqrt(d2); // rinv ≅ 1.0 / hypot(x, y)
+	    x *= rinv; // x ≅ cos θ
+	    y *= rinv; // y ≅ sin θ, hence θ ≅ asin y
+
+	    // Hack: we want: ind = floor(y * 256)
+	    // We deliberately force truncation by adding floating-point numbers whose
+	    // exponents differ greatly.  The FPU will right-shift y to match exponents,
+	    // dropping all but the first 9 significant bits, which become the 9 LSBs
+	    // of the resulting mantissa.
+	    // Inspired by a similar piece of C code at
+	    // http://www.shellandslate.com/computermath101.html
+	    double yp = FRAC_BIAS + y;
+	    int ind = (int) Double.doubleToRawLongBits(yp);
+
+	    // Find φ (a first approximation of θ) from the LUT
+	    double φ = ASIN_TAB[ind];
+	    double cφ = COS_TAB[ind]; // cos(φ)
+
+	    // sin(φ) == ind / 256.0
+	    // Note that sφ is truncated, hence not identical to y.
+	    double sφ = yp - FRAC_BIAS;
+	    double sd = y * cφ - x * sφ; // sin(θ-φ) ≡ sinθ cosφ - cosθ sinφ
+
+	    // asin(sd) ≅ sd + ⅙sd³ (from first 2 terms of Maclaurin series)
+	    double d = (6.0 + sd * sd) * sd * ONE_SIXTH;
+	    double θ = φ + d;
+
+	    // Translate back to correct octant
+	    if (steep) { θ = Math.PI * 0.5 - θ; }
+	    if (negX) { θ = Math.PI - θ; }
+	    if (negY) { θ = -θ; }
+
+	    return θ;
+	  }
+
+	  private static final double ONE_SIXTH = 1.0 / 6.0;
+	  private static final int FRAC_EXP = 8; // LUT precision == 2 ** -8 == 1/256
+	  private static final int LUT_SIZE = (1 << FRAC_EXP) + 1;
+	  private static final double FRAC_BIAS =
+	    Double.longBitsToDouble((0x433L - FRAC_EXP) << 52);
+	  private static final double[] ASIN_TAB = new double[LUT_SIZE];
+	  private static final double[] COS_TAB = new double[LUT_SIZE];
+
+	  static
+	  {
+	    /* Populate trig tables */
+	    for (int ind = 0; ind < LUT_SIZE; ++ ind)
+	    {
+	      double v = ind / (double) (1 << FRAC_EXP);
+	      double asinv = Math.asin(v);
+	      COS_TAB[ind] = Math.cos(asinv);
+	      ASIN_TAB[ind] = asinv;
+	    }
+	  }
+	
+	
+	
+	
+	
 	public static double [] reverseMap(double fLat, double fLong, double fLatT, double fLongT) {
 		// from spherical to Cartesian coordinates
 		double [] f3DPoint = spherical2Cartesian(fLat, fLong);
@@ -426,6 +540,37 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 	@Override
 	public boolean canHandleDataType(DataType dataType) {
 		return false;
+	}
+	
+	
+	public static void main(String[] args) {
+		// speed test
+		Randomizer.setSeed(123);
+		int N = 10000000;
+		double [][] point = new double[N][2];
+		for (int i = 0; i < N; i++) {
+			point[i][0] = Randomizer.nextDouble() * 180 - 90;
+			point[i][1] = Randomizer.nextDouble() * 360 - 180;
+		}
+		
+		System.err.println("Starting...");
+		
+		long start = System.currentTimeMillis();
+		double a0 = 0, a1 = 1;
+		double x0 = 0, x1 = 1;
+		for (int i = 0; i < N; i++) {
+			double [] cart = SphericalDiffusionModel.spherical2Cartesian(point[i][0], point[i][1]);
+			double [] sper = SphericalDiffusionModel.cartesian2Sperical(cart);
+			x0 += sper[0];
+			x1 += sper[1];
+			a0 += point[i][0];
+			a1 += point[i][1];
+		}
+		
+		System.err.println("Expeted sum: " + a0 + " " + a1);
+		System.err.println("Calculated : " + x0 + " " + x1);
+		long end = System.currentTimeMillis();
+		System.err.println("Runtime: " + ((end - start)/1000.0) + " seconds");
 	}
     
 }
