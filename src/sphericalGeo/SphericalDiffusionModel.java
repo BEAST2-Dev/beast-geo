@@ -308,8 +308,8 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 	public static double [] cartesian2Sperical(double[] f3dRotated2) {
 		return 	new double[]{
 				//Math.acos(-f3dRotated2[2]) * 180/Math.PI - 90,
-				FastMath.acos(-f3dRotated2[2]) * 180/Math.PI - 90,
-				//acos_fast7(-f3dRotated2[2]) * 180/Math.PI - 90, // <- faster but considerably less accurate
+				//FastMath.acos(-f3dRotated2[2]) * 180/Math.PI - 90,
+				acos_parts_fast7(-f3dRotated2[2]) * 180/Math.PI - 90, // <- faster but considerably less accurate
 				//Math.atan2(f3dRotated2[1], f3dRotated2[0]) * 180.0/Math.PI
 				//FastMath.atan2(f3dRotated2[1], f3dRotated2[0]) * 180.0/Math.PI
 				fast_atan2(f3dRotated2[1], f3dRotated2[0]) * 180.0/Math.PI

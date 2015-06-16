@@ -34,7 +34,7 @@ public class KMLRegion extends Region {
 	}
 
 	private void calcAdmissableNodes(List<List<Double>> coordinates) throws Exception {
-		boolean debug = true;// Boolean.valueOf(System.getProperty("beast.debug"));
+		boolean debug = Boolean.valueOf(System.getProperty("beast.debug"));
 		boolean traversesMapCenter = false;
 		for (List<Double> coords : coordinates) {
 			for (int i = 0; i < coords.size() - 2; i += 2) {
@@ -88,18 +88,22 @@ public class KMLRegion extends Region {
 		Graphics g = image.getGraphics();
 
 		if (debug) {
-			final BufferedImage worldimage = ImageIO.read(new File("World98b.png"));
-			System.err.println((int) (worldimage.getWidth() * (180 + minLong) / 360.0));
-			System.err.println((int) (worldimage.getHeight() * (90 + minLat) / 180.0));
-			System.err.println((int) (worldimage.getWidth() * (180 + maxLong) / 360.0));
-			System.err.println((int) (worldimage.getHeight() * (90 + maxLat) / 180.0));
-
-			g.drawImage(worldimage, 0, 0, width, height, 
-					(int) (worldimage.getWidth() * (180 + minLong) / 360.0),
-					(int) (worldimage.getHeight() * (90 - maxLat) / 180.0), 
-					(int) (worldimage.getWidth() * (180 + maxLong) / 360.0), 
-					(int) (worldimage.getHeight() * (90 - minLat) / 180.0), null);
-			ImageIO.write(image, "png", new File("/tmp/kmlrange" + getID() + ".png"));
+			try {
+				final BufferedImage worldimage = ImageIO.read(new File("World98b.png"));
+				System.err.println((int) (worldimage.getWidth() * (180 + minLong) / 360.0));
+				System.err.println((int) (worldimage.getHeight() * (90 + minLat) / 180.0));
+				System.err.println((int) (worldimage.getWidth() * (180 + maxLong) / 360.0));
+				System.err.println((int) (worldimage.getHeight() * (90 + maxLat) / 180.0));
+	
+				g.drawImage(worldimage, 0, 0, width, height, 
+						(int) (worldimage.getWidth() * (180 + minLong) / 360.0),
+						(int) (worldimage.getHeight() * (90 - maxLat) / 180.0), 
+						(int) (worldimage.getWidth() * (180 + maxLong) / 360.0), 
+						(int) (worldimage.getHeight() * (90 - minLat) / 180.0), null);
+				ImageIO.write(image, "png", new File("/tmp/kmlrange" + getID() + ".png"));
+			} catch (Exception e) {
+				// ignore
+			}
 		}
 
 		for (List<Double> coords : coordinates) {
@@ -115,7 +119,11 @@ public class KMLRegion extends Region {
 		}
 
 		if (debug) {
-			ImageIO.write(image, "png", new File("/tmp/kmlregion" + getID() + ".png"));
+			try {
+				ImageIO.write(image, "png", new File("/tmp/kmlregion" + getID() + ".png"));
+			} catch (Exception e) {
+				// ignore
+			}
 		}
 
 	}

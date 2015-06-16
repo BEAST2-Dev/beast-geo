@@ -5,6 +5,7 @@ package sphericalGeo;
 import java.util.ArrayList;
 import java.util.List;
 
+import beast.core.BEASTInterface;
 import beast.core.Citation;
 import beast.core.Description;
 import beast.core.Input;
@@ -91,7 +92,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		if (geopriors.size() > 0) {
 			sampledLocations = locationInput.get();
 			if (sampledLocations == null) {
-				Log.warning.println("'location' needs to be specified when geopriors are defined, but location=null");
+				Log.warning.println("\nWARNING: 'location' needs to be specified when geopriors are defined, but location=null\n");
 			}
 			Double [] d = new Double[sampledLocations.getDimension()];
 			for (int i = 0; i < d.length; i++) {
@@ -106,6 +107,21 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			}
 			RealParameter tmp = new RealParameter(d);
 			sampledLocations.assignFromWithoutID(tmp);
+		} else {
+			// geopriors.size: sanity check to see whether there really are no geo-priors
+			String ids ="";
+			for (Object o : ((BEASTInterface) tree).getOutputs()) {
+				if (o instanceof GeoPrior) {
+					ids += ((BEASTInterface)o).getID() + ", ";
+				}
+			}
+			if (ids.length() > 1) {
+				ids = ids.substring(0, ids.length() - 2);
+				Log.warning.println("\nWARNING: this analysis contains GeoPriors (" + ids + "), but these are not "
+						+ "connected to the ApproxMultivariateTraitLikelihood (" + getID() + ").");
+				Log.warning.println("For every GeoPrior, there should be a geoprior entry.");
+				Log.warning.println("Expect this analysis to fail.\n");
+			}
 		}
 		
 		loggerLikelihood = new PFApproxMultivariateTraitLikelihood();

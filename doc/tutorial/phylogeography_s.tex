@@ -553,6 +553,22 @@ and
 \end{verbatim}
 
 
+
+Finally, in order to initialise the locations and let the likelihood know which locations are sampled, and which are approximated directly, we have to do two things:\\
+1. let the {\tt ApproxMultivariateTraitLikelihood} know where the location parameter is by adding the location-attribute, and\\
+2. add an entry for every {\tt geoprior}.
+
+After this, the XML for the geography likelihood should look something like this:
+
+\begin{verbatim}
+      <distribution id="geography" spec="sphericalGeo.ApproxMultivariateTraitLikelihood" tree="@Tree.t:AFRICA" 
+		location idref="location.geo">
+        <geoprior idref="China"/>
+        <geoprior idref="Eurasia"/>
+        ...
+\end{verbatim}
+
+
 \subsubsection*{Putting a prior on the root locations}
 
 Putting a prior on the root means we have to sample the root location, which essentially follows the recipe for sampling tips, but instead of specifying a single taxon, we specify a taxon set containing all taxa. If we want to restrict the root location to China, as specified above, this can be done for example like so:
