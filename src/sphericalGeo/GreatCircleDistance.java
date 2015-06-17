@@ -16,7 +16,7 @@ public class GreatCircleDistance extends BEASTObject implements Distance {
 	TreeTraitMap trait;
 	TreeInterface tree;
 
-	final static double EARTHRADIUS = 6371; // mean radius, according to http://en.wikipedia.org/wiki/Earth_radius
+	final public static double EARTHRADIUS = 6371; // mean radius, according to http://en.wikipedia.org/wiki/Earth_radius
 	
 	@Override
 	public void initAndValidate() throws Exception {
