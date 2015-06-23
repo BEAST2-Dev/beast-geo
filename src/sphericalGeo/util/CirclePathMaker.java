@@ -1,6 +1,7 @@
 package sphericalGeo.util;
 
 import java.io.File;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class CirclePathMaker extends BEASTObject {
 	
 	// members
 	PrintStream out = System.out;
+	String treeFile = null;
 	List<Tree> trees;
 
 	double minarc = MIN_ARC;
@@ -29,8 +31,15 @@ public class CirclePathMaker extends BEASTObject {
 	public CirclePathMaker(String[] args) {
 		try {
 			parseArgs(args);
-			if (trees == null) {
-				throw new Exception("no tree(s) found specified");
+			NexusParser parser = new NexusParser();
+			if (treeFile != null) {
+				parser.parseFile(new File(treeFile));
+			} else {
+				parser.parseFile("x", new InputStreamReader(System.in));
+			}
+			trees = parser.trees;
+			if (trees.size() == 0) {
+				throw new Exception("no trees found in file");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -46,12 +55,7 @@ public class CirclePathMaker extends BEASTObject {
 				if (i == args.length - 1) {
 					throw new Exception("not enough arguments");
 				}
-				NexusParser parser = new NexusParser();
-				parser.parseFile(new File(args[i+1]));
-				trees = parser.trees;
-				if (trees.size() == 0) {
-					throw new Exception("no trees found in file");
-				}
+				treeFile = args[i+1];
 				i++;
 			break;
 			case "-out":
@@ -85,7 +89,7 @@ public class CirclePathMaker extends BEASTObject {
 	private void printUsageAndExit() {
 		System.out.println("CirclePathMaker [args]");
 		System.out.println(getDescription()); 
-		System.out.println("-tree <nexus file> nexus file containing summary tree to be annotated");
+		System.out.println("-tree <nexus file> nexus file containing summary tree to be annotated (default stdin)");
 		System.out.println("-out <tree file> where to save results (default to stdout)");
 		System.out.println("-minarc <number> minimum arc in degrees to be split (default " + MIN_ARC + ")");
 		System.out.println("-name <name> name of the attribute storing the location info (default " + LOCATION_NAME + ")");
