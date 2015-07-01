@@ -486,18 +486,19 @@ Second, you have to define a set of regions, either by KML or by colouring a bit
 To set up the state, add the following line (where "geo" is the name used for the geography partition)
 
 \begin{verbatim}
-<stateNode idref="location.geo"/>
+<stateNode idref="location.s:geo"/>
 \end{verbatim}
 
+Note that the "s:" in "location.s:geo" is important!
 Next, add a LocationOperator to the set of operators (inside the MCMC element, where the other operators are):
 
 \begin{verbatim}
 <operator id='location.sampler' spec='sphericalGeo.LocationOperator' 
-    location='@location.geo' 
+    location='@location.s:geo' 
     likelihood='@slocationtreeLikelihood.geo' weight='30'/>
 \end{verbatim}
 
-Also, add a reference to {\tt location.geo} in ApproxMultivariateTraitLikelihood by adding the attribute {\tt location="@location.geo"} to the element with {\tt id="slocationtreeLikelihood.geo"}.
+Also, add a reference to {\tt location.s:geo} in ApproxMultivariateTraitLikelihood by adding the attribute {\tt location="@location.s:geo"} to the element with {\tt id="slocationtreeLikelihood.geo"}.
 
 To specify a KML region, add the following fragment to the XML at the top level (just under the alignment, but above the run element would be a good place).
 
@@ -522,7 +523,7 @@ There is an extra option to specify a bounding box by two latitude/longitude pai
 Now we defined a region, suppose you want to sample taxon AF182802 from the region of China, you add
 
 \begin{verbatim}
-<geoprior location='@location.geo' tree='@Tree.t:hbv' region='@China'
+<geoprior location='@location.s:geo' tree='@Tree.t:hbv' region='@China'
 	spec='sphericalGeo.GeoPrior'>
 	<taxon id='AF182802' spec='Taxon'/> 
 <geoprior>
@@ -547,7 +548,7 @@ and then you can leave out the spec attribute and instead of the above use
 and 
 
 \begin{verbatim}
-<geoprior location='@location.geo' tree='@Tree.t:hbv' region='@China'>
+<geoprior location='@location.s:geo' tree='@Tree.t:hbv' region='@China'>
 	<taxon id='AF182802' spec='Taxon'/>
 <geoprior>
 \end{verbatim}
@@ -562,7 +563,7 @@ After this, the XML for the geography likelihood should look something like this
 
 \begin{verbatim}
       <distribution id="geography" spec="sphericalGeo.ApproxMultivariateTraitLikelihood" tree="@Tree.t:AFRICA" 
-		location idref="location.geo">
+		location idref="location.s:geo">
         <geoprior idref="China"/>
         <geoprior idref="Eurasia"/>
         ...
@@ -574,7 +575,7 @@ After this, the XML for the geography likelihood should look something like this
 Putting a prior on the root means we have to sample the root location, which essentially follows the recipe for sampling tips, but instead of specifying a single taxon, we specify a taxon set containing all taxa. If we want to restrict the root location to China, as specified above, this can be done for example like so:
 
 \begin{verbatim}
-<geoprior location='@location.geo' tree='@Tree.t:hbv' region='@China'>
+<geoprior location='@location.s:geo' tree='@Tree.t:hbv' region='@China'>
 	<taxonset id='all.taxa' spec='TaxonSet' alignment='@hbv'/>
 <geoprior>
 \end{verbatim}
@@ -587,7 +588,7 @@ First, specify a monophyletic clade in the priors panel in BEAUti; hit the littl
 To specify the prior, add the following to the element with id="slocationtreeLikelihood.geo"
 
 \begin{verbatim}
-<geoprior location='@location.geo' tree='@Tree.t:hbv' region='@China'>
+<geoprior location='@location.s:geo' tree='@Tree.t:hbv' region='@China'>
 	<taxonset idref='myclade'/>
 <geoprior>
 \end{verbatim}
@@ -595,7 +596,7 @@ To specify the prior, add the following to the element with id="slocationtreeLik
 \subsubsection*{Trouble shooting}
 \begin{itemize}
 \item the taxon may already be specified somewhere in the XML if for example you are running a *BEAST analysis. In that case, replace {\tt $<$taxon id='AF182802' spec='Taxon'/$>$ } with {\tt$<$taxon idref='AF182802'/$>$ }.
-\item "location.geo" cannot be found, if you named your spherical diffusion partition something else than "geo". Just replace location.geo with location.your\_partition\_name.
+\item "location.s:geo" cannot be found, if you named your spherical diffusion partition something else than "geo". Just replace location.s:geo with location.s:your\_partition\_name.
 \item "Tree.t:hbv" cannot be found, if you named your tree in the data partition something else than "hbv". Again, just replace "hbv" with whatever the tree partition is called.
 \end{itemize}
 
