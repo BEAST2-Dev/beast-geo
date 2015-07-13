@@ -184,10 +184,8 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		double logP = 0;
 		for (Node node : tree.getNodesAsArray()) {
 			if (!node.isRoot()) {
-				logP += substModel.getLogLikelihood(
-						position[node.getParent().getNr()], 
-						position[node.getNr()], 
-						branchLengths[node.getNr()]);
+				logP += substModel.getLogLikelihood(node, position,
+						branchLengths);
 			}
 		}
 		return logP;

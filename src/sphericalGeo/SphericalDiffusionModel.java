@@ -74,10 +74,18 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
         super.initAndValidate();
     }
 
+    public double getLogLikelihood(Node node, double [][] position, double [] branchLengths) {
+		double [] start = position[node.getParent().getNr()];
+		double [] stop = position[node.getNr()];
+		double time = branchLengths[node.getNr()];
+		return getLogLikelihood(start, stop, time);
+    }
+    
     // assumes start = {latitude, longitude}
     //         stop  = {latitude, longitude}
     // and -90 < latitude < 90, -180 < longitude < 180
-    public double getLogLikelihood(double[] start, double[] stop, double time) {
+    public double getLogLikelihood(double [] start, double [] stop, double time) {
+
     	if (fast) {
     		return getLogLikelihood2(start, stop, time);
     	}
