@@ -17,32 +17,30 @@ public class LocationOperator extends Operator {
 			"likelihood over the locations", Validate.REQUIRED);
 	
 	RealParameter sampledLocations;
-	boolean [] isSampled;
 	List<Integer> sampleNumber;
-	List<GeoPrior> geopriors;
+	ApproxMultivariateTraitLikelihood likelihood;
 	
 	@Override
 	public void initAndValidate() throws Exception {
 		sampledLocations = locationInput.get();
 
-		ApproxMultivariateTraitLikelihood likelihood = likelihoodInput.get();
-		isSampled = likelihood.isSampled;
-		sampleNumber = likelihood.sampleNumber;
-		geopriors = likelihood.geopriorsInput.get();
+		likelihood = likelihoodInput.get();
 		
 	}
 
 	@Override
 	public double proposal() {
+		sampleNumber = likelihood.sampleNumber;
 		if (sampleNumber.size() == 0) {
 			return 0;
 		}
 		int i = Randomizer.nextInt(sampleNumber.size());
+		List<GeoPrior> geopriors = likelihood.geopriorsInput.get();
 		GeoPrior prior = geopriors.get(i);
 		double [] location = prior.sample();
-		i = sampleNumber.get(i);
-		sampledLocations.setValue(i * 2, location[0]);
-		sampledLocations.setValue(i * 2 + 1, location[1]);
+		int k = sampleNumber.get(i);
+		sampledLocations.setValue(k * 2, location[0]);
+		sampledLocations.setValue(k * 2 + 1, location[1]);
 		
 		return 0;
 	}

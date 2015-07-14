@@ -1,5 +1,6 @@
 package sphericalGeo;
 
+import java.io.PrintStream;
 import java.util.List;
 import java.util.Random;
 
@@ -32,7 +33,7 @@ public class GeoPrior extends Distribution {
 	RealParameter location;
 	Tree tree;
 	TaxonSet taxonSet;
-	int taxonNr;
+	int taxonNr = -1;
 	boolean isRoot;
 	boolean isTip = false;
 	
@@ -41,6 +42,8 @@ public class GeoPrior extends Distribution {
     // array of flags to indicate which taxa are in the set
     boolean[] isInTaxaSet;
 
+
+	boolean initialised = false;
 
 	@Override
 	public void initAndValidate() throws Exception {
@@ -57,6 +60,15 @@ public class GeoPrior extends Distribution {
 			location.setDimension(taxonSet.getTaxonCount() * 4 - 2);
 		}
 
+		super.initAndValidate();
+		//initialise();
+	}
+
+	/** 
+    * Need delayed initialisation in order for the tree to get set up.
+	* If this happens through a StateNodeInitialiser, node numbering can change.
+	**/
+	protected void initialise() {
 		if (taxonInput.get() != null) {
 			isTip = true;
 			String taxonName = taxonInput.get().getID();
@@ -85,14 +97,20 @@ public class GeoPrior extends Distribution {
 	                isInTaxaSet[iTaxon] = true;
 	                //taxonIndex[k++] = iTaxon;
 	            }
+	            nrOfTaxa = taxonset2.asStringList().size();
+				// set up taxonNr
+				calcMRCAtime(tree.getRoot(), new int[1]);
 			}
 		}
-
-		super.initAndValidate();
+		initialised = true;
 	}
 
 	@Override
 	public double calculateLogP() throws Exception {
+		if (!initialised) {
+			initialise();
+		}
+
 		logP = Double.NEGATIVE_INFINITY;
 		boolean isInside = isInsideInput.get();
 
@@ -150,6 +168,22 @@ public class GeoPrior extends Distribution {
         }
     }
 
+    
+    
+    @Override
+    public void init(PrintStream out) throws Exception {
+        out.print(getID() + ".latitude\t");
+        out.print(getID() + ".longitude\t");
+    }
+    
+    @Override
+    public void log(int nSample, PrintStream out) {
+		double[] location = new double[2];
+		this.location.getMatrixValues1(taxonNr, location);
+        out.print(location[0] + "\t");
+        out.print(location[1] + "\t");
+    }
+    
 
 	@Override
 	public List<String> getArguments() {

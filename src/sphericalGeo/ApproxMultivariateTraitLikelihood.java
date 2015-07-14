@@ -52,6 +52,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	boolean [] isSampled;
 	List<Integer> sampleNumber;
 	
+	double precision;
+	
+	
 	@Override
 	public void initAndValidate() throws Exception {
 		super.initAndValidate();
@@ -86,6 +89,36 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		sumLengths = new double[tree.getNodeCount()];
 		parentweight = new double[tree.getNodeCount()];
 	
+		
+		//initialiseSampledStates();
+		List<GeoPrior> geopriors = geopriorsInput.get();
+		{
+			// geopriors.size: sanity check to see whether there really are no geo-priors
+			String ids ="";
+			for (Object o : ((BEASTInterface) tree).getOutputs()) {
+				if (o instanceof GeoPrior &&  !geopriors.contains(o)) {
+					ids += ((BEASTInterface)o).getID() + ", ";
+				}
+			}
+			if (ids.length() > 1) {
+				ids = ids.substring(0, ids.length() - 2);
+				Log.warning.println("\nWARNING: this analysis contains GeoPriors (" + ids + "), but these are not "
+						+ "connected to the ApproxMultivariateTraitLikelihood (" + getID() + ").");
+				Log.warning.println("For every GeoPrior, there should be a geoprior entry.");
+				Log.warning.println("Expect this analysis to fail.\n");
+			}
+		}
+		
+		logAverage = logAverageInput.get();
+	}
+	
+	int initialisations = 0;
+	void initialiseSampledStates() throws Exception {
+		if (initialisations > 0) {
+			return;
+		}
+		initialisations++;
+		
 		List<GeoPrior> geopriors = geopriorsInput.get();
 		isSampled = new boolean[tree.getNodeCount()];
 		sampleNumber = new ArrayList<Integer>();
@@ -99,6 +132,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 				d[i] = sampledLocations.getValue(i);
 			}
 			for (GeoPrior prior : geopriors) {
+				prior.initialise();
 				isSampled[prior.taxonNr] = true;
 				sampleNumber.add(prior.taxonNr);
 				double [] location = prior.sample();
@@ -107,23 +141,11 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			}
 			RealParameter tmp = new RealParameter(d);
 			sampledLocations.assignFromWithoutID(tmp);
-		} else {
-			// geopriors.size: sanity check to see whether there really are no geo-priors
-			String ids ="";
-			for (Object o : ((BEASTInterface) tree).getOutputs()) {
-				if (o instanceof GeoPrior) {
-					ids += ((BEASTInterface)o).getID() + ", ";
-				}
-			}
-			if (ids.length() > 1) {
-				ids = ids.substring(0, ids.length() - 2);
-				Log.warning.println("\nWARNING: this analysis contains GeoPriors (" + ids + "), but these are not "
-						+ "connected to the ApproxMultivariateTraitLikelihood (" + getID() + ").");
-				Log.warning.println("For every GeoPrior, there should be a geoprior entry.");
-				Log.warning.println("Expect this analysis to fail.\n");
-			}
 		}
 		
+		SiteModel siteModel = (SiteModel) siteModelInput.get();
+		AlignmentFromTraitMap data = (AlignmentFromTraitMap) dataInput.get();
+
 		loggerLikelihood = new PFApproxMultivariateTraitLikelihood();
 		if (geopriors.size() > 0) {
 			loggerLikelihood.initByName("scale", scaleByBranchLength, "tree", tree, "siteModel", siteModel, 
@@ -133,11 +155,14 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			loggerLikelihood.initByName("scale", scaleByBranchLength, "tree", tree, "siteModel", siteModel, 
 					"branchRateModel", clockModel, "data", data, "transformer", transformer);
 		}
-		logAverage = logAverageInput.get();
 	}
+	
+	
 	
 	@Override
 	public double calculateLogP() throws Exception {
+		initialiseSampledStates();
+
         logP = Double.NaN;
 		try {
 			// check prior
@@ -241,6 +266,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			}
 		}
 		
+		precision = substModel.precisionInput.get().getValue();
 		initByMean(tree.getRoot());
 		resetMeanDown(tree.getRoot());
 		
@@ -285,8 +311,8 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	void setHalfWayPosition(int nodeNr, int child1, int child2) {
 		// start in weighted middle of the children
 		if (scaleByBranchLength) {
-			double b1 = 1.0/Math.sqrt(branchLengths[child1]);
-			double b2 = 1.0/Math.sqrt(branchLengths[child2]);
+			double b1 = 1.0/Math.sqrt(branchLengths[child1]/precision);
+			double b2 = 1.0/Math.sqrt(branchLengths[child2]/precision);
 			double len = b1 + b2;
 			sphereposition[nodeNr][0] = (sphereposition[child1][0] * b1 + sphereposition[child2][0] * b2) / len;
 			sphereposition[nodeNr][1] = (sphereposition[child1][1] * b1 + sphereposition[child2][1] * b2) / len;
@@ -296,8 +322,8 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 //			sphereposition[nodeNr][1] = (sphereposition[child1][1] / branchLengths[child1] + sphereposition[child2][1] / branchLengths[child2]) / len;
 //			sphereposition[nodeNr][2] = (sphereposition[child1][2] / branchLengths[child1] + sphereposition[child2][2] / branchLengths[child2]) / len;
 		} else{
-			double b1 = 1.0/Math.sqrt(branchLengths[child1]);
-			double b2 = 1.0/Math.sqrt(branchLengths[child2]);
+			double b1 = 1.0/Math.sqrt(branchLengths[child1]/precision);
+			double b2 = 1.0/Math.sqrt(branchLengths[child2]/precision);
 			if (tree.getNode(nodeNr).isRoot()) {
 				double len = b1 + b2;
 				b1 = b1 / len;
@@ -330,9 +356,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	void setHalfWayPosition(int nodeNr, int child1, int child2, int parent) {
 		// start in weighted middle of the children and parent location
 		if (scaleByBranchLength) {
-			double b1 = 1.0/Math.sqrt(branchLengths[child1]);
-			double b2 = 1.0/Math.sqrt(branchLengths[child2]);
-			double p = 1.0/Math.sqrt(branchLengths[nodeNr]);
+			double b1 = 1.0/Math.sqrt(branchLengths[child1]/precision);
+			double b2 = 1.0/Math.sqrt(branchLengths[child2]/precision);
+			double p = 1.0/Math.sqrt(branchLengths[nodeNr]/precision);
 			double len = b1 + b2 + p;
 			sphereposition[nodeNr][0] = (sphereposition[child1][0] * b1 + sphereposition[child2][0] * b2 + sphereposition[parent][0] * p) / len;
 			sphereposition[nodeNr][1] = (sphereposition[child1][1] * b1 + sphereposition[child2][1] * b2 + sphereposition[parent][1] * p) / len;
@@ -343,9 +369,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 //			sphereposition[nodeNr][1] = (sphereposition[child1][1] / branchLengths[child1] + sphereposition[child2][1] / branchLengths[child2] + sphereposition[parent][1] / branchLengths[nodeNr]) / len;
 //			sphereposition[nodeNr][2] = (sphereposition[child1][2] / branchLengths[child1] + sphereposition[child2][2] / branchLengths[child2] + sphereposition[parent][2] / branchLengths[nodeNr]) / len;
 		} else {
-			double b1 = branchLengths[child1];
-			double b2 = branchLengths[child2];
-			double p = branchLengths[nodeNr];
+			double b1 = branchLengths[child1]/precision;
+			double b2 = branchLengths[child2]/precision;
+			double p = branchLengths[nodeNr]/precision;
 			double len = b1 + b2 + p;
 			b1 /= len;
 			b2 /= len;
@@ -410,7 +436,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			int nodeNr = node.getNr();
 			int child1 = node.getLeft().getNr();
 			int child2 = node.getRight().getNr();
-			if (node.isRoot()) {
+			if (node.isRoot() || isSampled[node.getNr()]) {
 				//setHalfWayPosition(nodeNr, child1, child2);
 			} else {
 				int parent = node.getParent().getNr();
@@ -676,7 +702,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	@Override
 	protected boolean requiresRecalculation() {
 		needsUpdate = true;
-		loggerLikelihood.needsUpdate = true;
+		if (loggerLikelihood != null) {
+			loggerLikelihood.needsUpdate = true;
+		}
 		super.requiresRecalculation();
 		return true;
 	}
