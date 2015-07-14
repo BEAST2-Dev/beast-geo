@@ -136,8 +136,11 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 				isSampled[prior.taxonNr] = true;
 				sampleNumber.add(prior.taxonNr);
 				double [] location = prior.sample();
-				d[prior.taxonNr * 2] = location[0];
-				d[prior.taxonNr * 2 + 1] = location[1];
+				// check if the location is already initialised (e.g. through resuming a chain)
+				if (Math.abs(d[prior.taxonNr * 2]) < 1e-10 && Math.abs(d[prior.taxonNr * 2 + 1]) < 1e-10) {
+					d[prior.taxonNr * 2] = location[0];
+					d[prior.taxonNr * 2 + 1] = location[1];
+				}
 			}
 			RealParameter tmp = new RealParameter(d);
 			sampledLocations.assignFromWithoutID(tmp);
