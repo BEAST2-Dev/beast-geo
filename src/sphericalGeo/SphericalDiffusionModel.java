@@ -143,7 +143,14 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 		maxin = in[in.length - 1];
 	}
 	
+	
+    private double lastTau = -1;
+    private double lastN = 0;
     double calcLogN(double tau) {
+    	if (tau == lastTau) {
+    		return lastN;
+    	}
+
     	if (tau < minin) {
     		return 0;
     	}
@@ -169,7 +176,9 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
     	double fWeight2 = (tau - in[i])/(in[i+1] - in[i]);
     	double fWeight1 = 1.0 - fWeight2;
 		// TODO Auto-generated method stub
-		return logout1 * fWeight1 + logout2 * fWeight2;
+		lastN = logout1 * fWeight1 + logout2 * fWeight2;
+		lastTau = tau;
+		return lastN;
 	}
 
 	//@Override
