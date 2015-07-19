@@ -182,7 +182,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			// calc likelihood
 			logP = 0.0;
 			calcBranchLengths();
-			caclPositions();
+			calcPositions();
 			logP = calcLogP();
 			needsUpdate = false;
 		} catch (Exception e) {
@@ -250,7 +250,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 //	}
 	
 	
-	void caclPositions() {
+	void calcPositions() {
 		final double EPSILON = 1e-8;
 		
 		// process sampled locations
@@ -275,31 +275,31 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		
 			
 		if (scaleByBranchLength) {
-		double [][] oldPosition = new double[tree.getNodeCount()][3];
-		for (int i = 0; i < 50; i++) {
-			if (i % 5 == 0)
-			for (int j = tree.getLeafNodeCount(); j < oldPosition.length; j++) {
-				oldPosition[j][0] = sphereposition[j][0];
-				oldPosition[j][1] = sphereposition[j][1];
-				oldPosition[j][2] = sphereposition[j][2];
-			}
-
+			double [][] oldPosition = new double[tree.getNodeCount()][3];
+			for (int i = 0; i < 50; i++) {
+				if (i % 5 == 0) {
+					for (int j = tree.getLeafNodeCount(); j < oldPosition.length; j++) {
+						oldPosition[j][0] = sphereposition[j][0];
+						oldPosition[j][1] = sphereposition[j][1];
+						oldPosition[j][2] = sphereposition[j][2];
+					}
+				}
+	
 				resetMeanDown(tree.getRoot());
 				resetMeanUp(tree.getRoot());
-
+	
 				if (i % 5 == 0) {
-				double max = 0;
-				for (int j = tree.getLeafNodeCount(); j < oldPosition.length; j++) {
-					double delta0 = oldPosition[j][0] - sphereposition[j][0];
-					double delta1 = oldPosition[j][1] - sphereposition[j][1];
-					double delta2 = oldPosition[j][2] - sphereposition[j][2];
-					max = Math.max(max, Math.max(Math.abs(delta0), Math.max(Math.abs(delta1), Math.abs(delta2))));
+					double max = 0;
+					for (int j = tree.getLeafNodeCount(); j < oldPosition.length; j++) {
+						double delta0 = oldPosition[j][0] - sphereposition[j][0];
+						double delta1 = oldPosition[j][1] - sphereposition[j][1];
+						double delta2 = oldPosition[j][2] - sphereposition[j][2];
+						max = Math.max(max, Math.max(Math.abs(delta0), Math.max(Math.abs(delta1), Math.abs(delta2))));
+					}
+					if (max < EPSILON) {
+						break;
+					}
 				}
-				if (max < EPSILON) {
-					break;
-				}
-				}
-					
 			}
 		}
 		
@@ -372,9 +372,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 //			sphereposition[nodeNr][1] = (sphereposition[child1][1] / branchLengths[child1] + sphereposition[child2][1] / branchLengths[child2] + sphereposition[parent][1] / branchLengths[nodeNr]) / len;
 //			sphereposition[nodeNr][2] = (sphereposition[child1][2] / branchLengths[child1] + sphereposition[child2][2] / branchLengths[child2] + sphereposition[parent][2] / branchLengths[nodeNr]) / len;
 		} else {
-			double b1 = branchLengths[child1]/precision;
-			double b2 = branchLengths[child2]/precision;
-			double p = branchLengths[nodeNr]/precision;
+			double b1 = 1.0/Math.sqrt(branchLengths[child1]/precision);
+			double b2 = 1.0/Math.sqrt(branchLengths[child2]/precision);
+			double p = 1.0/Math.sqrt(branchLengths[nodeNr]/precision);
 			double len = b1 + b2 + p;
 			b1 /= len;
 			b2 /= len;
