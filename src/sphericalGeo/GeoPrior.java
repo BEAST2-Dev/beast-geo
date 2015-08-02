@@ -33,7 +33,7 @@ public class GeoPrior extends Distribution {
 	RealParameter location;
 	Tree tree;
 	TaxonSet taxonSet;
-	int taxonNr = -1;
+	public int taxonNr = -1;
 	boolean isRoot;
 	boolean isTip = false;
 	
@@ -68,7 +68,7 @@ public class GeoPrior extends Distribution {
     * Need delayed initialisation in order for the tree to get set up.
 	* If this happens through a StateNodeInitialiser, node numbering can change.
 	**/
-	protected void initialise() {
+	public void initialise() {
 		if (taxonInput.get() != null) {
 			isTip = true;
 			String taxonName = taxonInput.get().getID();
