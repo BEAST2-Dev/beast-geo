@@ -108,7 +108,9 @@ public class GeoPrior extends Distribution {
 	@Override
 	public double calculateLogP() throws Exception {
 		if (!initialised) {
-			initialise();
+			logP = 0;
+			return logP;
+			//initialise();
 		}
 
 		logP = Double.NEGATIVE_INFINITY;
@@ -153,17 +155,18 @@ public class GeoPrior extends Distribution {
             }
         } else {
             int iTaxons = calcMRCAtime(node.getLeft(), nTaxonCount);
-            final int nLeftTaxa = nTaxonCount[0];
+            int nTaxa = nTaxonCount[0];
             nTaxonCount[0] = 0;
-            if (node.getRight() != null) {
-                iTaxons += calcMRCAtime(node.getRight(), nTaxonCount);
-                final int nRightTaxa = nTaxonCount[0];
-                nTaxonCount[0] = nLeftTaxa + nRightTaxa;
-                if (iTaxons == nrOfTaxa) {
-                	taxonNr = node.getNr();
-                    return iTaxons + 1;                	
-               }
+            for (int i = 0; i < node.getChildCount(); i++) {
+            	Node child = node.getChild(i);
+                iTaxons += calcMRCAtime(child, nTaxonCount);
+                nTaxa += nTaxonCount[0];
             }
+            nTaxonCount[0] = nTaxa;
+            if (iTaxons == nrOfTaxa) {
+            	taxonNr = node.getNr();
+                return iTaxons + 1;                	
+           }
             return iTaxons;
         }
     }
