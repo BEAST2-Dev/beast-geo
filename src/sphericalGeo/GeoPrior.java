@@ -157,7 +157,7 @@ public class GeoPrior extends Distribution {
             int iTaxons = calcMRCAtime(node.getLeft(), nTaxonCount);
             int nTaxa = nTaxonCount[0];
             nTaxonCount[0] = 0;
-            for (int i = 0; i < node.getChildCount(); i++) {
+            for (int i = 1; i < node.getChildCount(); i++) {
             	Node child = node.getChild(i);
                 iTaxons += calcMRCAtime(child, nTaxonCount);
                 nTaxa += nTaxonCount[0];
