@@ -18,6 +18,7 @@ public class AlignmentFromTraitMap extends Alignment {
 
 	public AlignmentFromTraitMap() {
 		dataTypeInput.setRule(Validate.OPTIONAL);
+		taxonSetInput.setRule(Validate.OPTIONAL);
 		stateCountInput.setRule(Validate.OPTIONAL);
 		stripInvariantSitesInput.setRule(Validate.OPTIONAL);
 		sequenceInput.setRule(Validate.OPTIONAL);
@@ -25,6 +26,10 @@ public class AlignmentFromTraitMap extends Alignment {
 
 	@Override
     public void initAndValidate() throws Exception {
+		
+		if (taxonSetInput.get() != null && taxonSetInput.get().getTaxonCount() == 0) {
+			taxonSetInput.setValue(null, this);
+		}
     	traitMap = traitInput.get();
     	patternIndex = new int[0];
         counts = new ArrayList<List<Integer>>();
