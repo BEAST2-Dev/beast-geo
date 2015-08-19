@@ -49,7 +49,7 @@ public class TraitFunction extends RealParameter {
 	@Override
 	public Double getMatrixValue(int i, int j) {
 		if (likelihood != null)
-		return likelihood.getPostion(i)[j];
+		return likelihood.getPosition(i)[j];
 		return likelihood2.getPostion(i)[j];
 	}
 

@@ -169,7 +169,7 @@ public class CirclePathMaker extends BEASTObject {
 		mid[1] /= len;
 		mid[2] /= len;
 		
-		double [] mid0 = SphericalDiffusionModel.cartesian2Sperical(mid);
+		double [] mid0 = SphericalDiffusionModel.cartesian2Sperical(mid, true);
 		
 		Node node = new Node();
 		node.metaDataString = locationName + "={" + mid0[0] + "," + mid0[1] + "}"; 
