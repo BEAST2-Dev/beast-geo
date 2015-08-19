@@ -54,6 +54,8 @@ import static java.lang.Math.*;
 @Description("Diffusion model that assumes a normal diffusion process on a sphere")
 public class SphericalDiffusionModel extends SubstitutionModel.Base {
 
+    private static final double RAD2DEG = 180 / Math.PI;
+    private static final double DEG2RAD = Math.PI / 180;
     public Input<RealParameter> precisionInput = new Input<RealParameter>("precision", "precision of diffusion process", Validate.REQUIRED);
     public Input<Boolean> m_fast = new Input<>("fast", "Use an approximation for arccos for angles close to 0 "
     + "(|cos(x) > 0.9). In this range the approximation has an error of at most 1e-10, " +
@@ -116,7 +118,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
             double angle = Math.acos(Math.sin(theta1) * Math.sin(theta2) + Math.cos(theta1) * Math.cos(theta2) * Math.cos(Deltalambda));
 
             final double tau = time / precision.getValue(0);
-            double logN = calcLogN(tau);
+            final double logN = calcLogN(tau);
             final double logP = 0.5 * Math.log(angle * sin(angle)) - Math.log(tau) + -angle * angle / (tau * 2.0);
 
 //            double inverseVariance = precision.getValue(0) / time;
@@ -133,16 +135,16 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 	static double [] in = new double[]{0.0000006743496, 0.0000009536743, 0.000001348699, 0.000001907349, 0.000002697398, 0.000003814697, 0.000005394797, 0.000007629395, 0.00001078959, 0.00001525879, 0.00002157919, 0.00003051758, 0.00004315837, 0.00006103516, 0.00008631675, 0.0001220703, 0.0001726335, 0.0002441406, 0.000345267, 0.0004882812, 0.000690534, 0.0009765625, 0.001381068, 0.001953125, 0.002762136, 0.00390625, 0.005524272, 0.0078125, 0.01104854, 0.015625, 0.02209709, 0.03125, 0.04419417, 0.0625, 0.08838835, 0.125, 0.1767767, 0.25, 0.3535534, 0.5, 0.7071068, 1, 1.414214, 2, 2.828427, 4, 5.656854, 8, 11.31371, 16, 22.62742, 32, 45.25483, 64, 90.50967, 128, 181.0193, 256, 362.0387, 512, 724.0773, 1024, 1448.155, 2048, 2896.309, 4096, 5792.619, 8192, 11585.24, 16384, 23170.48, 32768, 46340.95, 65536, 92681.9, 131072, 185363.8, 262144, 370727.6, 524288, 741455.2, 1048576, 1482910, 2097152, 2965821, 4194304, 5931642, 8388608, 11863280, 16777220, 23726570, 33554430, 47453130, 67108860, 94906270, 134217700, 189812500, 268435500, 379625100, 536870900, 759250100};
 	static double [] out = new double[]{0.9999999, 0.9999998, 0.9999998, 0.9999997, 0.9999996, 0.9999994, 0.9999991, 0.9999987, 0.9999982, 0.9999975, 0.9999964, 0.9999949, 0.9999928, 0.9999898, 0.9999856, 0.9999797, 0.9999712, 0.9999593, 0.9999425, 0.9999186, 0.9998849, 0.9998372, 0.9997698, 0.9996745, 0.9995397, 0.999349, 0.9990795, 0.9986983, 0.9981593, 0.9973972, 0.9963198, 0.994797, 0.992645, 0.9896045, 0.9853106, 0.9792494, 0.9706989, 0.9586452, 0.9416613, 0.9177062, 0.8837365, 0.8353602, 0.7681435, 0.6813698, 0.5805998, 0.4757169, 0.3765316, 0.2896687, 0.2179294, 0.1612042, 0.1177539, 0.08522718, 0.06127549, 0.0438445, 0.0312647, 0.02223985, 0.01579263, 0.01120063, 0.007936867, 0.005620646, 0.003978664, 0.002815455, 0.001991886, 0.001409006, 0.0009965826, 0.0007048228, 0.0004984513, 0.0003524914, 0.0002492657, 0.0001762657, 0.0001246428, 0.00008813786, 0.00006232392, 0.00004407018, 0.00003116258, 0.0000220354, 0.00001558145, 0.00001101778, 0.000007790763, 0.00000550891, 0.000003895391, 0.00000275446, 0.000001947698, 0.000001377231, 0.0000009738497, 0.0000006886158, 0.000000486925, 0.000000344308, 0.0000002434625, 0.000000172154, 0.0000001217313, 0.00000008607701, 0.00000006086564, 0.00000004303851, 0.00000003043282, 0.00000002151925, 0.00000001521641, 0.00000001075963, 0.000000007608205, 0.000000005379814, 0.000000003804103};
 	static double [] logout;
-	static double minin, maxin;
+	static double minin, maxin, logminin;
 	static {
 		logout = new double[out.length];
 		for (int i = 0; i < out.length; i++) {
 			logout[i] = Math.log(out[i]);
 		}
 		minin = in[0];
+		logminin = FastMath.log(minin);
 		maxin = in[in.length - 1];
 	}
-	
 	
     private double lastTau = -1;
     private double lastN = 0;
@@ -158,7 +160,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
     		return FastMath.log(2.888266/tau);
     	}
     	
-    	int i = (int) ((FastMath.log(tau)-FastMath.log(minin))/0.3465735);
+    	int i = (int) ((FastMath.log(tau)-logminin)/0.3465735);
     	if (i == in.length-1) {
     		return logout[i];
     	}
@@ -197,14 +199,14 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 
         double latitude1 = start[0];
         double longitude1 = start[1];
-        final double DEG2RAD = Math.PI / 180.0;
-        final double theta1 = (latitude1) * DEG2RAD;
+        //final double DEG2RAD = Math.PI / 180.0;
+        final double theta1 = latitude1 * DEG2RAD;
         if( longitude1 < 0 ) longitude1 += 360;
         //final double phi1 = longitude1 * DEG2RAD;
 
         double latitude2 = stop[0];
         double longitude2 = stop[1];
-        final double theta2 = (latitude2) * DEG2RAD;
+        final double theta2 = latitude2 * DEG2RAD;
         if( longitude2 < 0 ) longitude2 += 360;
         //final double phi2 = longitude2 * DEG2RAD;
 
@@ -221,14 +223,14 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 //                FastMath.cos(theta1) * FastMath.cos(theta2) * FastMath.cos(deltaLambda);
         final double angle;
         if( fast ) {
-          angle = (abs(x) > .9 ? acos_parts_fast7(x) : acos(x));
+          angle = (abs(x) > .9 ? acos_parts_fast7(x) : FastMath.acos(x));
         } else {
-           angle = acos(x);
+          angle = acos(x);
         }
 
 //        final double inverseVariance = precision.getValue(0) / time;
         final double tau = time/precision.getValue(0);
-        double logN = calcLogN(tau);
+        final double logN = calcLogN(tau);
         //final double logP = -angle * angle * inverseVariance / 2.0 + 0.5 * Math.log(angle * sin(angle)) + Math.log(inverseVariance);
 
         //final double logP = Math.log(Math.sqrt(angle * sin(angle)) / tau * exp(-angle * angle / (tau * 2.0));
@@ -252,8 +254,8 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 	
 	/** anglerange[0] = lower bound, anglerange[1] = upper bound of range for angle2
 	 * **/
-	public double[] sample(double[] start, double time, double precision,
-			double [] angleRange) throws ConvergenceException, FunctionEvaluationException, IllegalArgumentException {
+	public double[] sample(double[] start, double time, double precision, double [] angleRange)
+            throws ConvergenceException, FunctionEvaluationException, IllegalArgumentException {
 		
 		// first, sample an angle from the spherical diffusion density
 		final double inverseVariance = precision / time;
@@ -296,24 +298,45 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 	    double [] xC = new double[] {Math.cos(angle), Math.sin(angle)*Math.cos(angle2), Math.sin(angle)*Math.sin(angle2)};
 
 	    // convert back to latitude, longitude relative to (lat=0, long=0)
-		double [] xL = cartesian2Sperical(xC);
+		double [] xL = cartesian2Sperical(xC, true);
 	    //double [] sC = spherical2Cartesian(start[0], start[1]);
 		double [] position = reverseMap(xL[0], xL[1], start[0], start[1]);
 		return position;
 	}
 
+    public static double getAngle(double[] start, double[] stop) {
+        double latitude1 = start[0];
+        double longitude1 = start[1];
+        double theta1 = (latitude1) * Math.PI/180.0;
+        if (longitude1 < 0) longitude1 += 360;
+        double phi1 = longitude1 * Math.PI/180;
+
+        double latitude2 = stop[0];
+        double longitude2 = stop[1];
+        double theta2 = (latitude2) * Math.PI/180.0;
+        if (longitude2 < 0) longitude2 += 360;
+        double phi2 = longitude2 * Math.PI/180;
+
+        double Deltalambda = phi2 - phi1;
+
+        // See http://en.wikipedia.org/wiki/Great-circle_distance#Formulas
+        double angle = Math.acos(Math.sin(theta1) * Math.sin(theta2) + Math.cos(theta1) * Math.cos(theta2) * Math.cos(Deltalambda));
+        return angle;
+    }
+
 	/** Convert spherical coordinates (latitude,longitude) in degrees on unit sphere 
 	 * to Cartesian (x,y,z) coordinates **/
 	public static double [] spherical2Cartesian(double fLat, double fLong) {
-		double fPhi = (fLong * Math.PI / 180.0);
-		double fTheta = (90 - fLat) * Math.PI / 180.0;
+		double fPhi = fLong * DEG2RAD;
+		double fTheta = (90 - fLat) * DEG2RAD;
 		//double fTheta = (fLat) * Math.PI / 180.0;
 	    //{x}=\rho \, \sin\theta \, \cos\phi  
 	    //{y}=\rho \, \sin\theta \, \sin\phi  
 	    //{z}=\rho \, \cos\theta 
 		double [] fNorm = new double[3];
-		fNorm[0] = FastMath.sin(fTheta) * FastMath.cos(fPhi);
-		fNorm[1] = FastMath.sin(fTheta) * FastMath.sin(fPhi);
+        final double sinTheta = FastMath.sin(fTheta);
+        fNorm[0] = sinTheta * FastMath.cos(fPhi);
+		fNorm[1] = sinTheta * FastMath.sin(fPhi);
 		fNorm[2] = FastMath.cos(fTheta);
 //		fNorm[0] = Math.sin(fTheta) * Math.cos(fPhi);
 //		fNorm[1] = Math.sin(fTheta) * Math.sin(fPhi);
@@ -322,14 +345,16 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 	} // spherical2Cartesian
 
 	/** inverse of spherical2Cartesian **/
-	public static double [] cartesian2Sperical(double[] f3dRotated2) {
-		return 	new double[]{
-				//Math.acos(-f3dRotated2[2]) * 180/Math.PI - 90,
-				//FastMath.acos(-f3dRotated2[2]) * 180/Math.PI - 90,
-				acos_parts_fast7(-f3dRotated2[2]) * 180/Math.PI - 90, // <- faster but considerably less accurate
+	public static double [] cartesian2Sperical(double[] f3dRotated2, boolean fastApprox) {
+        final double v = usemyat ? at2(f3dRotated2[1], f3dRotated2[0], 30) : fast_atan2(f3dRotated2[1], f3dRotated2[0]);
+        //assert abs(v - v1) < 1e-5;
+        return 	new double[]{
+				//Math.acos(-f3dRotated2[2]) * RAD2DEG - 90,
+				!fastApprox ? FastMath.acos(-f3dRotated2[2]) * RAD2DEG - 90 :
+				             myacos(-f3dRotated2[2]) * RAD2DEG - 90, // <- faster but considerably less accurate
 				//Math.atan2(f3dRotated2[1], f3dRotated2[0]) * 180.0/Math.PI
 				//FastMath.atan2(f3dRotated2[1], f3dRotated2[0]) * 180.0/Math.PI
-				fast_atan2(f3dRotated2[1], f3dRotated2[0]) * 180.0/Math.PI
+				v * 180.0/Math.PI
 				
 		};
 	}
@@ -446,11 +471,11 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 		// double [] p = cartesian2Sperical(f3DPoint);
 		// rotate, first latitude, then longitude
 		double [] f3DRotated = new double[3];
-		double fC = Math.cos(fLongT * Math.PI / 180);
-		double fS = Math.sin(fLongT * Math.PI / 180);
+		double fC = Math.cos(fLongT * DEG2RAD);
+		double fS = Math.sin(fLongT * DEG2RAD);
 		double [] f3DRotated2 = new double[3];
-		double fC2 = Math.cos(-fLatT * Math.PI / 180);
-		double fS2 = Math.sin(-fLatT * Math.PI / 180);
+		double fC2 = Math.cos(-fLatT * DEG2RAD);
+		double fS2 = Math.sin(-fLatT * DEG2RAD);
 
 		// rotate over latitude
 		f3DRotated[0] = f3DPoint[0] * fC2 + f3DPoint[2] * fS2;
@@ -462,8 +487,8 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 		f3DRotated2[1] = f3DRotated[0] * fS + f3DRotated[1] * fC; 
 		f3DRotated2[2] = f3DRotated[2]; 
 
-		double [] point = cartesian2Sperical(f3DRotated2); 
-		System.err.println(Arrays.toString(point) + " " + Arrays.toString(f3DRotated2) + " " + Arrays.toString(f3DRotated));
+		double [] point = cartesian2Sperical(f3DRotated2, true);
+		//System.err.println(Arrays.toString(point) + " " + Arrays.toString(f3DRotated2) + " " + Arrays.toString(f3DRotated));
 		return point;
 	} // map
 	
@@ -482,11 +507,11 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 		double [] f3DPoint = spherical2Cartesian(fLat, fLong);
 		// rotate, first longitude, then latitude
 		double [] f3DRotated = new double[3];
-		double fC = Math.cos(-fLongT * Math.PI / 180);
-		double fS = Math.sin(-fLongT * Math.PI / 180);
+		double fC = Math.cos(-fLongT * DEG2RAD);
+		double fS = Math.sin(-fLongT * DEG2RAD);
 		double [] f3DRotated2 = new double[3];
-		double fC2 = Math.cos(fLatT * Math.PI / 180);
-		double fS2 = Math.sin(fLatT * Math.PI / 180);
+		double fC2 = Math.cos(fLatT * DEG2RAD);
+		double fS2 = Math.sin(fLatT * DEG2RAD);
 
 		// rotate over longitude
 		f3DRotated[0] = f3DPoint[0] * fC - f3DPoint[1] * fS; 
@@ -501,7 +526,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 		
 		System.err.println(Arrays.toString(f3DPoint) + " " + Arrays.toString(f3DRotated) + " " + Arrays.toString(f3DRotated2));
 		// translate back to (longitude, latitude)
-		double [] point = cartesian2Sperical(f3DRotated2); 
+		double [] point = cartesian2Sperical(f3DRotated2, true);
 		return point;
 	} // map
 	
@@ -543,7 +568,58 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
             return acos_fast7(x);
         }
     }
-    
+    static private double myacos(double x) {
+       //return abs(x) > .95 ? acos_parts_fast7(x) : FastMath.acos(x);
+       return acos_parts_fast7(x);
+    }
+
+   static final int NN = 100;
+   static private double[] phi = new double[NN]; // [2.**(-k) for k in range(1,n+1)]
+   static private double [] ap = new double[NN]; // [math.atan(phi[n]) for n in range(len(phi))]
+
+   static double at2(double y, double x, int N) {
+       //#ap = [math.atan(x) for x in phi]
+       //#v = [cos(0.25), sin(0.25)]'; % Starting vector (input)
+       boolean r1 = false;
+       if( x < 0 ) {
+           x = -x;
+           r1 = true;
+       }
+       boolean r2 = false;
+       if( y < 0 ) {
+           y = -y;
+           r2 = true;
+       }
+       boolean r = false;
+       if( y > x ) {
+           final double t = x;
+           x = y;
+           y = t;
+           r = true;
+       }
+       double a = 0;
+       for (int n = 0; n < N; ++n) {
+           //final double s = y > 0 ? 1 : -1;
+           final double p = y > 0 ? phi[n] : -phi[n];
+           a += y > 0 ? ap[n] : -ap[n];
+
+           final double tx = x + p * y;
+           y -= p * x;
+           x = tx;
+           //System.err.println("a " + a + " " + x + " " + y);
+       }
+       if( r ) {
+           a = Math.PI / 2 - a;
+       }
+       if( r1 ) {
+           a = Math.PI - a;
+       }
+       if( r2 ) {
+           a = -a;
+       }
+       return a;
+   }
+
 	@Override
 	public void getTransitionProbabilities(Node node, double fStartTime, double fEndTime, double fRate, double[] matrix) {
 		// TODO Auto-generated method stub
@@ -559,35 +635,77 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 		return false;
 	}
 	
-	
+	static boolean usemyacos = false;
+    static boolean usemyat = false;
+
+    // Args - N seed , 0/1 (0 fastmath/ 1 jhacos), 0/1 (0 fastmath/ 1 jhatn) 0/1 (0 gen rands inline / 1 pre allocate)
 	public static void main(String[] args) {
+        for(int k = 1; k < NN+1; ++k) {
+            phi[k-1] = Math.pow(2.0, -k);
+            ap[k-1] = Math.atan(phi[k-1]);
+        }
+
 		// speed test
-		Randomizer.setSeed(123);
-		int N = 10000000;
-		double [][] point = new double[N][2];
-		for (int i = 0; i < N; i++) {
-			point[i][0] = Randomizer.nextDouble() * 180 - 90;
-			point[i][1] = Randomizer.nextDouble() * 360 - 180;
-		}
-		
-		System.err.println("Starting...");
-		
-		long start = System.currentTimeMillis();
-		double a0 = 0, a1 = 1;
-		double x0 = 0, x1 = 1;
-		for (int i = 0; i < N; i++) {
-			double [] cart = SphericalDiffusionModel.spherical2Cartesian(point[i][0], point[i][1]);
-			double [] sper = SphericalDiffusionModel.cartesian2Sperical(cart);
-			x0 += sper[0];
-			x1 += sper[1];
-			a0 += point[i][0];
-			a1 += point[i][1];
-		}
-		
+        final int N = args.length > 0 ? Integer.parseInt(args[0]) : 10000000;
+        final int seed = args.length > 1 ? Integer.parseInt(args[1]) : 123;
+		Randomizer.setSeed(seed);
+        if( args.length >  2 ) {
+            usemyacos = (Integer.parseInt(args[2]) != 0);
+        }
+        if( args.length >  3 ) {
+            usemyat = (Integer.parseInt(args[3]) != 0);
+        }
+        boolean pre = true;
+        if( args.length >  4 ) {
+            pre = (Integer.parseInt(args[4]) != 0);
+        }
+
+        long start ;
+        double a0 = 0, a1 = 1;
+        double x0 = 0, x1 = 1;
+        if( pre ) {
+            double[][] point = new double[N][2];
+            for (int i = 0; i < N; i++) {
+                point[i][0] = Randomizer.nextDouble() * 180 - 90;
+                point[i][1] = Randomizer.nextDouble() * 360 - 180;
+            }
+
+            System.err.println("Starting...");
+
+            start = System.currentTimeMillis();
+
+            for (int i = 0; i < N; i++) {
+                double[] cart = SphericalDiffusionModel.spherical2Cartesian(point[i][0], point[i][1]);
+                double[] sper = SphericalDiffusionModel.cartesian2Sperical(cart, usemyacos);
+                x0 += sper[0];
+                x1 += sper[1];
+                a0 += point[i][0];
+                a1 += point[i][1];
+            }
+        } else {
+            double[] point = new double[2];
+            System.err.println("Starting...");
+
+            start = System.currentTimeMillis();
+
+            for (int i = 0; i < N; i++) {
+                point[0] = Randomizer.nextDouble() * 180 - 90;
+                point[1] = Randomizer.nextDouble() * 360 - 180;
+                double[] cart = SphericalDiffusionModel.spherical2Cartesian(point[0], point[1]);
+                double[] sper = SphericalDiffusionModel.cartesian2Sperical(cart, usemyacos);
+                x0 += sper[0];
+                x1 += sper[1];
+                a0 += point[0];
+                a1 += point[1];
+            }
+        }
+
+        long end = System.currentTimeMillis();
+        System.err.println("N : " + N + " seed: " + seed + (usemyacos ? " jhacos" : " fastmath") + (usemyat ? " jhatan2" : " atanapprox"));
 		System.err.println("Expeted sum: " + a0 + " " + a1);
 		System.err.println("Calculated : " + x0 + " " + x1);
-		long end = System.currentTimeMillis();
+        System.err.println("Diff : " + Math.abs(a0-x0)/Math.max(a0,x0) + " " + Math.abs(a1-x1)/Math.max(a1,x1));
+
 		System.err.println("Runtime: " + ((end - start)/1000.0) + " seconds");
 	}
-    
 }
