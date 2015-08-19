@@ -2,8 +2,7 @@ package sphericalGeo;
 
 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import beast.core.BEASTInterface;
 import beast.core.Citation;
@@ -15,22 +14,43 @@ import beast.core.util.Log;
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.branchratemodel.StrictClockModel;
 import beast.evolution.likelihood.GenericTreeLikelihood;
+import beast.evolution.operators.AttachOperator;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TreeInterface;
+import org.apache.commons.math3.util.FastMath;
 //import beast.evolution.tree.TreeTraitMap;
 
 @Description("Approximate likelihood by MAP approximation of internal states")
 @Citation("Remco R. Bouckaert. Phylogeography by diffusion on a sphere. bioRxiv, BIORXIV/2015/016311, 2015.")
-public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
+public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood implements AttachOperator.DistanceProvider {
 	public Input<Boolean> scaleByBranchLengthInput = new Input<Boolean>("scale", "scale by branch lengths for initial position", true);
-	public Input<List<GeoPrior>> geopriorsInput = new Input<List<GeoPrior>>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<>());
+	public Input<List<GeoPrior>> geopriorsInput = new Input<List<GeoPrior>>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<GeoPrior>());
 	public Input<RealParameter> locationInput = new Input<RealParameter>("location",
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree");
 
 	public Input<Transformer> transformerInput = new Input<Transformer>("transformer","landscape transformer to capture some inheterogenuity in the diffusion process");
 	public Input<Boolean> logAverageInput = new Input<Boolean>("logAverage", "when logging, use average position instead of sample from particle filter. "
 			+ "This is faster, but also artificially reduces uncertainty in locations. ", false);
+	public Input<Method> distMethod = new Input<Method>("method", "for calculating distance between clade positions (for operator weights). sqrt takes " +
+         "square root of distance (default distance)",  Method.DISTANCE, Method.values());
+
+	enum Method {
+		DISTANCE("distance"),
+		SQRT("sqrt"),
+		ARC("arc");
+
+		Method(final String name) {
+			this.ename = name;
+		}
+
+		public String toString() {
+			return ename;
+		}
+
+		private final String ename;
+	}
+
 	SphericalDiffusionModel substModel;
 	TreeInterface tree;
 	BranchRateModel clockModel;
@@ -110,6 +130,8 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		}
 		
 		logAverage = logAverageInput.get();
+
+		distanceMethod = distMethod.get();
 	}
 	
 	int initialisations = 0;
@@ -177,8 +199,6 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 					}
 				}
 			}
-			
-			
 			// calc likelihood
 			logP = 0.0;
 			calcBranchLengths();
@@ -304,7 +324,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		}
 		
 		for (int i = tree.getLeafNodeCount(); i < tree.getNodeCount(); i++) {
-			position[i] = SphericalDiffusionModel.cartesian2Sperical(sphereposition[i]);
+			position[i] = SphericalDiffusionModel.cartesian2Sperical(sphereposition[i], true);
 		}
 
 //		System.err.println("maxdelta2 = " + max);
@@ -336,15 +356,23 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 				b2 /= w;
 			} else {
 				double p = 1.0/Math.sqrt(branchLengths[nodeNr]);
-				double len = b1 + b2 + p;
-				b1 /= len;
-				b2 /= len;
-				p /= len;
-				double w = (1.0 - b1 * parentweight[child1] - b2 * parentweight[child2]);
-				b1 /= w;
-				b2 /= w;
-				p /= w;
-				parentweight[nodeNr] = p;
+				final double len = b1 + b2 + p;
+                if( true ) {
+                    //same as other branch
+                    final double s = 1.0 / (len - b1 * parentweight[child1] - b2 * parentweight[child2]);
+                    b1 *= s;
+                    b2 *= s;
+                    parentweight[nodeNr] = p * s;
+                } else {
+                    b1 /= len;
+                    b2 /= len;
+                    p /= len;
+                    double w = (1.0 - b1 * parentweight[child1] - b2 * parentweight[child2]);
+                    b1 /= w;
+                    b2 /= w;
+                    p /= w;
+                    parentweight[nodeNr] = p;
+                }
 			}
 			sphereposition[nodeNr][0] = (sphereposition[child1][0] * b1 + sphereposition[child2][0] * b2);
 			sphereposition[nodeNr][1] = (sphereposition[child1][1] * b1 + sphereposition[child2][1] * b2);
@@ -372,15 +400,21 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 //			sphereposition[nodeNr][1] = (sphereposition[child1][1] / branchLengths[child1] + sphereposition[child2][1] / branchLengths[child2] + sphereposition[parent][1] / branchLengths[nodeNr]) / len;
 //			sphereposition[nodeNr][2] = (sphereposition[child1][2] / branchLengths[child1] + sphereposition[child2][2] / branchLengths[child2] + sphereposition[parent][2] / branchLengths[nodeNr]) / len;
 		} else {
-			double b1 = 1.0/Math.sqrt(branchLengths[child1]/precision);
-			double b2 = 1.0/Math.sqrt(branchLengths[child2]/precision);
-			double p = 1.0/Math.sqrt(branchLengths[nodeNr]/precision);
-			double len = b1 + b2 + p;
-			b1 /= len;
-			b2 /= len;
-			p /= len;
-			double w = (1.0 - b1 * parentweight[child1] - b2 * parentweight[child2]);
-			p /= w;
+            final double sp = 1.0/precision;
+			double b1 = 1.0/Math.sqrt(branchLengths[child1] * sp);
+			double b2 = 1.0/Math.sqrt(branchLengths[child2] * sp);
+			double p = 1.0/Math.sqrt(branchLengths[nodeNr] * sp);
+			final double len = b1 + b2 + p;
+            if( true ) {
+                final double s = (len - b1 * parentweight[child1] - b2 * parentweight[child2]);
+                p /= s;
+            } else {
+                b1 /= len;
+                b2 /= len;
+                p /= len;
+                double w = (1.0 - b1 * parentweight[child1] - b2 * parentweight[child2]);
+                p /= w;
+            }
 			sphereposition[nodeNr][0] += sphereposition[parent][0] * p;
 			sphereposition[nodeNr][1] += sphereposition[parent][1] * p;
 			sphereposition[nodeNr][2] += sphereposition[parent][2] * p;
@@ -646,14 +680,110 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 //	}
 	final static int MAX_ITER = 0;
 	final static double MIN_EPSILON = 0.001;
-	
+
+	class LocationData implements AttachOperator.DistanceProvider.Data {
+		double[] position;
+		int weight;
+
+		public LocationData(double[] pos) {
+			position = pos;
+			weight = 1;
+		}
+		public LocationData() {
+			position = new double[3];
+            weight = 0;
+		}
+	}
+
+	@Override
+	public Map<String, AttachOperator.DistanceProvider.Data> init(Set<String> taxa) {
+		final HashMap<String, AttachOperator.DistanceProvider.Data> m = new HashMap<>();
+		int count = 0;
+		for (int i = 0; i < tree.getLeafNodeCount(); i++) {
+			Node n = tree.getNode(i);
+			final String taxon = n.getID();
+			if( taxa.contains(taxon) ) {
+				final double[] xyz = SphericalDiffusionModel.spherical2Cartesian(position[i][0], position[i][1]);
+				m.put(taxon, new LocationData(xyz));
+				count += 1;
+			}
+		}
+		if( count != taxa.size() ) {
+			return null;
+		}
+		return m;
+	}
+
+//	@Override
+//	public AttachOperatorNew.DistanceProvider.Data combine(AttachOperatorNew.DistanceProvider.Data x1, AttachOperatorNew.DistanceProvider.Data x2) {
+//		LocationData d1 = (LocationData) x1;
+//		LocationData d2 = (LocationData) x2;
+//		LocationData r = new LocationData();
+//
+//		final double w = r.weight = d1.weight + d2.weight;
+//        assert d1.weight >= 0 &&  d2.weight >= 0 && w > 0;
+//		for(int i = 0; i < 3; ++i) {
+//			r.position[i] = (d1.position[i] * d1.weight + d2.position[i] * d2.weight) / w;
+//		}
+//		return r;
+//	}
+
+    @Override
+    public Data empty() {
+        return new LocationData();
+    }
+
+    @Override
+    public void clear(Data d) {
+        ((LocationData)d).weight = 0;
+    }
+
+    @Override
+    public void update(Data info, Data with) {
+        LocationData d1 = (LocationData) info;
+        LocationData d2 = (LocationData) with;
+        assert d1.weight >= 0 &&  d2.weight > 0;
+
+        if( d1.weight == 0 ) {
+            System.arraycopy(d2.position, 0, d1.position, 0, 3);
+            d1.weight = d2.weight;
+        } else {
+            final int w = d1.weight + d2.weight;
+            for (int i = 0; i < 3; ++i) {
+                d1.position[i] = (d1.position[i] * d1.weight + d2.position[i] * d2.weight) / w;
+            }
+            d1.weight = w;
+        }
+        assert d1.weight > 0;
+    }
+
+    private Method distanceMethod;
+
+    @Override
+    public double dist(AttachOperator.DistanceProvider.Data info1, AttachOperator.DistanceProvider.Data info2) {
+        LocationData d1 = (LocationData) info1;
+        LocationData d2 = (LocationData) info2;
+        double s = 0;
+        for(int k = 0; k < 3; ++k) {
+            double x = (d1.position[k] - d2.position[k]);
+            s += x*x;
+        }
+        s = (s == 0) ? 1e-8 : s;
+        switch (distanceMethod) {
+            case DISTANCE: break;
+            case SQRT: s = Math.sqrt(s); break;
+            case ARC: s =  FastMath.asin(FastMath.sqrt(s) / 2); break;
+        }
+        return s;
+    }
+
 	@Override
 	public boolean isStochastic() {
 		return true;
 	}
 
 	/** return randomized position **/
-	public double[] getPostion(int iDim) {
+	public double[] getPosition(int iDim) {
 		if (!logAverage) {
 			return loggerLikelihood.getPostion(iDim);
 		} else {
@@ -711,6 +841,4 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		super.requiresRecalculation();
 		return true;
 	}
-	
-	
 }

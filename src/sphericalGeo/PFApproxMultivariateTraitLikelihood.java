@@ -2,8 +2,7 @@ package sphericalGeo;
 
 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import beast.core.Description;
 import beast.core.Input;
@@ -11,14 +10,16 @@ import beast.core.parameter.RealParameter;
 //import beast.evolution.alignment.AlignmentFromTraitMap;
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.likelihood.GenericTreeLikelihood;
+import beast.evolution.operators.AttachOperator;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TreeInterface;
 //import beast.evolution.tree.TreeTraitMap;
 import beast.util.Randomizer;
+import org.apache.commons.math3.util.FastMath;
 
 @Description("Approximate likelihood by particle filter approximation")
-public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
+public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood implements AttachOperator.DistanceProvider {
 	public Input<Integer> nrOfParticlesInput = new Input<Integer>("nrOfParticles", "number of particles to use", 25);//100
 	public Input<Integer> nrOfIterationsInput = new Input<Integer>("nrOfIterations", "number of iterations to run the particle filter", 10);
 	public Input<Integer> rangeSizeInput = new Input<Integer>("nrrange", "number of random samples for placing a node", 10);//10
@@ -31,13 +32,33 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 
 	public Input<Transformer> transformerInput = new Input<Transformer>("transformer","landscape transformer to capture some inheterogenuity in the diffusion process");
 
+    public Input<Method> distMethod = new Input<Method>("method", "for calculating distance between clade positions (for operator weights). sqrt takes " +
+            "square root of distance (default distance)",  Method.DISTANCE, Method.values());
+
+    enum Method {
+        DISTANCE("distance"),
+        SQRT("sqrt"),
+        ARC("arc");
+
+        Method(final String name) {
+            this.ename = name;
+        }
+
+        public String toString() {
+            return ename;
+        }
+
+        private final String ename;
+    }
+
 	double epsilon = 2.0;
 	boolean scaleByBranchLength;
 
 	RealParameter sampledLocations;
 	boolean [] isSampled;
 	List<Integer> sampleNumber;
-	
+
+
 	class LeafParticleSet {
 		int particleCount;
 		int nodeNr;
@@ -213,6 +234,8 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 				sampleNumber.add(prior.taxonNr);
 			}
 		}
+
+        distanceMethod = distMethod.get();
 	}
 
 	@Override
@@ -238,8 +261,7 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			sampleDown(tree.getRoot());
 			resample();
 		}
-		
-		
+
 		logP = calcLogP();
 		needsUpdate = false;
 		return logP;
@@ -520,7 +542,98 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		}
 
 	}
-	
+
+    class LocationData implements Data {
+        double[] position;
+        int weight;
+
+        public LocationData(double[] pos) {
+            position = pos;
+            weight = 1;
+        }
+        public LocationData() {
+            position = new double[3];
+            weight = 0;
+        }
+    }
+
+	@Override
+	public Map<String, Data> init(Set<String> taxa) {
+		final HashMap<String, Data> m = new HashMap<>();
+        int count = 0;
+        for (int i = 0; i < tree.getLeafNodeCount(); i++) {
+            Node n = tree.getNode(i);
+            final String taxon = n.getID();
+            if( taxa.contains(taxon) ) {
+                LocationData l = new LocationData(position[i]);
+                m.put(taxon, l);
+                count += 1;
+            }
+		}
+        if( count != taxa.size() ) {
+            return null;
+        }
+		return m;
+	}
+
+//    @Override
+//    public Data combine(Data x1, Data x2) {
+//        LocationData d1 = (LocationData) x1;
+//        LocationData d2 = (LocationData) x2;
+//        LocationData r = new LocationData();
+//        final double w = r.weight = d1.weight + d2.weight;
+//        for(int i = 0; i < 3; ++i) {
+//            r.position[i] = (d1.position[i] * d1.weight + d2.position[i] * d2.weight) / w;
+//        }
+//        return r;
+//    }
+
+    @Override
+    public Data empty() {
+        return new LocationData();
+    }
+
+    @Override
+    public void clear(Data d) {
+        ((LocationData)d).weight = 0;
+    }
+
+    @Override
+    public void update(Data info, Data with) {
+        LocationData d1 = (LocationData) info;
+        LocationData d2 = (LocationData) with;
+        if( d1.weight == 0 ) {
+            System.arraycopy(d2.position, 0, d1.position, 0, 3);
+            d1.weight = d2.weight;
+        } else {
+            final int w = d1.weight + d2.weight;
+            for (int i = 0; i < 3; ++i) {
+                d1.position[i] = (d1.position[i] * d1.weight + d2.position[i] * d2.weight) / w;
+            }
+            d1.weight = w;
+        }
+    }
+
+    private Method distanceMethod;
+
+	@Override
+	public double dist(Data info1, Data info2) {
+        LocationData d1 = (LocationData) info1;
+        LocationData d2 = (LocationData) info2;
+        double s = 0;
+        for(int k = 0; k < 3; ++k) {
+            double x = (d1.position[k] - d2.position[k]);
+            s += x*x;
+        }
+        s = (s == 0) ? 1e-8 : s;
+        switch (distanceMethod) {
+            case DISTANCE: break;
+            case SQRT: s = Math.sqrt(s); break;
+            case ARC: s =  FastMath.asin(FastMath.sqrt(s) / 2); break;
+        }
+        return s;
+	}
+
 	@Override
 	public boolean isStochastic() {
 		return true;
