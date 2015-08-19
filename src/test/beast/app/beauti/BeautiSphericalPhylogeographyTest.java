@@ -20,8 +20,7 @@ import org.fest.swing.fixture.JTableFixture;
 import org.fest.swing.image.ScreenshotTaker;
 import org.junit.Test;
 
-import com.sun.javafx.Utils;
-
+import beast.app.util.Utils;
 import test.beast.app.beauti.BeautiBase;
 
 public class BeautiSphericalPhylogeographyTest extends BeautiBase {
