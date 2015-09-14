@@ -136,13 +136,26 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			}
 			for (GeoPrior prior : geopriors) {
 				prior.initialise();
-				isSampled[prior.taxonNr] = true;
-				sampleNumber.add(prior.taxonNr);
-				double [] location = prior.sample();
-				// check if the location is already initialised (e.g. through resuming a chain)
-				if (Math.abs(d[prior.taxonNr * 2]) < 1e-10 && Math.abs(d[prior.taxonNr * 2 + 1]) < 1e-10) {
-					d[prior.taxonNr * 2] = location[0];
-					d[prior.taxonNr * 2 + 1] = location[1];
+				if (prior.allInternalNodes) {
+					for (int i = tree.getLeafNodeCount(); i < tree.getNodeCount(); i++) {
+						isSampled[i] = true;
+						sampleNumber.add(i);
+						double [] location = prior.sample();
+						// check if the location is already initialised (e.g. through resuming a chain)
+						if (Math.abs(d[i * 2]) < 1e-10 && Math.abs(d[i * 2 + 1]) < 1e-10) {
+							d[i * 2] = location[0];
+							d[i * 2 + 1] = location[1];
+						}
+					}
+				} else {
+					isSampled[prior.taxonNr] = true;
+					sampleNumber.add(prior.taxonNr);
+					double [] location = prior.sample();
+					// check if the location is already initialised (e.g. through resuming a chain)
+					if (Math.abs(d[prior.taxonNr * 2]) < 1e-10 && Math.abs(d[prior.taxonNr * 2 + 1]) < 1e-10) {
+						d[prior.taxonNr * 2] = location[0];
+						d[prior.taxonNr * 2 + 1] = location[1];
+					}
 				}
 			}
 			RealParameter tmp = new RealParameter(d);
@@ -174,7 +187,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			// check prior
 			if (sampledLocations != null) {
 				for (GeoPrior prior : geopriorsInput.get()) {
-					if (prior.calculateLogP() != 0) {
+					if (Double.isInfinite(prior.calculateLogP())) {
 						logP = Double.NEGATIVE_INFINITY;
 						return logP;
 					}

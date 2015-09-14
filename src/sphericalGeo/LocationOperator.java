@@ -7,6 +7,7 @@ import beast.core.Input;
 import beast.core.Operator;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
+import beast.evolution.tree.TreeInterface;
 import beast.util.Randomizer;
 
 @Description("operator to samples locations from geo-priors")
@@ -34,11 +35,19 @@ public class LocationOperator extends Operator {
 		if (sampleNumber.size() == 0) {
 			return 0;
 		}
-		int i = Randomizer.nextInt(sampleNumber.size());
 		List<GeoPrior> geopriors = likelihood.geopriorsInput.get();
+		int i = Randomizer.nextInt(geopriors.size());
 		GeoPrior prior = geopriors.get(i);
+		if (prior.allInternalNodes) {
+			TreeInterface tree = likelihood.tree;
+			int k = tree.getLeafNodeCount() + Randomizer.nextInt(tree.getInternalNodeCount());
+			double [] location = prior.sample();
+			sampledLocations.setValue(k * 2, location[0]);
+			sampledLocations.setValue(k * 2 + 1, location[1]);
+			return 0;
+		}
 		double [] location = prior.sample();
-		int k = sampleNumber.get(i);
+		int k = prior.taxonNr;
 		sampledLocations.setValue(k * 2, location[0]);
 		sampledLocations.setValue(k * 2 + 1, location[1]);
 		

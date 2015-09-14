@@ -212,8 +212,15 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		if (geopriors.size() > 0) {
 			sampledLocations = locationInput.get();
 			for (GeoPrior prior : geopriors) {
-				isSampled[prior.taxonNr] = true;
-				sampleNumber.add(prior.taxonNr);
+				if (prior.allInternalNodes) {
+					sampleNumber.add(-1);
+					for (int i = tree.getLeafNodeCount(); i < tree.getNodeCount(); i++) {
+						isSampled[i] = true;
+					}
+				} else {
+					isSampled[prior.taxonNr] = true;
+					sampleNumber.add(prior.taxonNr);
+				}
 			}
 		}
 	}

@@ -25,9 +25,10 @@ public class GeoPrior extends Distribution {
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree", Validate.REQUIRED);
 	public Input<Tree> treeInput = new Input<Tree>("tree", "beast tree (from which to get the taxon set)", Validate.REQUIRED);
 
+	public Input<Boolean> allInternalNodesInput = new Input<>("allInternalNodes", "if true, apply prior to all internal nodes", false);
 	public Input<Taxon> taxonInput = new Input<Taxon>("taxon", "taxon associated with this region, if only a tip is restricted. Otherwise use 'taxonset'");
 	public Input<TaxonSet> taxonSetInput = new Input<TaxonSet>("taxonset",
-			"specify the prior over an internal node that is the MRCA of set of taxa. Select all taxa for the root", Validate.XOR, taxonInput);
+			"specify the prior over an internal node that is the MRCA of set of taxa. Select all taxa for the root");//, Validate.XOR, taxonInput);
 
 	Region region;
 	RealParameter location;
@@ -36,6 +37,7 @@ public class GeoPrior extends Distribution {
 	public int taxonNr = -1;
 	boolean isRoot;
 	boolean isTip = false;
+	boolean allInternalNodes = false;
 	
     // number of taxa in taxon set
     int nrOfTaxa = -1;
@@ -60,6 +62,13 @@ public class GeoPrior extends Distribution {
 			location.setDimension(taxonSet.getTaxonCount() * 4 - 2);
 		}
 
+		allInternalNodes = allInternalNodesInput.get();
+		if (!allInternalNodes) {
+			if ((taxonSetInput.get() == null && taxonInput.get() == null) ||
+			    (taxonSetInput.get() != null && taxonInput.get() != null)) {
+				throw new Exception("Either taxon or taxonset must be specified");
+			}
+		}
 		super.initAndValidate();
 		//initialise();
 	}
@@ -69,7 +78,8 @@ public class GeoPrior extends Distribution {
 	* If this happens through a StateNodeInitialiser, node numbering can change.
 	**/
 	public void initialise() {
-		if (taxonInput.get() != null) {
+		if (allInternalNodes) {
+		} else if (taxonInput.get() != null) {
 			isTip = true;
 			String taxonName = taxonInput.get().getID();
 			List<String> names = taxonSet.asStringList();
@@ -117,6 +127,24 @@ public class GeoPrior extends Distribution {
 		boolean isInside = isInsideInput.get();
 
 		double[] location = new double[2];
+		if (allInternalNodes) {
+			logP = 0;
+			for (int i = 0; i < tree.getNodeCount(); i++) {
+				this.location.getMatrixValues1(i, location);
+				if (region.isInside(location[0], location[1])) {
+					if (!isInside) {
+						logP -= 1e-20;
+					}
+				} else {
+					if (isInside) {
+						logP -= 1e-20;
+					}
+				}
+			}
+			return logP;
+		}
+		
+		
 		if (isRoot) {
 			taxonNr = tree.getRoot().getNr();
 		} else {
@@ -181,6 +209,9 @@ public class GeoPrior extends Distribution {
     
     @Override
     public void log(int nSample, PrintStream out) {
+		if (!initialised) {
+			initialise();
+		}
 		double[] location = new double[2];
 		this.location.getMatrixValues1(taxonNr, location);
         out.print(location[0] + "\t");

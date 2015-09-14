@@ -9,6 +9,7 @@ import sphericalGeo.GreatCircleDistance;
 import sphericalGeo.SphericalDiffusionModel;
 import beast.core.BEASTObject;
 import beast.core.Description;
+import beast.core.util.Log;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.NexusParser;
@@ -150,6 +151,10 @@ public class CirclePathMaker extends BEASTObject {
 	private void annotateBranch(Node from, Node to) {
 		double [] pos1 = nodePosition(from, locationName);
 		double [] pos2 = nodePosition(to, locationName);
+		if (pos1 == null) {
+			Log.err.println("Could not find position in metadata -- perhaps the name need to be specified (with the -name argument)?");
+			System.exit(0);
+		}
 		double angle = GreatCircleDistance.pairwiseDistance(pos1, pos2) / GreatCircleDistance.EARTHRADIUS;
 		angle = Math.abs(angle) * 180 / Math.PI;
 		if (angle < minarc) {
