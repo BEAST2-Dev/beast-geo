@@ -2,6 +2,7 @@ package sphericalGeo.region;
 
 import java.io.File;
 
+import beast.app.beauti.BeautiDoc;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
@@ -121,6 +122,19 @@ public class KMLRegion extends Region {
 		if (debug) {
 			try {
 				ImageIO.write(image, "png", new File("/tmp/kmlregion" + getID() + ".png"));
+				
+//				String s = BeautiDoc.load("/tmp/" + getID() + ".dat");
+//				String [] strs = s.split("\n");
+//				for (int i = 1; i < strs.length; i++) {
+//					String [] x = strs[i].split("\\s+");
+//					g.setColor(Color.blue);
+//					if (x.length == 2) {
+//						int x0 = (int) ((Double.parseDouble(x[1]) - minLong) * w);
+//						int y0 = height - (int) ((Double.parseDouble(x[0]) - minLat) * h);
+//						g.fillOval(x0-5, y0-5, 10, 10);
+//					}
+//				}
+//				ImageIO.write(image, "png", new File("/tmp/kmlsamples" + getID() + ".png"));
 			} catch (Exception e) {
 				// ignore
 			}

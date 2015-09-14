@@ -9,12 +9,20 @@ import beast.core.parameter.RealParameter;
 		+ "Rotates around a center point, then scales latitude and longitude")
 public class AffineTransformer extends BEASTObject implements Transformer {
 	public Input<RealParameter> centerInput = new Input<>("center", "center of transformation (default (0,0))");
-	public Input<RealParameter> rotationInput = new Input<>("angle", "angle used for rotation around center (default 0)");
+	public Input<RealParameter> angleInput = new Input<>("angle", "angle used for rotation around center (default 0)");
 	public Input<RealParameter> scaleInput = new Input<>("scale", "scale input, multiplies latitude, divides longitude (default 1)");
 	
 	RealParameter center;
 	RealParameter angle;
 	RealParameter scale;
+	
+	public AffineTransformer(String center, String angle, String scale) throws Exception {
+		centerInput.setValue(center, this);
+		angleInput.setValue(angle, this);
+		scaleInput.setValue(scale, this);
+		initAndValidate();
+	}
+	
 	
 	@Override
 	public void initAndValidate() throws Exception {
@@ -22,7 +30,7 @@ public class AffineTransformer extends BEASTObject implements Transformer {
 		if (center != null && center.getDimension() != 2) {
 			throw new Exception("Center should have a dimension of 2");
 		}
-		angle = rotationInput.get();
+		angle = angleInput.get();
 		if (angle != null && angle.getDimension() != 1) {
 			throw new Exception("angle should have a dimension of 1");
 		}
