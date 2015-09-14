@@ -691,6 +691,10 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 					e.printStackTrace();
 				}
 			}
+			if (transformer != null) {
+				double [] p = transformer.projectInverse(position[iDim][0], position[iDim][1]);
+				return p;
+			}
 			return position[iDim];
 		}
 	}
