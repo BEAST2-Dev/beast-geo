@@ -18,7 +18,7 @@ import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
 import beast.util.TreeParser;
 
-public class RandowWalkSimulator extends JPanel implements MouseListener {
+public class RandomWalkSimulator extends JPanel implements MouseListener {
 	
 	enum MODE {simple, levy, biased, correlated};
 	class RandomWalk {
@@ -204,7 +204,7 @@ public class RandowWalkSimulator extends JPanel implements MouseListener {
 
 	public static void main(String[] args) {
 		JFrame frame = new JFrame();
-		RandowWalkSimulator panel =  new RandowWalkSimulator();
+		RandomWalkSimulator panel =  new RandomWalkSimulator();
 		frame.add(panel);
 		frame.addMouseListener(panel);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
