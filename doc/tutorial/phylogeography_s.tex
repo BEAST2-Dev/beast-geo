@@ -1,7 +1,7 @@
 \documentclass{article}
 \usepackage{url,graphicx,color}
 
-\newcommand{\BEASTVersion}{2.2}
+\newcommand{\BEASTVersion}{2.3}
 \newcommand{\TracerVersion}{1.6}
 \newcommand{\FigTreeVersion}{1.4.2}
 
@@ -592,6 +592,38 @@ To specify the prior, add the following to the element with id="slocationtreeLik
 	<taxonset idref='myclade'/>
 <geoprior>
 \end{verbatim}
+
+
+\section*{Somewhat heterogeneous diffusion}
+
+Somewhat heterogeneous diffusion can be achieved by transforming the Mercator projection, thus getting a new map where the standard diffusion process is run. The transformation can be based on a cartogram. To create a cartogram, add the following element to the {\tt sphericalGeo.ApproxMultivariateTraitLikelihood}
+
+If you have information in a shape file, add
+
+\begin{verbatim}
+ <transformer id="transformer" 
+       shapeFile="TM_WORLD_BORDERS_SIMPL-0.3.shp" <!-- name of the shape file  ->
+       attIdentifier="NAME" <!-- name of the field identifying a shape -->
+       weightIdentifier="POP2005" <!-- name of the weight used to build the cartogram -->
+       spec="sphericalGeo.scapetoad.ScapeToadTransfomer"
+       cartogram="cartogram-population.ser"/> <!-- name of the file to store the cartogram, 
+            so it does not need to be recalculated on resume -->
+ \end{verbatim}
+
+If you have information in a KML file, add
+
+\begin{verbatim}
+<transformer id="transformer" shapeFile="IE.kml"
+      attIdentifier=?name" <!-- name of the field identifying a region -->
+      value="Caucasus=1000,Dummy=10,TopLeft=10,TopRight=10"
+          <!-- comma separated list of identifier=weight pairs -->
+      spec="sphericalGeo.scapetoad.ScapeToadTransfomer"
+      cartogram="cartogram-population2.ser"/>
+\end{verbatim}
+
+After starting the BEAST run, two files are produced:
+{\tt /tmp/scapetoad.svg} containing the deformation grid and original shapes but transformed, and 
+{\tt /tmp/deformationGrid.svg} which contains only the deformation grid. These can be used to see whether the transformation is somewhat reasonable.
 
 \subsubsection*{Trouble shooting}
 \begin{itemize}
