@@ -596,34 +596,75 @@ To specify the prior, add the following to the element with id="slocationtreeLik
 
 \section*{Somewhat heterogeneous diffusion}
 
-Somewhat heterogeneous diffusion can be achieved by transforming the Mercator projection, thus getting a new map where the standard diffusion process is run. The transformation can be based on a cartogram. To create a cartogram, add the following element to the {\tt sphericalGeo.ApproxMultivariateTraitLikelihood}
+\includegraphics[width=0.5\textwidth]{../paper/gridorg}
+\includegraphics[width=0.5\textwidth]{../paper/grid2}
 
-If you have information in a shape file, add
+Somewhat heterogeneous diffusion can be achieved by transforming the Mercator projection, thus getting a new map where the standard diffusion process is run. The transformation can be based on a cartogram, where the area is transformed such that higher density shapes are blown up and lower density ones are shrunk. The image above shows the standard Mercator projection world map left and a cartogram where country sizes represent population sizes on the right. To use a cartogram transformation, create a file containing shapes in ESRI shape file or KML file. ESRI shape files allow attributes to be associated directly with shapes, which can be used as density or weight. For KML files, each shape has a name, and in the BEAST XML you can specify for each of these names the weight it should get.
+
+{\bf Note}: The deformation grid that is generated only covers the bounding box around the shapes, to the shapes should be covering the area of interest. You can place dummy shapes at the corners in order to ensure the bounding box is big enough.
+
+Once the shape file is created, add the following element to the {\tt sphericalGeo.ApproxMultivariateTraitLikelihood}.
+If you have information in a shape file, add something like
 
 \begin{verbatim}
  <transformer id="transformer" 
-       shapeFile="TM_WORLD_BORDERS_SIMPL-0.3.shp" <!-- name of the shape file  ->
-       attIdentifier="NAME" <!-- name of the field identifying a shape -->
-       weightIdentifier="POP2005" <!-- name of the weight used to build the cartogram -->
+       shapeFile="TM_WORLD_BORDERS_SIMPL-0.3.shp" 
+       attIdentifier="NAME" 
+       weightIdentifier="POP2005" 
        spec="sphericalGeo.scapetoad.ScapeToadTransfomer"
-       cartogram="cartogram-population.ser"/> <!-- name of the file to store the cartogram, 
-            so it does not need to be recalculated on resume -->
+       cartogram="cartogram-population.ser"/> 
  \end{verbatim}
 
-If you have information in a KML file, add
+If you have information in a KML file, add something like
 
 \begin{verbatim}
 <transformer id="transformer" shapeFile="IE.kml"
-      attIdentifier=?name" <!-- name of the field identifying a region -->
+      attIdentifier="name"
       value="Caucasus=1000,Dummy=10,TopLeft=10,TopRight=10"
-          <!-- comma separated list of identifier=weight pairs -->
       spec="sphericalGeo.scapetoad.ScapeToadTransfomer"
       cartogram="cartogram-population2.ser"/>
 \end{verbatim}
 
-After starting the BEAST run, two files are produced:
+ScapeToadTransfomer has the following general attributes:\\
+
+{\tt shapeFile}: file containing regions in .shp or .kml format. Must be specified.\\
+
+{\tt attIdentifier}: name of attribute in shape file that identifies a region, default "NAME".\\
+
+{\tt value}: comma separated list of 'id=value' pairs where values representing relative size for each regions with ID from the shape file.\\
+
+{\tt weightIdentifier}: name of attribute in shape file that identifies a weight, either specify weightIdentifier or value, but no both.\\
+
+{\tt cartogram}: File containing cartogram. If specified and file does not exist, the cartogram will be calculated and stored there.\\
+
+To govern the behaviour of the transformation, the following attributes can be specified as well:\\
+
+{\tt isDensity}: if true, weights are interpreted as densities, otherwise they are interpreted as mass, default true.\\
+
+{\tt advanced}: if true the advanced parameters should be taken in account, otherwise these are estimated. Default false.\\
+
+{\tt gridSizeX}: A first grid is applied to the main transformation layer. 
+This rectangular grid is defined by the number of columns. 
+Higher numbers produce denser grids and thus a better cartogram quality. 
+However, a denser grid also implies a longer treatment. 
+Default 200, ignored if advanced=false.\\
+
+{\tt gridSizeY}: As gridSizeX but for number of rows, default 200, ignored if advanced=false\\
+diffusionGridSize: A second grid is applied to the main transformation layer. 
+This square grid is defined by the number of rows. 
+Denser grids imply again a better cartogram quality but longer computation times.
+must be a power of 2, default 128, ignored if advanced=false.\\
+
+{\tt diffusionIterations}: The second grid is transformed with the Gastner/Newman diffusion 
+algorithm, which can be run several times to obtain a higher transformation quality. 
+Higher numbers of iterations also imply longer treatment times.
+Default 3, ignored if advanced=false.\\
+
+{\tt gridLayerSize}: The visualisation grid layer size. After starting the BEAST run, two files are produced:
 {\tt /tmp/scapetoad.svg} containing the deformation grid and original shapes but transformed, and 
-{\tt /tmp/deformationGrid.svg} which contains only the deformation grid. These can be used to see whether the transformation is somewhat reasonable.
+{\tt /tmp/deformationLayer.svg} which contains only the deformation grid. These can be used to see whether the transformation is somewhat reasonable. This is the gridsize which is produced for visual effect only in the sag files. 
+Default 100.
+
 
 \subsubsection*{Trouble shooting}
 \begin{itemize}

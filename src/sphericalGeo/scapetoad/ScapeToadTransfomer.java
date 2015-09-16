@@ -19,8 +19,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import cern.colt.Arrays;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -57,15 +55,64 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 	public Input<String> attIdentifierInput = new Input<String>("attIdentifier", "name of attribute in shape file that identifies a region", DEFAULT_ATT_IDENTIFIER);
 	public Input<String> weightInput = new Input<String>("value", "comma separated list of 'id=value' pairs where values representing relative size for each regions with ID from the shape file");
 	public Input<String> weightIdentifiedInput = new Input<String>("weightIdentifier", "name of attribute in shape file that identifies a weight", Validate.XOR, weightInput);
-	public Input<Boolean> isDensityInput = new Input<Boolean>("isDensity", "if true, weights are interpreted as densities, otherwise they are interpreted as mass", true);
 	
 	public Input<File> cartogramFileInput = new Input<File>("cartogram", "File containing cartogram. If specified and file does not exist, the cartogram will be calculated and stored there.");
+	
+
+	public Input<Boolean> isDensityInput = new Input<>("isDensity", "if true, weights are interpreted as densities, otherwise they are interpreted as mass", true);
+	public Input<Integer> deformationAmountInput = new Input<>("deformationAmount", "Defines the amount of deformation. This is an integer value between" +
+			" 0 and 100. The default value is 50", 50);
+	public Input<Boolean> isAdvancedInput = new Input<>("advanced", "if true the advanced parameters should be taken in account, otherwise these are estimated.", false);
+		
+
+	public Input<Integer> gridSizeXInput = new Input<>("gridSizeX", "A first grid is applied to the main transformation layer. "
+			+ "This rectangular grid is defined by the number of columns. "
+			+ "Higher numbers produce denser grids and thus a better cartogram quality. "
+			+ "However, a denser grid also implies a longer treatment. "
+			+ "Default 200, ignored if advanced=false", 200);
+	public Input<Integer> gridSizeYInput = new Input<>("gridSizeY", "As gridSizeX but for number of rows, default 200, ignored if advanced=false", 200);
+
+	public Input<Integer> diffusionGridSizeInput = new Input<>("diffusionGridSize", "A second grid is applied to the main transformation layer. "
+			+ "This square grid is defined by the number of rows. "
+			+ "Denser grids imply again a better cartogram quality but longer computation times."
+			+ "must be a power of 2, default 128, ignored if advanced=false", 128);
+
+	public Input<Integer> diffusionIterationsInput = new Input<>("diffusionIterations", "The second grid is transformed with the Gastner/Newman diffusion "
+			+ "algorithm, which can be run several times to obtain a higher transformation quality. "
+			+ "Higher numbers of iterations also imply longer treatment times."
+			+ "Default 3, ignored if advanced=false", 3);
+	
+	public Input<Integer> gridLayerSizeInput = new Input<>("gridLayerSize", "The visualisation grid layer size. "
+			+ "This is the grid which is produced for visual effect only in the files /tmp/scapetoad.svg and /tmp/deformationLayer.svg. "
+			+ "Default 100.", 100);
+	
+	
 	
 	CartogramGrid cartogramGrid;
 	Map<String,Double> map;
 	
 	@Override
 	public void initAndValidate() throws Exception {
+		// input sanity checks
+		if (deformationAmountInput.get() < 0 || deformationAmountInput.get() > 100) {
+			throw new RuntimeException("deformationAmount must be between 0 and 100");
+		}
+		if (gridSizeXInput.get() < 0) {
+			throw new RuntimeException("gridSizeX must be between positive");
+		}
+		if (gridSizeYInput.get() < 0) {
+			throw new RuntimeException("gridSizeY must be between positive");
+		}
+		int i = diffusionGridSizeInput.get();
+		do {
+			if (i % 2 != 0) {
+				throw new RuntimeException("diffusionGridSize must be a power of 2");
+			}
+		} while (i > 1);
+		if (gridLayerSizeInput.get() < 0) {
+			throw new RuntimeException("gridLayerSize must be between positive");
+		}
+		
 		
         // parse region values and store in map
 		if (weightInput.get() != null) {
@@ -401,23 +448,19 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 		cg.setConstrainedDeformationLayers(null/*mCartogramWizard.getConstrainedDeformationLayers()*/);
 			
 		
-		cg.setAmountOfDeformation(5/*mCartogramWizard.getAmountOfDeformation()*/);
+		cg.setAmountOfDeformation(deformationAmountInput.get()/*mCartogramWizard.getAmountOfDeformation()*/);
 		
-		cg.setAdvancedOptionsEnabled(false/*mCartogramWizard.getAdvancedOptionsEnabled()*/);
-			
-		cg.setGridSize(200, 200/*mCartogramWizard.getCartogramGridSizeInX(),
-			mCartogramWizard.getCartogramGridSizeInY()*/);
-			
-		cg.setDiffusionGridSize(128/*mCartogramWizard.getDiffusionGridSize()*/);
-		cg.setDiffusionIterations(3/*mCartogramWizard.getDiffusionIterations()*/);
+		cg.setAdvancedOptionsEnabled(isAdvancedInput.get()/*mCartogramWizard.getAdvancedOptionsEnabled()*/);
+
+		cg.setGridSize(gridSizeXInput.get(), gridSizeYInput.get());
 		
-		
+		cg.setDiffusionGridSize(diffusionGridSizeInput.get()/*mCartogramWizard.getDiffusionGridSize()*/);
+
+		cg.setDiffusionIterations(diffusionIterationsInput.get()/*mCartogramWizard.getDiffusionIterations()*/);
 		
 		// Set the parameters for the deformation grid layer.
 		cg.setCreateGridLayer(true/*mCartogramWizard.getCreateGridLayer()*/);
-		cg.setGridLayerSize(100/*mCartogramWizard.getDeformationGridSize()*/);
-		
-		
+		cg.setGridLayerSize(gridLayerSizeInput.get()/*mCartogramWizard.getDeformationGridSize()*/);
 		
 		// Set the parameters for the legend layer.
 		// We have to estimate the legend values.
