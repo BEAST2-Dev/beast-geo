@@ -635,13 +635,15 @@ ScapeToadTransfomer has the following general attributes:\\
 
 {\tt weightIdentifier}: name of attribute in shape file that identifies a weight, either specify weightIdentifier or value, but no both.\\
 
-{\tt cartogram}: File containing cartogram. If specified and file does not exist, the cartogram will be calculated and stored there.\\
-
-To govern the behaviour of the transformation, the following attributes can be specified as well:\\
-
 {\tt isDensity}: if true, weights are interpreted as densities, otherwise they are interpreted as mass, default true.\\
 
+{\tt cartogram}: File containing cartogram. If specified and file does not exist, the cartogram will be calculated and stored there so that on resuming a run the cartogram does not need to be recalculated.\\
+
+{\bf Note:} to govern the behaviour of the transformation, there is a simple option (when {\tt advanced=false}) where the deformation amount is specified and all other parameters are estimated, or each of the parameters can be specified individually (when {\tt advanced=true}).\\
+
 {\tt advanced}: if true the advanced parameters should be taken in account, otherwise these are estimated. Default false.\\
+
+{\tt deformationAmount}: Defines the amount of deformation. This is an integer value between 0 and 100. The default value is 50. Ignored if advanced=true.\\
 
 {\tt gridSizeX}: A first grid is applied to the main transformation layer. 
 This rectangular grid is defined by the number of columns. 
