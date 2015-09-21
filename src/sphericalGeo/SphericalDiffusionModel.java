@@ -569,8 +569,12 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
         }
     }
     static private double myacos(double x) {
-       //return abs(x) > .95 ? acos_parts_fast7(x) : FastMath.acos(x);
-       return acos_parts_fast7(x);
+		// This can happen if calling code is not carefull. Hack at the moment
+		if( Double.isInfinite(x) || Double.isNaN(x) ) {
+			return x;
+		}
+        assert -1 <= x && x <= 1;
+		return acos_parts_fast7(x);
     }
 
    static final int NN = 100;

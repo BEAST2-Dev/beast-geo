@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import beast.evolution.operators.DistanceProvider;
 import org.apache.commons.math3.util.FastMath;
 
 import beast.core.BEASTObject;
@@ -16,7 +17,7 @@ import beast.evolution.tree.Node;
 import beast.evolution.tree.TreeInterface;
 
 @Description("Provide distance between geographical locations -- to be used by AttachOperator")
-public class CircleDistanceProvider extends BEASTObject implements AttachOperator.DistanceProvider {
+public class CircleDistanceProvider extends BEASTObject implements DistanceProvider {
 	enum Method {
 		DISTANCE("distance"),
 		SQRT("sqrt"),
@@ -62,7 +63,7 @@ public class CircleDistanceProvider extends BEASTObject implements AttachOperato
 
 	}
 	
-	class LocationData implements AttachOperator.DistanceProvider.Data {
+	class LocationData implements DistanceProvider.Data {
 		final static int MAX_ITER = 0;
 		final static double MIN_EPSILON = 0.001;
 
@@ -80,8 +81,8 @@ public class CircleDistanceProvider extends BEASTObject implements AttachOperato
 	}
 	
 	@Override
-	public Map<String, AttachOperator.DistanceProvider.Data> init(Set<String> taxa) {
-		final HashMap<String, AttachOperator.DistanceProvider.Data> m = new HashMap<>();
+	public Map<String, DistanceProvider.Data> init(Set<String> taxa) {
+		final HashMap<String, DistanceProvider.Data> m = new HashMap<>();
 		int count = 0;
 		for (int i = 0; i < tree.getLeafNodeCount(); i++) {
 			Node n = tree.getNode(i);
@@ -142,7 +143,7 @@ public class CircleDistanceProvider extends BEASTObject implements AttachOperato
     }
 
     @Override
-    public double dist(AttachOperator.DistanceProvider.Data info1, AttachOperator.DistanceProvider.Data info2) {
+    public double dist(DistanceProvider.Data info1, DistanceProvider.Data info2) {
         LocationData d1 = (LocationData) info1;
         LocationData d2 = (LocationData) info2;
         double s = 0;
