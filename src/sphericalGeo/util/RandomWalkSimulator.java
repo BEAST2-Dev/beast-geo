@@ -16,9 +16,9 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import com.itextpdf.awt.PdfGraphics2D;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfWriter;
+//import com.itextpdf.awt.PdfGraphics2D;
+//import com.itextpdf.text.pdf.PdfContentByte;
+//import com.itextpdf.text.pdf.PdfWriter;
 
 import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.Alignment;
@@ -146,24 +146,24 @@ public class RandomWalkSimulator extends JPanel implements MouseListener, KeyLis
 		
 	void exportPDF(String sFileName) {
 		try {
-			com.itextpdf.text.Document doc = new com.itextpdf.text.Document();
-			PdfWriter writer = PdfWriter.getInstance(doc, new FileOutputStream(sFileName));
-			doc.setPageSize(new com.itextpdf.text.Rectangle(getWidth(), getHeight()));
-			doc.open();
-			PdfContentByte cb = writer.getDirectContent();
-			Graphics2D g = new PdfGraphics2D(cb, getWidth(), getHeight());
-			 
-			BufferedImage bi;
-			bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
-			//g = bi.getGraphics();
-			g.setPaintMode();
-			g.setColor(getBackground());
-			g.fillRect(0, 0, getWidth(), getHeight());
-			paint(g);
-			//m_Panel.printAll(g);
-		
-			g.dispose();
-			doc.close();
+//			com.itextpdf.text.Document doc = new com.itextpdf.text.Document();
+//			PdfWriter writer = PdfWriter.getInstance(doc, new FileOutputStream(sFileName));
+//			doc.setPageSize(new com.itextpdf.text.Rectangle(getWidth(), getHeight()));
+//			doc.open();
+//			PdfContentByte cb = writer.getDirectContent();
+//			Graphics2D g = new PdfGraphics2D(cb, getWidth(), getHeight());
+//			 
+//			BufferedImage bi;
+//			bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+//			//g = bi.getGraphics();
+//			g.setPaintMode();
+//			g.setColor(getBackground());
+//			g.fillRect(0, 0, getWidth(), getHeight());
+//			paint(g);
+//			//m_Panel.printAll(g);
+//		
+//			g.dispose();
+//			doc.close();
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(this, "Export may have failed: " + e.getMessage());
 		}
