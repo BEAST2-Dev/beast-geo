@@ -1,25 +1,37 @@
 package sphericalGeo.util;
 
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
+import java.io.FileOutputStream;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import com.itextpdf.awt.PdfGraphics2D;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.Sequence;
 import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
 import beast.util.TreeParser;
 
-public class RandomWalkSimulator extends JPanel implements MouseListener {
+public class RandomWalkSimulator extends JPanel implements MouseListener, KeyListener {
 	
+	private static final long serialVersionUID = 1L;
+
+
 	enum MODE {simple, levy, biased, correlated};
 	class RandomWalk {
 		MODE mode;
@@ -95,7 +107,7 @@ public class RandomWalkSimulator extends JPanel implements MouseListener {
 		double [] end = new double[]{W/2, H/2};
 		dp = new double[]{W/2, H/2};
 		
-		int nSteps = 100;
+		int nSteps = 200;
 		
 		g.setColor(Color.black);
 		g2.drawString("mode=" + mode, 10, 10);
@@ -132,7 +144,30 @@ public class RandomWalkSimulator extends JPanel implements MouseListener {
 	}		
 		
 		
-	
+	void exportPDF(String sFileName) {
+		try {
+			com.itextpdf.text.Document doc = new com.itextpdf.text.Document();
+			PdfWriter writer = PdfWriter.getInstance(doc, new FileOutputStream(sFileName));
+			doc.setPageSize(new com.itextpdf.text.Rectangle(getWidth(), getHeight()));
+			doc.open();
+			PdfContentByte cb = writer.getDirectContent();
+			Graphics2D g = new PdfGraphics2D(cb, getWidth(), getHeight());
+			 
+			BufferedImage bi;
+			bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+			//g = bi.getGraphics();
+			g.setPaintMode();
+			g.setColor(getBackground());
+			g.fillRect(0, 0, getWidth(), getHeight());
+			paint(g);
+			//m_Panel.printAll(g);
+		
+			g.dispose();
+			doc.close();
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(this, "Export may have failed: " + e.getMessage());
+		}
+	}
 
 	private void line(Graphics g, double[] p0, double[] p1) {
 		g.drawLine((int) p0[0], (int) p0[1], (int) p1[0], (int) p1[1]);
@@ -207,6 +242,7 @@ public class RandomWalkSimulator extends JPanel implements MouseListener {
 		RandomWalkSimulator panel =  new RandomWalkSimulator();
 		frame.add(panel);
 		frame.addMouseListener(panel);
+		frame.addKeyListener(panel);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setSize(1024,768);
 		frame.setVisible(true);
@@ -214,6 +250,10 @@ public class RandomWalkSimulator extends JPanel implements MouseListener {
 	}
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		if (e.isShiftDown() && e.isAltDown()) {
+			exportPDF("/tmp/x.pdf");
+			return;
+		}
 		repaint();
 		if (e.isShiftDown()) {
 			switch (mode) {
@@ -247,6 +287,26 @@ public class RandomWalkSimulator extends JPanel implements MouseListener {
 	}
 	@Override
 	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+	}
+
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_P) {
+			exportPDF("/tmp/x.pdf");
+		}
+	}
+
+
+	@Override
+	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='BinaryCovarion' beautistatus='noAutoSetClockRate' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" version="2.0">
 
 
+<!-- spherical geography with fixed tree -->
+<!-- transform example with ESRI shape file -->
     
 
 
@@ -300,7 +302,6 @@ Pali=24.53 82.25
         <log idref="ucldStdev.c:geo"/>
         <log id="rate.c:geo" spec="beast.evolution.branchratemodel.RateStatistic" branchratemodel="@RelaxedClock.c:geo" tree="@Tree.t:IELex"/>
         <log idref="ucldMean.c:geo"/>
-        <log idref="Russian.geoprior"/>
     </logger>
 
     <logger id="screenlog" logEvery="1000">

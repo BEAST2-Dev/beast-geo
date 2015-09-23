@@ -108,6 +108,7 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 			if (i % 2 != 0) {
 				throw new RuntimeException("diffusionGridSize must be a power of 2");
 			}
+			i /= 2;
 		} while (i > 1);
 		if (gridLayerSizeInput.get() < 0) {
 			throw new RuntimeException("gridLayerSize must be between positive");
