@@ -34,6 +34,10 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 	/** list of partitions that need recalculating **/
 	List<Integer> dirtyPartitionList = new ArrayList<>();
 	
+	
+	
+
+	
     /**
      * Lengths of the branches in the tree associated with each of the nodes
      * in the tree through their node  numbers. By comparing whether the
@@ -43,6 +47,10 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
      * These lengths take branch rate models in account.
      */
     protected double[] storedBranchLengths;
+	double [][] storedPosition;
+	double [][] storedSphereposition;
+	//double [] storedSumLengths;
+	//double [] storedParentweight;
 	
 	
 	@Override
@@ -51,6 +59,9 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 
 		branchLengths = new double[tree.getNodeCount()];
 		storedBranchLengths = new double[tree.getNodeCount()];
+		
+		storedPosition = new double[tree.getNodeCount()][2];
+		storedSphereposition = new double[tree.getNodeCount()][3];
 	}
 	
 	@Override
@@ -63,16 +74,25 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 			isTopOfPartition[i] = true;
 		}
 		nodeToPartitionMap = new int[tree.getNodeCount()];
+		Arrays.fill(nodeToPartitionMap, -1);
 		int [] nextParitionNr = new int[1];
+		nextParitionNr[0] = -1;
 		initNodeToPartitionMap(tree.getRoot(), nextParitionNr, 0);
-		partitionCount = nextParitionNr[0];
+		partitionCount = nextParitionNr[0] + 1;
 
 		rootNodeToPartitionMap = new int[tree.getNodeCount()][3];
 		rootNode = new int[partitionCount];
 		for (int i: sampleNumber) {
-			int left = tree.getNode(i).getLeft().getNr();
-			int right = tree.getNode(i).getRight().getNr();
-			rootNodeToPartitionMap[i][0] = nodeToPartitionMap[i];
+			Node node = tree.getNode(i);
+			int left = node.getLeft().getNr();
+			int right = node.getRight().getNr();
+			if (!node.isRoot()) {
+				// normal behaviour for internal node
+				rootNodeToPartitionMap[i][0] = nodeToPartitionMap[i];
+			} else {
+				// hack to deal with root node
+				rootNodeToPartitionMap[i][0] = nodeToPartitionMap[left];
+			}
 			rootNodeToPartitionMap[i][1] = nodeToPartitionMap[left];
 			rootNodeToPartitionMap[i][2] = nodeToPartitionMap[right];
 			rootNode[nodeToPartitionMap[left]] = i;
@@ -92,6 +112,9 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 			}
 		} else {
 			nodeToPartitionMap[nodeNr] = currentPartition;
+			for (Node child : node.getChildren()) {
+				initNodeToPartitionMap(child, nextParitionNr, currentPartition);
+			}
 		}	
 	}
 
@@ -242,6 +265,22 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
         System.arraycopy(branchLengths, 0, storedBranchLengths, 0, branchLengths.length);
 
 		System.arraycopy(logPContributions, 0, storedLogPContributions, 0, partitionCount);
+		
+		// TODO: instead of copying all positions, only copy those of the partitions that changed in the last update
+		double [] p, sp;
+		for (int i = 0; i < position.length; i++) {
+			p = position[i];
+			sp = storedPosition[i];
+			sp[0] = p[0];
+			sp[1] = p[1];
+		}
+		for (int i = 0; i < position.length; i++) {
+			p = sphereposition[i];
+			sp = storedSphereposition[i];
+			sp[0] = p[0];
+			sp[1] = p[1];
+		}
+
 		super.store();
 	}
 	
@@ -256,10 +295,21 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
         tmp = logPContributions;
         logPContributions = storedLogPContributions;
         storedLogPContributions = tmp;
+        
+        double [][]tmp2 = position;
+        position = storedPosition;
+        storedPosition = tmp2;
+        
+        tmp2 = sphereposition;
+        sphereposition = storedSphereposition;
+        storedSphereposition = tmp2;
 	}
 	
 	@Override
 	protected boolean requiresRecalculation() {
+		if (!initialised) {
+			initialiseSampledStates();
+		}
 		boolean [] dirtyPartitions = new boolean[tree.getNodeCount()];
 		//Arrays.fill(dirtyPartitions, false);
 		
@@ -294,8 +344,8 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 
 		if (sampledLocations.somethingIsDirty()) {
 			for (int i : sampleNumber) {
-				if (sampledLocations.isDirty(i)) {
-					double lat1 = sampledLocations.getMatrixValue(i, 0);
+				if (sampledLocations.isDirty(i*2) || !initialised) {
+					double lat1  = sampledLocations.getMatrixValue(i, 0);
 					double long1 = sampledLocations.getMatrixValue(i, 1);
 					if (transformer != null) {
 						double [] t = transformer.project(lat1, long1);

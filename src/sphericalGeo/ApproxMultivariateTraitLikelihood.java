@@ -23,7 +23,7 @@ import beast.evolution.tree.TreeInterface;
 @Description("Approximate likelihood by MAP approximation of internal states")
 @Citation("Remco R. Bouckaert. Phylogeography by diffusion on a sphere. bioRxiv, BIORXIV/2015/016311, 2015.")
 public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood implements StateNodeInitialiser { 
-	public Input<Boolean> scaleByBranchLengthInput = new Input<Boolean>("scale", "scale by branch lengths for initial position", true);
+	public Input<Boolean> scaleByBranchLengthInput = new Input<Boolean>("scale", "scale by branch lengths for initial position", false);
 	public Input<List<GeoPrior>> geopriorsInput = new Input<List<GeoPrior>>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<GeoPrior>());
 	public Input<RealParameter> locationInput = new Input<RealParameter>("location",
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree");
@@ -41,7 +41,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	double [][] position;
 	double [][] sphereposition;
 	double [] branchLengths;
-	double [] sumLengths;
+	//double [] sumLengths;
 	double [] parentweight;
 
 	boolean needsUpdate = true;
@@ -92,11 +92,10 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		}
 
 		branchLengths = new double[tree.getNodeCount()];
-		sumLengths = new double[tree.getNodeCount()];
+		//sumLengths = new double[tree.getNodeCount()];
 		parentweight = new double[tree.getNodeCount()];
 	
 		
-		//initialiseSampledStates();
 		List<GeoPrior> geopriors = geopriorsInput.get();
 		{
 			// geopriors.size: sanity check to see whether there really are no geo-priors
@@ -114,7 +113,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 				Log.warning.println("Expect this analysis to fail.\n");
 			}
 		}
-				
+
+//		initialiseSampledStates();
+
 		logAverage = logAverageInput.get();
 	}
 	
@@ -151,6 +152,8 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 						if (Math.abs(d[i * 2]) < 1e-10 && Math.abs(d[i * 2 + 1]) < 1e-10) {
 							d[i * 2] = location[0];
 							d[i * 2 + 1] = location[1];
+						} else {
+							Log.warning.println("location of " + prior.getID() + " already set at " + d[i*2]+","+d[i*2+1]);
 						}
 					}
 					taxonNrs[k] = -1;
@@ -168,6 +171,8 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 						if (Math.abs(d[taxonNr * 2]) < 1e-10 && Math.abs(d[taxonNr * 2 + 1]) < 1e-10) {
 							d[taxonNr * 2] = location[0];
 							d[taxonNr * 2 + 1] = location[1];
+						} else {
+							Log.warning.println("location of " + prior.getID() + " already set at " + d[taxonNr*2]+","+d[taxonNr*2+1]);
 						}
 					}
 					taxonNrs[k] = taxonNr;
@@ -238,19 +243,20 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		for (Node node : tree.getNodesAsArray()) {
 			if (!node.isRoot()) {
 				branchLengths[node.getNr()] = node.getLength() * clockModel.getRateForBranch(node);
-				if (!node.isLeaf()) {
-					Node child1 = node.getLeft();
-					Node child2 = node.getRight();
-					sumLengths[node.getNr()] = branchLengths[node.getNr()] +
-							child1.getLength() * clockModel.getRateForBranch(child1) +
-							child2.getLength() * clockModel.getRateForBranch(child2);
-				}
+//				if (!node.isLeaf()) {
+//					Node child1 = node.getLeft();
+//					Node child2 = node.getRight();
+//					sumLengths[node.getNr()] = branchLengths[node.getNr()] +
+//							child1.getLength() * clockModel.getRateForBranch(child1) +
+//							child2.getLength() * clockModel.getRateForBranch(child2);
+//				}
 			}
 		}
 	}
 
 	/** traverse tree **/
 	double calcLogP() {
+		calcLogP(tree.getRoot());
 		double logP = 0;
 		for (Node node : tree.getNodesAsArray()) {
 			if (!node.isRoot()) {
@@ -260,6 +266,12 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		}
 		return logP;
 	}
+	
+	private void calcLogP(Node root) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	
 //	void caclPositions() {
 //		final double EPSILON = 1e-8;
@@ -292,6 +304,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 //	}
 	
 	
+
+
+
 	void calcPositions() {
 		final double EPSILON = 1e-8;
 		
@@ -346,7 +361,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		}
 		
 		for (int i = tree.getLeafNodeCount(); i < tree.getNodeCount(); i++) {
-			position[i] = SphericalDiffusionModel.cartesian2Sperical(sphereposition[i], true);
+			if (!isSampled[i]) {
+				position[i] = SphericalDiffusionModel.cartesian2Sperical(sphereposition[i], true);
+			}
 		}
 
 //		System.err.println("maxdelta2 = " + max);
@@ -787,7 +804,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 			loggerLikelihood.needsUpdate = true;
 		}
 		
-		if (geoPriorChanged()) {
+		if (initialised && geoPriorChanged()) {
 			initialiseSampledStates();
 		}
 		super.requiresRecalculation();
