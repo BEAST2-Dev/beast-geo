@@ -52,10 +52,13 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	
 	RealParameter sampledLocations;
 	boolean [] isSampled;
+	boolean [] storedIsSampled;
 	List<Integer> sampleNumber;
+	List<Integer> storedSampleNumber;
 	
 	double precision;
 	int [] taxonNrs;
+	int [] storedTaxonNrs;
 	
 	
 	@Override
@@ -120,8 +123,11 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		
 		List<GeoPrior> geopriors = geopriorsInput.get();
 		isSampled = new boolean[tree.getNodeCount()];
-		sampleNumber = new ArrayList<Integer>();
+		storedIsSampled = new boolean[tree.getNodeCount()];
+		sampleNumber = new ArrayList<>();
+		storedSampleNumber = new ArrayList<>();
 		taxonNrs = new int[geopriors.size()];
+		storedTaxonNrs = new int[geopriors.size()];
 		if (geopriors.size() > 0) {
 			sampledLocations = locationInput.get();
 			if (sampledLocations == null) {
@@ -745,6 +751,12 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	public void store() {
 		needsUpdate = true;
 		loggerLikelihood.needsUpdate = true;
+		
+		System.arraycopy(isSampled, 0, storedIsSampled, 0, isSampled.length);
+		System.arraycopy(taxonNrs, 0, storedTaxonNrs, 0, taxonNrs.length);
+		
+		storedSampleNumber.clear();
+		storedSampleNumber.addAll(sampleNumber);
 		super.store();
 	}
 	
@@ -752,6 +764,19 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	public void restore() {
 		needsUpdate = true;
 		loggerLikelihood.needsUpdate = true;
+		
+		boolean [] tmp = storedIsSampled;
+		storedIsSampled = isSampled;
+		isSampled = tmp;
+
+		int [] tmp3 = storedTaxonNrs;
+		storedTaxonNrs = taxonNrs;
+		taxonNrs = tmp3;
+
+		
+		List<Integer> tmp2 = storedSampleNumber;
+		storedSampleNumber = sampleNumber;
+		sampleNumber = tmp2;
 		super.restore();
 	}
 	
