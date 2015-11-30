@@ -47,7 +47,7 @@ public class LocationOperator extends Operator {
 			return 0;
 		}
 		double [] location = prior.sample();
-		int k = prior.taxonNr;
+		int k = prior.getTaxonNr();
 		sampledLocations.setValue(k * 2, location[0]);
 		sampledLocations.setValue(k * 2 + 1, location[1]);
 		

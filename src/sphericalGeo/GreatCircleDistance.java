@@ -61,4 +61,11 @@ public class GreatCircleDistance extends BEASTObject implements Distance {
 		return angle * EARTHRADIUS;
 	}
 
+	public static void main(String[] args) {
+		System.out.println("vancouver - berlin " + pairwiseDistance(new double[]{11.8, -15.5}, new double[]{10.76262, 106.660172}));
+		System.out.println("galapagos - nairobi " + pairwiseDistance(new double[]{-0.777259,-91.142578}, new double[]{-1.280423, 36.816311}));
+		
+		
+		System.out.println("vancouver - berlin " + pairwiseDistance(new double[]{49.246292, -123.116226}, new double[]{52.516266,13.377775}));
+	}
 }

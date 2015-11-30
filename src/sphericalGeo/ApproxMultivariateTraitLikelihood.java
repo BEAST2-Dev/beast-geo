@@ -8,22 +8,21 @@ import beast.core.BEASTInterface;
 import beast.core.Citation;
 import beast.core.Description;
 import beast.core.Input;
+import beast.core.StateNode;
+import beast.core.StateNodeInitialiser;
 import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
-//import beast.evolution.alignment.AlignmentFromTraitMap;
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.branchratemodel.StrictClockModel;
 import beast.evolution.likelihood.GenericTreeLikelihood;
-import beast.evolution.operators.AttachOperator;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TreeInterface;
-import org.apache.commons.math3.util.FastMath;
-//import beast.evolution.tree.TreeTraitMap;
+
 
 @Description("Approximate likelihood by MAP approximation of internal states")
 @Citation("Remco R. Bouckaert. Phylogeography by diffusion on a sphere. bioRxiv, BIORXIV/2015/016311, 2015.")
-public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood { 
+public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood implements StateNodeInitialiser { 
 	public Input<Boolean> scaleByBranchLengthInput = new Input<Boolean>("scale", "scale by branch lengths for initial position", true);
 	public Input<List<GeoPrior>> geopriorsInput = new Input<List<GeoPrior>>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<GeoPrior>());
 	public Input<RealParameter> locationInput = new Input<RealParameter>("location",
@@ -148,13 +147,14 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 						}
 					}
 				} else {
-					isSampled[prior.taxonNr] = true;
-					sampleNumber.add(prior.taxonNr);
+					int taxonNr = prior.getTaxonNr();
+					isSampled[taxonNr] = true;
+					sampleNumber.add(taxonNr);
 					double [] location = prior.sample();
 					// check if the location is already initialised (e.g. through resuming a chain)
-					if (Math.abs(d[prior.taxonNr * 2]) < 1e-10 && Math.abs(d[prior.taxonNr * 2 + 1]) < 1e-10) {
-						d[prior.taxonNr * 2] = location[0];
-						d[prior.taxonNr * 2 + 1] = location[1];
+					if (Math.abs(d[taxonNr * 2]) < 1e-10 && Math.abs(d[taxonNr * 2 + 1]) < 1e-10) {
+						d[taxonNr * 2] = location[0];
+						d[taxonNr * 2 + 1] = location[1];
 					}
 				}
 			}
@@ -741,5 +741,20 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		}
 		super.requiresRecalculation();
 		return true;
+	}
+
+
+
+	@Override
+	public void initStateNodes() throws Exception {
+		initialiseSampledStates();
+		initialisations = 0;
+	}
+
+
+
+	@Override
+	public void getInitialisedStateNodes(List<StateNode> stateNodes) {
+		stateNodes.add(locationInput.get());
 	}
 }

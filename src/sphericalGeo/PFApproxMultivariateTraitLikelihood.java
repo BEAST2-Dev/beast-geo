@@ -218,8 +218,8 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 						isSampled[i] = true;
 					}
 				} else {
-					isSampled[prior.taxonNr] = true;
-					sampleNumber.add(prior.taxonNr);
+					isSampled[prior.getTaxonNr()] = true;
+					sampleNumber.add(prior.getTaxonNr());
 				}
 			}
 		}

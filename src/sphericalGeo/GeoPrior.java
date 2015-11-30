@@ -16,10 +16,13 @@ import beast.evolution.alignment.Taxon;
 import beast.evolution.alignment.TaxonSet;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
+import beast.util.Randomizer;
 
 @Description("Flat prior over a region")
 public class GeoPrior extends Distribution {
-	public Input<Region> regionInput = new Input<Region>("region", "region to be in (or not depending on 'isinside' flag)", Validate.REQUIRED);
+	public Input<Region> regionInput = new Input<Region>("region", "region to be in (or not, depending on 'isInside' flag). "
+			+ "If not specified the MRCA node will be sampled (which may or may not be more efficient), but no restriction "
+			+ "is placed on the node.");//, Validate.REQUIRED);
 	public Input<Boolean> isInsideInput = new Input<Boolean>("isInside", "whether the prior is for being inside the region, instead of outside", true);
 	public Input<RealParameter> locationInput = new Input<RealParameter>("location",
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree", Validate.REQUIRED);
@@ -34,7 +37,10 @@ public class GeoPrior extends Distribution {
 	RealParameter location;
 	Tree tree;
 	TaxonSet taxonSet;
-	public int taxonNr = -1;
+	private int taxonNr = -1;
+	public int getTaxonNr() {
+		return taxonNr;
+	}
 	boolean isRoot;
 	boolean isTip = false;
 	boolean allInternalNodes = false;
@@ -117,7 +123,7 @@ public class GeoPrior extends Distribution {
 
 	@Override
 	public double calculateLogP() throws Exception {
-		if (!initialised) {
+		if (!initialised || region == null) {
 			logP = 0;
 			return logP;
 			//initialise();
@@ -234,7 +240,14 @@ public class GeoPrior extends Distribution {
 	}
 
 	public double[] sample() {
-		return region.sample(isInsideInput.get());
+		if (region != null) {
+			return region.sample(isInsideInput.get());
+		}
+		// no region available to sample from, so uniformly sample from the whole planet.
+		double [] location = new double[2];
+		location[0] = -90 + Randomizer.nextDouble() * 180;
+		location[1] = -180 + Randomizer.nextDouble() * 360;
+		return location;
 	}
 
 }
