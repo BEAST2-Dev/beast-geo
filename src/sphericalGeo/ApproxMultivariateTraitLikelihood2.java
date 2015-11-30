@@ -54,10 +54,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 	}
 	
 	@Override
-	void initialiseSampledStates() throws Exception {
-		if (initialisations > 0) {
-			return;
-		}
+	void initialiseSampledStates() {
 		super.initialiseSampledStates();
 
 		// initialise partition information
@@ -101,8 +98,11 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 
 	@Override
 	public double calculateLogP() throws Exception {
-		initialiseSampledStates();
-
+		if (!initialised) {
+			initialiseSampledStates();
+			initialised = true;
+		}
+		
         logP = Double.NaN;
 		try {
 			// check prior
@@ -268,6 +268,11 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 			loggerLikelihood.needsUpdate = true;
 		}
 		
+		if (geoPriorChanged()) {
+			initialiseSampledStates();
+			Arrays.fill(dirtyPartitions, true);
+		}
+
 		if (substModel.isDirtyCalculation()) {
 			Arrays.fill(dirtyPartitions, true);
 		}

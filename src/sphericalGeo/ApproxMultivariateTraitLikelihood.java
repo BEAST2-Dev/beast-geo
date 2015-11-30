@@ -55,6 +55,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	List<Integer> sampleNumber;
 	
 	double precision;
+	int [] taxonNrs;
 	
 	
 	@Override
@@ -110,20 +111,17 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 				Log.warning.println("Expect this analysis to fail.\n");
 			}
 		}
-		
+				
 		logAverage = logAverageInput.get();
 	}
 	
-	int initialisations = 0;
-	void initialiseSampledStates() throws Exception {
-		if (initialisations > 0) {
-			return;
-		}
-		initialisations++;
+	boolean initialised = false;
+	void initialiseSampledStates() {
 		
 		List<GeoPrior> geopriors = geopriorsInput.get();
 		isSampled = new boolean[tree.getNodeCount()];
 		sampleNumber = new ArrayList<Integer>();
+		taxonNrs = new int[geopriors.size()];
 		if (geopriors.size() > 0) {
 			sampledLocations = locationInput.get();
 			if (sampledLocations == null) {
@@ -133,6 +131,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 			for (int i = 0; i < d.length; i++) {
 				d[i] = sampledLocations.getValue(i);
 			}
+			Double [] d2 = d.clone();
+			
+			int k = 0;
 			for (GeoPrior prior : geopriors) {
 				prior.initialise();
 				if (prior.allInternalNodes) {
@@ -146,33 +147,51 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 							d[i * 2 + 1] = location[1];
 						}
 					}
+					taxonNrs[k] = -1;
 				} else {
 					int taxonNr = prior.getTaxonNr();
 					isSampled[taxonNr] = true;
 					sampleNumber.add(taxonNr);
-					double [] location = prior.sample();
-					// check if the location is already initialised (e.g. through resuming a chain)
-					if (Math.abs(d[taxonNr * 2]) < 1e-10 && Math.abs(d[taxonNr * 2 + 1]) < 1e-10) {
-						d[taxonNr * 2] = location[0];
-						d[taxonNr * 2 + 1] = location[1];
+					int storedTaxonNr = prior.getStoredTaxonNr();
+					if (storedTaxonNr >= 0 && storedTaxonNr != taxonNr) {
+						d[taxonNr * 2]     = d2[storedTaxonNr * 2];
+						d[taxonNr * 2 + 1] = d2[storedTaxonNr * 2 + 1];						
+					} else {
+						double [] location = prior.sample();
+						// check if the location is already initialised (e.g. through resuming a chain)
+						if (Math.abs(d[taxonNr * 2]) < 1e-10 && Math.abs(d[taxonNr * 2 + 1]) < 1e-10) {
+							d[taxonNr * 2] = location[0];
+							d[taxonNr * 2 + 1] = location[1];
+						}
 					}
+					taxonNrs[k] = taxonNr;
 				}
+				k++;
 			}
 			RealParameter tmp = new RealParameter(d);
 			sampledLocations.assignFromWithoutID(tmp);
+		}
+		
+
+		if (initialised) {
+			return;
 		}
 		
 		SiteModel siteModel = (SiteModel) siteModelInput.get();
 		AlignmentFromTraitMap data = (AlignmentFromTraitMap) dataInput.get();
 
 		loggerLikelihood = new PFApproxMultivariateTraitLikelihood();
-		if (geopriors.size() > 0) {
-			loggerLikelihood.initByName("scale", scaleByBranchLength, "tree", tree, "siteModel", siteModel, 
-				"branchRateModel", clockModel, "data", data,
-				"geoprior", geopriors, "location", sampledLocations, "transformer", transformer);
-		} else {
-			loggerLikelihood.initByName("scale", scaleByBranchLength, "tree", tree, "siteModel", siteModel, 
-					"branchRateModel", clockModel, "data", data, "transformer", transformer);
+		try {
+			if (geopriors.size() > 0) {
+				loggerLikelihood.initByName("scale", scaleByBranchLength, "tree", tree, "siteModel", siteModel, 
+					"branchRateModel", clockModel, "data", data,
+					"geoprior", geopriors, "location", sampledLocations, "transformer", transformer);
+			} else {
+				loggerLikelihood.initByName("scale", scaleByBranchLength, "tree", tree, "siteModel", siteModel, 
+						"branchRateModel", clockModel, "data", data, "transformer", transformer);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -180,7 +199,10 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	
 	@Override
 	public double calculateLogP() throws Exception {
-		initialiseSampledStates();
+		if (!initialised) {
+			initialiseSampledStates();
+			initialised = true;
+		}
 
         logP = Double.NaN;
 		try {
@@ -739,8 +761,26 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		if (loggerLikelihood != null) {
 			loggerLikelihood.needsUpdate = true;
 		}
+		
+		if (geoPriorChanged()) {
+			initialiseSampledStates();
+		}
 		super.requiresRecalculation();
 		return true;
+	}
+
+
+
+	protected boolean geoPriorChanged() {
+		int k = 0;
+		for (GeoPrior prior : geopriorsInput.get()) {
+			int taxonNr = prior.getTaxonNr();
+			if (taxonNr != taxonNrs[k]) {
+				return true;
+			}
+			k++;
+		}
+		return false;
 	}
 
 
@@ -748,7 +788,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	@Override
 	public void initStateNodes() throws Exception {
 		initialiseSampledStates();
-		initialisations = 0;
+		initialised = false;
 	}
 
 

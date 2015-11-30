@@ -1,8 +1,10 @@
 package sphericalGeo;
 
 import java.io.PrintStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import sphericalGeo.region.Region;
 import beast.core.Description;
@@ -37,8 +39,17 @@ public class GeoPrior extends Distribution {
 	RealParameter location;
 	Tree tree;
 	TaxonSet taxonSet;
+	private int storedTaxonNr = -1;
 	private int taxonNr = -1;
+	
 	public int getTaxonNr() {
+		if (taxonNr == -1 || cladeSet == null) {
+			return taxonNr;
+		}
+		Node node = tree.getNode(taxonNr);
+		while (!node.isRoot() && cladeSet.contains(node.getParent())) {
+			taxonNr = node.getParent().getNr();
+		}
 		return taxonNr;
 	}
 	boolean isRoot;
@@ -49,7 +60,7 @@ public class GeoPrior extends Distribution {
     int nrOfTaxa = -1;
     // array of flags to indicate which taxa are in the set
     boolean[] isInTaxaSet;
-
+    Set<Integer> cladeSet = null;
 
 	boolean initialised = false;
 
@@ -116,9 +127,20 @@ public class GeoPrior extends Distribution {
 	            nrOfTaxa = taxonset2.asStringList().size();
 				// set up taxonNr
 				calcMRCAtime(tree.getRoot(), new int[1]);
+				
+	            cladeSet = new HashSet<>();
+	            setUpCladeSet(tree.getNode(taxonNr));
 			}
 		}
 		initialised = true;
+	}
+
+	private void setUpCladeSet(Node node) {
+		cladeSet.add(node.getNr());
+		for (Node child : node.getChildren()) {
+			cladeSet.add(child.getNr());
+			setUpCladeSet(child);
+		}
 	}
 
 	@Override
@@ -225,6 +247,18 @@ public class GeoPrior extends Distribution {
     }
     
 
+    @Override
+    public void store() {
+    	storedTaxonNr = taxonNr;
+    	super.store();
+    }
+    
+    @Override
+    public void restore() {
+    	taxonNr = storedTaxonNr;
+    	super.restore();
+    }
+    
 	@Override
 	public List<String> getArguments() {
 		return null;
@@ -248,6 +282,10 @@ public class GeoPrior extends Distribution {
 		location[0] = -90 + Randomizer.nextDouble() * 180;
 		location[1] = -180 + Randomizer.nextDouble() * 360;
 		return location;
+	}
+
+	public int getStoredTaxonNr() {
+		return storedTaxonNr;
 	}
 
 }
