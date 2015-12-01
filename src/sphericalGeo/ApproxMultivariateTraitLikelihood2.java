@@ -76,7 +76,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		nodeToPartitionMap = new int[tree.getNodeCount()];
 		Arrays.fill(nodeToPartitionMap, -1);
 		int [] nextParitionNr = new int[1];
-		nextParitionNr[0] = -1;
+		nextParitionNr[0] = isSampled[tree.getRoot().getNr()] ? -1 : 0;
 		initNodeToPartitionMap(tree.getRoot(), nextParitionNr, 0);
 		partitionCount = nextParitionNr[0] + 1;
 
@@ -89,6 +89,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 			if (!node.isRoot()) {
 				// normal behaviour for internal node
 				rootNodeToPartitionMap[i][0] = nodeToPartitionMap[i];
+				rootNode[nodeToPartitionMap[i]] = firstSampledAncestor(node.getParent());
 			} else {
 				// hack to deal with root node
 				rootNodeToPartitionMap[i][0] = nodeToPartitionMap[left];
@@ -103,15 +104,25 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		storedLogPContributions = new double[partitionCount];
 	}
 	
+	private int firstSampledAncestor(Node node) {
+		if (node.isRoot()) {
+			return node.getNr(); 
+		}
+		if (isSampled[node.getNr()]) {
+			return node.getNr();
+		}
+		return firstSampledAncestor(node.getParent());
+	}
+
 	private void initNodeToPartitionMap(Node node, int [] nextParitionNr, int currentPartition) {
 		int nodeNr = node.getNr();
+		nodeToPartitionMap[nodeNr] = currentPartition;
 		if (isSampled[nodeNr]) {
 			for (Node child : node.getChildren()) {
 				nextParitionNr[0]++;
 				initNodeToPartitionMap(child, nextParitionNr, nextParitionNr[0]);
 			}
 		} else {
-			nodeToPartitionMap[nodeNr] = currentPartition;
 			for (Node child : node.getChildren()) {
 				initNodeToPartitionMap(child, nextParitionNr, currentPartition);
 			}
@@ -146,7 +157,9 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 			// only update dirty partitions
 			for (int i : dirtyPartitionList) {
 				Node node = tree.getNode(rootNode[i]);
-				if (nodeToPartitionMap[node.getLeft().getNr()] == i) {
+				if (node.isRoot() && !isSampled[node.getNr()]) {
+					calcPositions(node);
+				} else if (nodeToPartitionMap[node.getLeft().getNr()] == i) {
 					calcPositions(node.getLeft());
 				} else {
 					if (nodeToPartitionMap[node.getRight().getNr()] != i) {
@@ -158,7 +171,9 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 
 			for (int i : dirtyPartitionList) {
 				Node node = tree.getNode(rootNode[i]);
-				if (nodeToPartitionMap[node.getLeft().getNr()] == i) {
+				if (node.isRoot() && !isSampled[node.getNr()]) {
+					logPContributions[i] = calcLogPContribution(node);
+				} else if (nodeToPartitionMap[node.getLeft().getNr()] == i) {
 					logPContributions[i] = calcLogPContribution(node.getLeft());
 				} else {
 					logPContributions[i] = calcLogPContribution(node.getRight());					
@@ -168,6 +183,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 			// logP = sum of contributions of all partitions
 			for (double c : logPContributions) {
 				logP += c;
+				//System.err.println(logP);
 			}
 			
 // TODO: slightly more efficient way to sum instead of the loop just above		
@@ -197,7 +213,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		// TODO: loop over nodes in partition stored in List<Integer>[partitionCount] instead of over all internal nodes
 		int currentPartition = nodeToPartitionMap[node.getNr()];
 		for (int i = tree.getLeafNodeCount(); i < tree.getNodeCount(); i++) {
-			if (nodeToPartitionMap[i] == currentPartition) {
+			if (nodeToPartitionMap[i] == currentPartition && !isSampled[i]) {
 				position[i] = SphericalDiffusionModel.cartesian2Sperical(sphereposition[i], true);
 			}
 		}
@@ -250,9 +266,11 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 	/** traverse partition of a tree **/
 	private double calcLogPContribution(Node node) {
 		double logP = 0.0;
-		logP += substModel.getLogLikelihood(node, position, branchLengths);
-		for (Node child : node.getChildren()) {
-			if (!isSampled[child.getNr()]) {
+		if (!node.isRoot()) {
+			logP += substModel.getLogLikelihood(node, position, branchLengths);
+		}
+		if (!isSampled[node.getNr()]) {
+			for (Node child : node.getChildren()) {
 				logP += calcLogPContribution(child);
 			}
 		}
@@ -279,6 +297,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 			sp = storedSphereposition[i];
 			sp[0] = p[0];
 			sp[1] = p[1];
+			sp[2] = p[2];
 		}
 
 		super.store();
