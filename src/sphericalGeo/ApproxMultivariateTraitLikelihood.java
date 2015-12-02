@@ -166,7 +166,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 					isSampled[taxonNr] = true;
 					sampleNumber.add(taxonNr);
 					int storedTaxonNr = prior.getStoredTaxonNr();
-					if (storedTaxonNr >= 0 && storedTaxonNr != taxonNr) {
+					if (storedTaxonNr >= 0) {
 						d[taxonNr * 2]     = d2[storedTaxonNr * 2];
 						d[taxonNr * 2 + 1] = d2[storedTaxonNr * 2 + 1];						
 						setPosition(taxonNr, d2[storedTaxonNr * 2], d2[storedTaxonNr * 2 + 1]);
@@ -252,6 +252,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		//System.err.print("locP(" + logP +") ");
 		return logP;
 	}
 

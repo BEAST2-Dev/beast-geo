@@ -196,6 +196,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		//System.err.print("locP2(" + logP +")\n");
 		return logP;
 	}
 
@@ -364,20 +365,17 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		
 		if (sampledLocations.somethingIsDirty()) {
 			for (int i : sampleNumber) {
-				if (sampledLocations.isDirty(i*2) || sampledLocations.isDirty(i*2+1) || !initialised) {
-					double lat1  = sampledLocations.getMatrixValue(i, 0);
-					double long1 = sampledLocations.getMatrixValue(i, 1);
-					if (transformer != null) {
-						double [] t = transformer.project(lat1, long1);
-						lat1 = t[0];
-						long1 = t[1];
-					}
-					if (position[i][0] != lat1 || position[i][1] != long1) {
-						position[i][0] = lat1;
-						position[i][1] = long1;
-						sphereposition[i] = SphericalDiffusionModel.spherical2Cartesian(position[i][0], position[i][1]);
-					}
-					
+				double lat1  = sampledLocations.getMatrixValue(i, 0);
+				double long1 = sampledLocations.getMatrixValue(i, 1);
+				if (transformer != null) {
+					double [] t = transformer.project(lat1, long1);
+					lat1 = t[0];
+					long1 = t[1];
+				}
+				if (position[i][0] != lat1 || position[i][1] != long1) {
+					position[i][0] = lat1;
+					position[i][1] = long1;
+					sphereposition[i] = SphericalDiffusionModel.spherical2Cartesian(position[i][0], position[i][1]);
 					if (isTopOfPartition[i]) {
 						dirtyPartitions[rootNodeToPartitionMap[i][0]] = true;
 						dirtyPartitions[rootNodeToPartitionMap[i][1]] = true;
@@ -385,7 +383,6 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 					} else {
 						throw new RuntimeException("Programmer error: Sampled nodes should be root of partitions");
 					}
-					
 				}
 			}
 		}
