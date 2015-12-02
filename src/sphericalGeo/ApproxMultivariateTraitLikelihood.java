@@ -120,6 +120,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	}
 	
 	boolean initialised = false;
+
 	void initialiseSampledStates() {
 		
 		List<GeoPrior> geopriors = geopriorsInput.get();
@@ -152,8 +153,11 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 						if (Math.abs(d[i * 2]) < 1e-10 && Math.abs(d[i * 2 + 1]) < 1e-10) {
 							d[i * 2] = location[0];
 							d[i * 2 + 1] = location[1];
+							setPosition(i, location[0], location[1]);
 						} else {
-							Log.warning.println("location of " + prior.getID() + " already set at " + d[i*2]+","+d[i*2+1]);
+							if (!initialised) {
+								Log.warning.println("location of " + prior.getID() + " already set at " + d[i*2]+","+d[i*2+1]);
+							}
 						}
 					}
 					taxonNrs[k] = -1;
@@ -165,14 +169,18 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 					if (storedTaxonNr >= 0 && storedTaxonNr != taxonNr) {
 						d[taxonNr * 2]     = d2[storedTaxonNr * 2];
 						d[taxonNr * 2 + 1] = d2[storedTaxonNr * 2 + 1];						
+						setPosition(taxonNr, d2[storedTaxonNr * 2], d2[storedTaxonNr * 2 + 1]);
 					} else {
 						double [] location = prior.sample();
 						// check if the location is already initialised (e.g. through resuming a chain)
 						if (Math.abs(d[taxonNr * 2]) < 1e-10 && Math.abs(d[taxonNr * 2 + 1]) < 1e-10) {
 							d[taxonNr * 2] = location[0];
 							d[taxonNr * 2 + 1] = location[1];
+							setPosition(taxonNr, location[0], location[1]);
 						} else {
-							Log.warning.println("location of " + prior.getID() + " already set at " + d[taxonNr*2]+","+d[taxonNr*2+1]);
+							if (!initialised) {
+								Log.warning.println("location of " + prior.getID() + " already set at " + d[taxonNr*2]+","+d[taxonNr*2+1]);
+							}
 						}
 					}
 					taxonNrs[k] = taxonNr;
@@ -208,6 +216,14 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	
 	
 	
+	private void setPosition(int i, double lat, double long_) {
+		this.position[i][0] = lat;
+		this.position[i][1] = long_;
+		sphereposition[i] = SphericalDiffusionModel.spherical2Cartesian(lat, long_);		
+	}
+
+
+
 	@Override
 	public double calculateLogP() throws Exception {
 		if (!initialised) {
@@ -731,6 +747,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		} else {
 			if (needsUpdate) {
 				try {
+					if (geoPriorChanged()) {
+						initialiseSampledStates();
+					}
 					calculateLogP();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -795,7 +814,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		storedSampleNumber = sampleNumber;
 		sampleNumber = tmp2;
 		super.restore();
+
 	}
+	
 	
 	@Override
 	protected boolean requiresRecalculation() {
@@ -807,6 +828,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		if (initialised && geoPriorChanged()) {
 			initialiseSampledStates();
 		}
+		
 		super.requiresRecalculation();
 		return true;
 	}

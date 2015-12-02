@@ -47,9 +47,10 @@ public class GeoPrior extends Distribution {
 			return taxonNr;
 		}
 		Node node = tree.getNode(taxonNr);
-		while (!node.isRoot() && cladeSet.contains(node.getParent())) {
-			taxonNr = node.getParent().getNr();
+		while (!node.isRoot() && cladeSet.contains(node.getParent().getNr())) {
+			node = node.getParent();
 		}
+		taxonNr = node.getNr();
 		return taxonNr;
 	}
 	boolean isRoot;

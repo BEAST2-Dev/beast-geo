@@ -322,6 +322,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
         tmp2 = sphereposition;
         sphereposition = storedSphereposition;
         storedSphereposition = tmp2;
+        
 	}
 	
 	@Override
@@ -346,7 +347,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 			Arrays.fill(dirtyPartitions, true);
 		}
 		
-		if (((CalculationNode) clockModel).isDirtyCalculation()) {
+		if (((CalculationNode) clockModel).isDirtyCalculation() || tree.somethingIsDirty()) {
 			calcBranchLengths();
 			for (int i = 0; i < branchLengths.length; i++) {
 				if (Math.abs(branchLengths[i] - storedBranchLengths[i]) > 1e-10) {
@@ -360,10 +361,10 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 				}
 			}
 		}
-
+		
 		if (sampledLocations.somethingIsDirty()) {
 			for (int i : sampleNumber) {
-				if (sampledLocations.isDirty(i*2) || !initialised) {
+				if (sampledLocations.isDirty(i*2) || sampledLocations.isDirty(i*2+1) || !initialised) {
 					double lat1  = sampledLocations.getMatrixValue(i, 0);
 					double long1 = sampledLocations.getMatrixValue(i, 1);
 					if (transformer != null) {
