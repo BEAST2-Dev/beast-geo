@@ -20,7 +20,7 @@ import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
 
-@Description("Flat prior over a region")
+@Description("Flat prior over a region -- emforces monophyly of the clade (if any)")
 public class GeoPrior extends Distribution {
 	public Input<Region> regionInput = new Input<Region>("region", "region to be in (or not, depending on 'isInside' flag). "
 			+ "If not specified the MRCA node will be sampled (which may or may not be more efficient), but no restriction "
@@ -41,6 +41,8 @@ public class GeoPrior extends Distribution {
 	TaxonSet taxonSet;
 	private int storedTaxonNr = -1;
 	private int taxonNr = -1;
+	
+	boolean isMonophyletic = true;
 	
 	public int getTaxonNr() {
 		if (taxonNr == -1 || cladeSet == null) {
@@ -127,6 +129,7 @@ public class GeoPrior extends Distribution {
 	            }
 	            nrOfTaxa = taxonset2.asStringList().size();
 				// set up taxonNr
+	            isMonophyletic = false;
 				calcMRCAtime(tree.getRoot(), new int[1]);
 				
 	            cladeSet = new HashSet<>();
@@ -222,6 +225,7 @@ public class GeoPrior extends Distribution {
             nTaxonCount[0] = nTaxa;
             if (iTaxons == nrOfTaxa) {
             	taxonNr = node.getNr();
+            	isMonophyletic = (nTaxonCount[0] == nrOfTaxa);
                 return iTaxons + 1;                	
            }
             return iTaxons;
@@ -252,6 +256,10 @@ public class GeoPrior extends Distribution {
     public void store() {
     	storedTaxonNr = taxonNr;
     	super.store();
+    	if (Double.isInfinite(logP)) {
+    		int h= 3;
+    		h++;
+    	}
     }
     
     @Override
@@ -287,6 +295,10 @@ public class GeoPrior extends Distribution {
 
 	public int getStoredTaxonNr() {
 		return storedTaxonNr;
+	}
+
+	public boolean isMonoPhyletic() {
+		return isMonophyletic;
 	}
 
 }

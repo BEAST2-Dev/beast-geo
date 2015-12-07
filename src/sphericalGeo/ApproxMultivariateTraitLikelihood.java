@@ -60,6 +60,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	int [] taxonNrs;
 	int [] storedTaxonNrs;
 	
+	boolean isMonoPhyletic = false;
 	
 	@Override
 	public void initAndValidate() throws Exception {
@@ -162,32 +163,49 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 					}
 					taxonNrs[k] = -1;
 				} else {
-					int taxonNr = prior.getTaxonNr();
-					isSampled[taxonNr] = true;
-					sampleNumber.add(taxonNr);
-					int storedTaxonNr = prior.getStoredTaxonNr();
-					if (storedTaxonNr >= 0) {
-						d[taxonNr * 2]     = d2[storedTaxonNr * 2];
-						d[taxonNr * 2 + 1] = d2[storedTaxonNr * 2 + 1];						
-						setPosition(taxonNr, d2[storedTaxonNr * 2], d2[storedTaxonNr * 2 + 1]);
-					} else {
-						double [] location = prior.sample();
-						// check if the location is already initialised (e.g. through resuming a chain)
-						if (Math.abs(d[taxonNr * 2]) < 1e-10 && Math.abs(d[taxonNr * 2 + 1]) < 1e-10) {
-							d[taxonNr * 2] = location[0];
-							d[taxonNr * 2 + 1] = location[1];
-							setPosition(taxonNr, location[0], location[1]);
+					if (prior.isMonoPhyletic()) {
+						int taxonNr = prior.getTaxonNr();
+						if (taxonNr == 38 && k == 1) {
+							int h = 3;
+							h++;
+							prior.getTaxonNr();
+						}
+						isSampled[taxonNr] = true;
+						sampleNumber.add(taxonNr);
+						int storedTaxonNr = prior.getStoredTaxonNr();
+						if (storedTaxonNr >= 0) {
+							d[taxonNr * 2]     = d2[storedTaxonNr * 2];
+							d[taxonNr * 2 + 1] = d2[storedTaxonNr * 2 + 1];						
+							setPosition(taxonNr, d2[storedTaxonNr * 2], d2[storedTaxonNr * 2 + 1]);
 						} else {
-							if (!initialised) {
-								Log.warning.println("location of " + prior.getID() + " already set at " + d[taxonNr*2]+","+d[taxonNr*2+1]);
+							double [] location = prior.sample();
+							// check if the location is already initialised (e.g. through resuming a chain)
+							if (Math.abs(d[taxonNr * 2]) < 1e-10 && Math.abs(d[taxonNr * 2 + 1]) < 1e-10) {
+								d[taxonNr * 2] = location[0];
+								d[taxonNr * 2 + 1] = location[1];
+								setPosition(taxonNr, location[0], location[1]);
+							} else {
+								if (!initialised) {
+									Log.warning.println("location of " + prior.getID() + " already set at " + d[taxonNr*2]+","+d[taxonNr*2+1]);
+								}
 							}
 						}
+						taxonNrs[k] = taxonNr;
+					} else {
+						// enforce
+						taxonNrs[0] = -1;
+						isMonoPhyletic = false;
+						return;
 					}
-					taxonNrs[k] = taxonNr;
 				}
 				k++;
 			}
+			isMonoPhyletic = true;
 			RealParameter tmp = new RealParameter(d);
+			if (d[38*2] > 35) {
+				int h = 3;
+				h++;
+			}
 			sampledLocations.assignFromWithoutID(tmp);
 		}
 		
@@ -228,15 +246,21 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	public double calculateLogP() throws Exception {
 		if (!initialised) {
 			initialiseSampledStates();
-			initialised = true;
+			initialised = isMonoPhyletic;
 		}
 
+		if (!isMonoPhyletic) {
+			logP = Double.NEGATIVE_INFINITY;
+			return logP;
+		}
+		
         logP = Double.NaN;
 		try {
 			// check prior
 			if (sampledLocations != null) {
 				for (GeoPrior prior : geopriorsInput.get()) {
 					if (Double.isInfinite(prior.calculateLogP())) {
+						prior.calculateLogP();
 						logP = Double.NEGATIVE_INFINITY;
 						return logP;
 					}
@@ -253,7 +277,21 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 			e.printStackTrace();
 		}
 		//System.err.print("locP(" + logP +") ");
+		//System.out.print('.');
+		sanitycheck();
 		return logP;
+	}
+
+	void sanitycheck() {
+		for (int i : sampleNumber) {
+			if (position[i][0] != sampledLocations.getValue(i*2) ||
+				position[i][1] != sampledLocations.getValue(i*2+1)) {
+				System.err.println(position[i][0] +"!="+ sampledLocations.getValue(i*2));
+				System.err.println(position[i][1] +"!="+ sampledLocations.getValue(i*2+1));
+				int h = 3;
+				h++;
+			}
+		}
 	}
 
 	void calcBranchLengths() {
@@ -760,6 +798,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 				double [] p = transformer.projectInverse(position[iDim][0], position[iDim][1]);
 				return p;
 			}
+			sanitycheck();
 			return position[iDim];
 		}
 	}

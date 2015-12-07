@@ -48,6 +48,7 @@ public class LocationOperator extends Operator {
 		}
 		double [] location = prior.sample();
 		int k = prior.getTaxonNr();
+		//System.out.println(prior.getID() + ":" + k + " ("+sampledLocations.getValue(k*2)+","+sampledLocations.getValue(k*2+1) + ") => (" + location[0] + "," + location[1]+")");
 		sampledLocations.setValue(k * 2, location[0]);
 		sampledLocations.setValue(k * 2 + 1, location[1]);
 		

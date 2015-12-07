@@ -134,7 +134,12 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 	public double calculateLogP() throws Exception {
 		if (!initialised) {
 			initialiseSampledStates();
-			initialised = true;
+			initialised = isMonoPhyletic;
+		}
+		
+		if (!isMonoPhyletic) {
+			logP = Double.NEGATIVE_INFINITY;
+			return logP;
 		}
 		
         logP = Double.NaN;
@@ -197,6 +202,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 			e.printStackTrace();
 		}
 		//System.err.print("locP2(" + logP +")\n");
+		sanitycheck();
 		return logP;
 	}
 
