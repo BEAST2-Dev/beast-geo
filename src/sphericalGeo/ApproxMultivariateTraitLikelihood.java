@@ -776,7 +776,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 
 	@Override
 	public boolean isStochastic() {
-		return true;
+		return !logAverage;
 	}
 
 	/** return randomized position **/
