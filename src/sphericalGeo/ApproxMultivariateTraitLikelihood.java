@@ -2,6 +2,7 @@ package sphericalGeo;
 
 
 
+
 import java.util.*;
 
 import beast.core.BEASTInterface;
@@ -23,13 +24,13 @@ import beast.evolution.tree.TreeInterface;
 @Description("Approximate likelihood by MAP approximation of internal states")
 @Citation("Remco R. Bouckaert. Phylogeography by diffusion on a sphere. bioRxiv, BIORXIV/2015/016311, 2015.")
 public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood implements StateNodeInitialiser { 
-	public Input<Boolean> scaleByBranchLengthInput = new Input<Boolean>("scale", "scale by branch lengths for initial position", false);
-	public Input<List<GeoPrior>> geopriorsInput = new Input<List<GeoPrior>>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<GeoPrior>());
-	public Input<RealParameter> locationInput = new Input<RealParameter>("location",
+	public Input<Boolean> scaleByBranchLengthInput = new Input<>("scale", "scale by branch lengths for initial position", false);
+	public Input<List<GeoPrior>> geopriorsInput = new Input<>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<GeoPrior>());
+	public Input<LocationParameter> locationInput = new Input<>("location",
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree");
 
-	public Input<Transformer> transformerInput = new Input<Transformer>("transformer","landscape transformer to capture some inheterogenuity in the diffusion process");
-	public Input<Boolean> logAverageInput = new Input<Boolean>("logAverage", "when logging, use average position instead of sample from particle filter. "
+	public Input<Transformer> transformerInput = new Input<>("transformer","landscape transformer to capture some inheterogenuity in the diffusion process");
+	public Input<Boolean> logAverageInput = new Input<>("logAverage", "when logging, use average position instead of sample from particle filter. "
 			+ "This is faster, but also artificially reduces uncertainty in locations. ", false);
 
 
@@ -44,13 +45,13 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	//double [] sumLengths;
 	double [] parentweight;
 
-	boolean needsUpdate = true;
+	public boolean needsUpdate = true;
 	boolean scaleByBranchLength;
 	boolean logAverage;
 	
 	PFApproxMultivariateTraitLikelihood loggerLikelihood;
 	
-	RealParameter sampledLocations;
+	LocationParameter sampledLocations;
 	boolean [] isSampled;
 	boolean [] storedIsSampled;
 	List<Integer> sampleNumber;
@@ -121,16 +122,25 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	}
 	
 	boolean initialised = false;
-
+	boolean wasInitialised;
+	
+	
 	void initialiseSampledStates() {
+		wasInitialised = true;
 		
 		List<GeoPrior> geopriors = geopriorsInput.get();
-		isSampled = new boolean[tree.getNodeCount()];
-		storedIsSampled = new boolean[tree.getNodeCount()];
-		sampleNumber = new ArrayList<>();
-		storedSampleNumber = new ArrayList<>();
-		taxonNrs = new int[geopriors.size()];
-		storedTaxonNrs = new int[geopriors.size()];
+		if (isSampled == null) {
+			isSampled = new boolean[tree.getNodeCount()];
+			storedIsSampled = new boolean[tree.getNodeCount()];
+			sampleNumber = new ArrayList<>();
+			storedSampleNumber = new ArrayList<>();
+			taxonNrs = new int[geopriors.size()];
+			storedTaxonNrs = new int[geopriors.size()];
+		}
+		Arrays.fill(isSampled, false);
+		sampleNumber.clear();
+		Arrays.fill(taxonNrs, 0);
+		
 		if (geopriors.size() > 0) {
 			sampledLocations = locationInput.get();
 			if (sampledLocations == null) {
@@ -192,9 +202,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 						}
 						taxonNrs[k] = taxonNr;
 					} else {
-						// enforce
-						taxonNrs[0] = -1;
+						// only works when clades are monophyletic, so we give up here
 						isMonoPhyletic = false;
+						taxonNrs[0] = - (1+storedTaxonNrs[0]);
 						return;
 					}
 				}
@@ -202,18 +212,17 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 			}
 			isMonoPhyletic = true;
 			RealParameter tmp = new RealParameter(d);
-			if (d[38*2] > 35) {
-				int h = 3;
-				h++;
-			}
-			sampledLocations.assignFromWithoutID(tmp);
+			// RRB: assignFromWithoutID overrides sampledLocations.storedValues, so sampledLocations is invalid after restore
+			// sampledLocations.assignFromWithoutID(tmp);
+			sampledLocations.setValueSilently(d);
+			//System.err.println("Initialised");
 		}
 		
 
-		if (initialised) {
+		if (initialised || logAverage) {
 			return;
 		}
-		
+
 		SiteModel siteModel = (SiteModel) siteModelInput.get();
 		AlignmentFromTraitMap data = (AlignmentFromTraitMap) dataInput.get();
 
@@ -235,6 +244,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	
 	
 	private void setPosition(int i, double lat, double long_) {
+		//System.err.print(i+"(" + lat + "," + long_ + ")");
 		this.position[i][0] = lat;
 		this.position[i][1] = long_;
 		sphereposition[i] = SphericalDiffusionModel.spherical2Cartesian(lat, long_);		
@@ -249,6 +259,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 			initialised = isMonoPhyletic;
 		}
 
+		
+		
+		
 		if (!isMonoPhyletic) {
 			logP = Double.NEGATIVE_INFINITY;
 			return logP;
@@ -272,11 +285,12 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 			calcPositions();
 			logP = calcLogP();
 			needsUpdate = false;
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//System.err.print("locP(" + logP +") ");
+		//System.err.println("\nlocP(" + logP +") ");
 		//System.out.print('.');
 		sanitycheck();
 		return logP;
@@ -292,6 +306,17 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 				h++;
 			}
 		}
+//		for (int i = 0; i < position.length; i++) {
+//			System.err.print("["+position[i][0] + "," + position[i][1] + "]");
+//		}
+//		System.err.println();
+//		System.err.println(tree.getRoot().toNewick());
+//		System.err.println(sampleNumber.toString());
+//		System.err.println(Arrays.toString(branchLengths));
+//		System.err.println(Arrays.toString(isSampled));
+//		System.err.println(Arrays.toString(parentweight));
+
+		
 	}
 
 	void calcBranchLengths() {
@@ -311,20 +336,17 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 
 	/** traverse tree **/
 	double calcLogP() {
-		calcLogP(tree.getRoot());
 		double logP = 0;
 		for (Node node : tree.getNodesAsArray()) {
 			if (!node.isRoot()) {
-				logP += substModel.getLogLikelihood(node, position,
+				double d = substModel.getLogLikelihood(node, position,
 						branchLengths);
+				//System.err.print(d+" ");
+				logP += d;
 			}
 		}
+		//System.err.println();
 		return logP;
-	}
-	
-	private void calcLogP(Node root) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	
@@ -383,6 +405,12 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		
 		precision = substModel.precisionInput.get().getValue();
 		initByMean(tree.getRoot());
+		//for (int i = tree.getLeafNodeCount(); i < tree.getNodeCount(); i++) {
+			//System.err.print("[" + sphereposition[i][0]+","+sphereposition[i][1]+","+sphereposition[i][2]+"]");
+			//System.err.println("pos153A=["+position[153][0] + "," + position[153][1] + ":" + sphereposition[153][0]+","+sphereposition[153][1]+","+sphereposition[153][2]+"]");
+		//}
+		//System.err.println();
+		//System.err.print(Arrays.toString(parentweight));
 		resetMeanDown(tree.getRoot());
 		
 			
@@ -418,10 +446,12 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		for (int i = tree.getLeafNodeCount(); i < tree.getNodeCount(); i++) {
 			if (!isSampled[i]) {
 				position[i] = SphericalDiffusionModel.cartesian2Sperical(sphereposition[i], true);
+			} else {
+				//System.err.print("[skip " + i +"]");
 			}
 		}
-
-//		System.err.println("maxdelta2 = " + max);
+		//System.err.print("pos153B=["+position[153][0] + "," + position[153][1] + ":" + sphereposition[153][0]+","+sphereposition[153][1]+","+sphereposition[153][2]+"]");
+		//System.err.println();
 		
 	}
 	
@@ -476,6 +506,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 //			sphereposition[nodeNr][2] = (sphereposition[child1][2] + sphereposition[child2][2]) / 2.0;
 		}
 		normalise(sphereposition[nodeNr]);
+		//System.err.print("["+sphereposition[nodeNr][0]+","+sphereposition[nodeNr][1]+","+sphereposition[nodeNr][2]+"]");
 	}
 
 	void setHalfWayPosition(int nodeNr, int child1, int child2, int parent) {
@@ -535,6 +566,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 			int child2 = node.getRight().getNr();
 			if (!isSampled[nodeNr]) {
 				setHalfWayPosition(nodeNr, child1, child2);
+			} else {
+				parentweight[nodeNr] = 1;
+				//System.err.print("skip" + nodeNr);
 			}
 		}
 	}		
@@ -826,7 +860,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	@Override
 	public void store() {
 		needsUpdate = true;
-		loggerLikelihood.needsUpdate = true;
+		if (loggerLikelihood != null) {
+			loggerLikelihood.needsUpdate = true;
+		}
 		
 		System.arraycopy(isSampled, 0, storedIsSampled, 0, isSampled.length);
 		System.arraycopy(taxonNrs, 0, storedTaxonNrs, 0, taxonNrs.length);
@@ -834,12 +870,16 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		storedSampleNumber.clear();
 		storedSampleNumber.addAll(sampleNumber);
 		super.store();
+
+		wasInitialised = false;
 	}
 	
 	@Override
 	public void restore() {
 		needsUpdate = true;
-		loggerLikelihood.needsUpdate = true;
+		if (loggerLikelihood != null) {
+			loggerLikelihood.needsUpdate = true;
+		}
 		
 		boolean [] tmp = storedIsSampled;
 		storedIsSampled = isSampled;
@@ -855,6 +895,10 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		sampleNumber = tmp2;
 		super.restore();
 
+        if (wasInitialised) {
+			initialiseSampledStates();
+        }
+		wasInitialised = false;
 	}
 	
 	

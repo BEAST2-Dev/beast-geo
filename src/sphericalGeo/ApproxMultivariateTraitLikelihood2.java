@@ -8,7 +8,6 @@ import beast.core.CalculationNode;
 import beast.core.Citation;
 import beast.core.Description;
 import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
 
 
 @Description(value="Approximate likelihood by MAP approximation of internal states optimised to take sampled nodes in account", 
@@ -53,7 +52,6 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 	//double [] storedSumLengths;
 	//double [] storedParentweight;
 	
-	boolean wasInitialised;
 	
 	@Override
 	public void initAndValidate() throws Exception {
@@ -68,7 +66,6 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 	
 	@Override
 	void initialiseSampledStates() {
-		wasInitialised = true;
 		super.initialiseSampledStates();
 		if (!isMonoPhyletic) {
 			return;
@@ -81,6 +78,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		}
 		nodeToPartitionMap = new int[tree.getNodeCount()];
 		Arrays.fill(nodeToPartitionMap, -1);
+		
 		int [] nextParitionNr = new int[1];
 		nextParitionNr[0] = isSampled[tree.getRoot().getNr()] ? -1 : 0;
 		initNodeToPartitionMap(tree.getRoot(), nextParitionNr, 0);
@@ -266,13 +264,19 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 
 			if (!isSampled[child1]) {
 				initByMean(node.getLeft());
+			} else {
+				parentweight[child1] = 1;
 			}
 			if (!isSampled[child2]) {
 				initByMean(node.getRight());
+			} else {
+				parentweight[child2] = 1;
 			}
 			
 			if (!isSampled[nodeNr]) {
 				setHalfWayPosition(nodeNr, child1, child2);
+			} else {
+				parentweight[nodeNr] = 1;
 			}
 		}
 	}		
@@ -317,7 +321,13 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 	
 	@Override
 	public void store() {
-        System.arraycopy(branchLengths, 0, storedBranchLengths, 0, branchLengths.length);
+		super.store();
+
+		System.arraycopy(branchLengths, 0, storedBranchLengths, 0, branchLengths.length);
+
+		if (storedLogPContributions.length != logPContributions.length) {
+			storedLogPContributions = new double[logPContributions.length];
+		}
 
 		System.arraycopy(logPContributions, 0, storedLogPContributions, 0, partitionCount);
 		
@@ -336,10 +346,6 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 			sp[1] = p[1];
 			sp[2] = p[2];
 		}
-
-		super.store();
-		
-		wasInitialised = false;
 	}
 	
 	@Override
@@ -361,12 +367,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
         tmp2 = sphereposition;
         sphereposition = storedSphereposition;
         storedSphereposition = tmp2;
-        
-        if (wasInitialised) {
-			initialiseSampledStates();
-        }
-		wasInitialised = false;
-	}
+    }
 	
 	@Override
 	protected boolean requiresRecalculation() {
@@ -382,6 +383,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		
 		if (geoPriorChanged()) {
 			initialiseSampledStates();
+			dirtyPartitions = new boolean[partitionCount];
 			Arrays.fill(dirtyPartitions, true);
 		}
 		
@@ -390,6 +392,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 			nextParitionNr[0] = isSampled[tree.getRoot().getNr()] ? -1 : 0;
 			if (nodeToPartitionMapChanged(tree.getRoot(), nextParitionNr, 0)) {
 				initialiseSampledStates();
+				dirtyPartitions = new boolean[partitionCount];
 				Arrays.fill(dirtyPartitions, true);
 			}
 		}

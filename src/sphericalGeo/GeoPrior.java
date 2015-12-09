@@ -89,9 +89,17 @@ public class GeoPrior extends Distribution {
 				throw new Exception("Either taxon or taxonset must be specified");
 			}
 		}
+		
+        nrOfTaxa = taxonSetInput.get().asStringList().size();
+
 		super.initAndValidate();
 		//initialise();
 	}
+
+    // array of indices of taxa
+    int[] taxonIndex;
+	boolean [] nodesTraversed;
+    int nseen;
 
 	/** 
     * Need delayed initialisation in order for the tree to get set up.
@@ -115,7 +123,8 @@ public class GeoPrior extends Distribution {
 			} else {
 				isInTaxaSet = new boolean[taxonSet.getTaxonCount()];
 				List<String> names = taxonSet.asStringList();
-				//int k = 0;
+				int k = 0;
+	            taxonIndex = new int[nrOfTaxa];
 	            for (final String sTaxon : taxonset2.asStringList()) {
 	                final int iTaxon = names.indexOf(sTaxon);
 	                if (iTaxon < 0) {
@@ -125,12 +134,20 @@ public class GeoPrior extends Distribution {
 	                    throw new RuntimeException("Taxon " + sTaxon + " is defined multiple times, while they should be unique");
 	                }
 	                isInTaxaSet[iTaxon] = true;
-	                //taxonIndex[k++] = iTaxon;
+	                taxonIndex[k++] = iTaxon;
 	            }
-	            nrOfTaxa = taxonset2.asStringList().size();
+	            
 				// set up taxonNr
 	            isMonophyletic = false;
-				calcMRCAtime(tree.getRoot(), new int[1]);
+	            if( false) {
+	                calcMRCAtime(tree.getRoot(), new int[1]);
+	            } else {
+	                nodesTraversed = new boolean[tree.getNodeCount()];
+	                nseen = 0;
+	                final Node m = getCommonAncestor();
+	            	taxonNr = m.getNr();
+	                isMonophyletic = nseen == 2 * taxonIndex.length - 1;
+	            }
 				
 	            cladeSet = new HashSet<>();
 	            setUpCladeSet(tree.getNode(taxonNr));
@@ -138,6 +155,44 @@ public class GeoPrior extends Distribution {
 		}
 		initialised = true;
 	}
+
+    // would be nice to use nodeRef's, but they are not preserved :(
+    public Node getCommonAncestor() {
+        Node cur = tree.getNode(taxonIndex[0]);
+
+        for (int k = 1; k < taxonIndex.length; ++k) {
+            cur = getCommonAncestor(cur, tree.getNode(taxonIndex[k]));
+        }
+        return cur;
+    }
+
+    private Node getCommonAncestor(Node n1, Node n2) {
+        // assert n1.getTree() == n2.getTree();
+        if( ! nodesTraversed[n1.getNr()] ) {
+           nodesTraversed[n1.getNr()] = true;
+            nseen += 1;
+        }
+        if( ! nodesTraversed[n2.getNr()] ) {
+            nodesTraversed[n2.getNr()] = true;
+            nseen += 1;
+        }
+        while (n1 != n2) {
+            if (n1.getHeight() < n2.getHeight()) {
+                n1 = n1.getParent();
+                if( ! nodesTraversed[n1.getNr()] ) {
+                    nodesTraversed[n1.getNr()] = true;
+                    nseen += 1;
+                }
+            } else {
+                n2 = n2.getParent();
+                if( ! nodesTraversed[n2.getNr()] ) {
+                     nodesTraversed[n2.getNr()] = true;
+                     nseen += 1;
+                 }
+            }
+        }
+        return n1;
+    }
 
 	private void setUpCladeSet(Node node) {
 		cladeSet.add(node.getNr());

@@ -17,7 +17,7 @@ suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.freq
 			<userDataType spec='sphericalGeo.LocationDataType'/>
 			<traitMap id='traitmap.s:$(n)' spec='sphericalGeo.TreeTraitMap' tree='@Tree.t:$(n)' traitName='location' 
 				randomizeupper="90 180" randomizelower="-90 -180"  initByMean="true">
-				<parameter id="location.s:$(n)" minordimension='2' value='0.0 0.0'/>
+				<parameter spec="sphericalGeo.LocationParameter" id="location.s:$(n)" minordimension='2' value='0.0 0.0'/>
 			</traitMap>
 		</data>
 
