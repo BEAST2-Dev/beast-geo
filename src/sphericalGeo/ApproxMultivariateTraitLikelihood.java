@@ -39,7 +39,11 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	Transformer transformer;
 	
 	double [][] position;
+	double [][] storedPosition;
+
 	double [][] sphereposition;
+	double [][] storedSphereposition;
+	
 	double [] branchLengths;
 	//double [] sumLengths;
 	double [] parentweight;
@@ -61,6 +65,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	int [] storedTaxonNrs;
 	
 	boolean isMonoPhyletic = false;
+	boolean storedIsMonoPhyletic = false;
 	
 	@Override
 	public void initAndValidate() throws Exception {
@@ -91,6 +96,10 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		for (int i = 0; i < tree.getLeafNodeCount(); i++) {
 			sphereposition[i] = SphericalDiffusionModel.spherical2Cartesian(position[i][0], position[i][1]);
 		}
+		
+		storedPosition = new double[tree.getNodeCount()][2];
+		storedSphereposition = new double[tree.getNodeCount()][3];
+
 
 		branchLengths = new double[tree.getNodeCount()];
 		//sumLengths = new double[tree.getNodeCount()];
@@ -121,11 +130,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	}
 	
 	boolean initialised = false;
-	boolean wasInitialised;
 	
 	
 	void initialiseSampledStates() {
-		wasInitialised = true;
 		
 		List<GeoPrior> geopriors = geopriorsInput.get();
 		if (isSampled == null) {
@@ -210,6 +217,8 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 			// sampledLocations.assignFromWithoutID(tmp);
 			sampledLocations.setValueSilently(d);
 			//System.err.println("Initialised");
+		} else {
+			isMonoPhyletic = true;
 		}
 		
 
@@ -291,6 +300,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 				position[i][1] != sampledLocations.getValue(i*2+1)) {
 				System.err.println(position[i][0] +"!="+ sampledLocations.getValue(i*2));
 				System.err.println(position[i][1] +"!="+ sampledLocations.getValue(i*2+1));
+				System.exit(0);
 			}
 		}
 //		for (int i = 0; i < position.length; i++) {
@@ -846,6 +856,8 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	
 	@Override
 	public void store() {
+		super.store();
+
 		needsUpdate = true;
 		if (loggerLikelihood != null) {
 			loggerLikelihood.needsUpdate = true;
@@ -856,13 +868,30 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		
 		storedSampleNumber.clear();
 		storedSampleNumber.addAll(sampleNumber);
-		super.store();
 
-		wasInitialised = false;
+		// TODO: instead of copying all positions, only copy those of the partitions that changed in the last update
+		double [] p, sp;
+		for (int i = 0; i < position.length; i++) {
+			p = position[i];
+			sp = storedPosition[i];
+			sp[0] = p[0];
+			sp[1] = p[1];
+		}
+		for (int i = 0; i < position.length; i++) {
+			p = sphereposition[i];
+			sp = storedSphereposition[i];
+			sp[0] = p[0];
+			sp[1] = p[1];
+			sp[2] = p[2];
+		}
+
+		storedIsMonoPhyletic = isMonoPhyletic;
 	}
 	
 	@Override
 	public void restore() {
+		super.restore();
+
 		needsUpdate = true;
 		if (loggerLikelihood != null) {
 			loggerLikelihood.needsUpdate = true;
@@ -877,15 +906,20 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		taxonNrs = tmp3;
 
 		
-		List<Integer> tmp2 = storedSampleNumber;
+		List<Integer> tmp4 = storedSampleNumber;
 		storedSampleNumber = sampleNumber;
-		sampleNumber = tmp2;
-		super.restore();
+		sampleNumber = tmp4;
 
-        if (wasInitialised) {
-			initialiseSampledStates();
-        }
-		wasInitialised = false;
+        double [][]tmp2 = position;
+        position = storedPosition;
+        storedPosition = tmp2;
+        
+        tmp2 = sphereposition;
+        sphereposition = storedSphereposition;
+        storedSphereposition = tmp2;
+
+		isMonoPhyletic = storedIsMonoPhyletic;
+
 	}
 	
 	

@@ -17,15 +17,20 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 	
 	/** maps each node to the partition containing the node **/
 	int [] nodeToPartitionMap;
+	int [] storedNodeToPartitonMap;
 	
 	/** flag to indicate for each node whether it is a 'root' for a partition **/
 	boolean [] isTopOfPartition;
+	boolean [] storedIsTopOfPartition;
 	/** array of root nodes, one for each partition **/
 	int [] rootNode;
+	int [] storedRootNode;
 	
 	/** partition root nodes can affect 3 (or at least 2 for global root) **/
 	int [][] rootNodeToPartitionMap;
+	int [][] storedRootNodeToPartitionMap;
 	int partitionCount;
+	//int storedPartitionCount;
 	
 	/** contribution to logP by each of the partitions **/
 	double [] logPContributions;
@@ -35,6 +40,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 	List<Integer> dirtyPartitionList = new ArrayList<>();
 	
 	
+	boolean wasInitialised;
 	
 
 	
@@ -47,10 +53,8 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
      * These lengths take branch rate models in account.
      */
     protected double[] storedBranchLengths;
-	double [][] storedPosition;
-	double [][] storedSphereposition;
 	//double [] storedSumLengths;
-	//double [] storedParentweight;
+	double [] storedParentweight;
 	
 	
 	@Override
@@ -59,24 +63,33 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 
 		branchLengths = new double[tree.getNodeCount()];
 		storedBranchLengths = new double[tree.getNodeCount()];
+		storedParentweight = new double[tree.getNodeCount()];
 		
-		storedPosition = new double[tree.getNodeCount()][2];
-		storedSphereposition = new double[tree.getNodeCount()][3];
 	}
 	
 	@Override
 	void initialiseSampledStates() {
+		wasInitialised = true;
+		
 		super.initialiseSampledStates();
 		if (!isMonoPhyletic) {
 			return;
 		}
 
+		
 		// initialise partition information
-		isTopOfPartition = new boolean[tree.getNodeCount()];
+		if (isTopOfPartition == null) {
+			isTopOfPartition = new boolean[tree.getNodeCount()];
+			storedIsTopOfPartition = new boolean[tree.getNodeCount()];
+			nodeToPartitionMap = new int[tree.getNodeCount()];
+			storedNodeToPartitonMap = new int[tree.getNodeCount()];
+			rootNodeToPartitionMap = new int[tree.getNodeCount()][3];
+			storedRootNodeToPartitionMap = new int[tree.getNodeCount()][3];
+		}
+		Arrays.fill(isTopOfPartition, false);
 		for (int i : sampleNumber) {
 			isTopOfPartition[i] = true;
 		}
-		nodeToPartitionMap = new int[tree.getNodeCount()];
 		Arrays.fill(nodeToPartitionMap, -1);
 		
 		int [] nextParitionNr = new int[1];
@@ -84,8 +97,11 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		initNodeToPartitionMap(tree.getRoot(), nextParitionNr, 0);
 		partitionCount = nextParitionNr[0] + 1;
 
-		rootNodeToPartitionMap = new int[tree.getNodeCount()][3];
-		rootNode = new int[partitionCount];
+		if (rootNode == null) {
+			rootNode = new int[partitionCount];
+			storedRootNode = new int[partitionCount];
+		}
+		
 		for (int i: sampleNumber) {
 			Node node = tree.getNode(i);
 			int left = node.getLeft().getNr();
@@ -201,6 +217,9 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 					calcPositions(node.getRight());
 				}
 			}
+//for (int i = 0; i < position.length; i++) {
+//	System.err.print("["+position[i][0] + "," + position[i][1] + "]");
+//}
 
 			for (int i : dirtyPartitionList) {
 				Node node = tree.getNode(rootNode[i]);
@@ -324,28 +343,43 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		super.store();
 
 		System.arraycopy(branchLengths, 0, storedBranchLengths, 0, branchLengths.length);
+		System.arraycopy(parentweight, 0, storedParentweight, 0, parentweight.length);
 
-		if (storedLogPContributions.length != logPContributions.length) {
-			storedLogPContributions = new double[logPContributions.length];
-		}
+		//if (storedLogPContributions.length != logPContributions.length) {
+		//	storedLogPContributions = new double[logPContributions.length];
+		//}
 
-		System.arraycopy(logPContributions, 0, storedLogPContributions, 0, partitionCount);
+		System.arraycopy(logPContributions, 0, storedLogPContributions, 0, logPContributions.length);
 		
-		// TODO: instead of copying all positions, only copy those of the partitions that changed in the last update
-		double [] p, sp;
-		for (int i = 0; i < position.length; i++) {
-			p = position[i];
-			sp = storedPosition[i];
-			sp[0] = p[0];
-			sp[1] = p[1];
-		}
-		for (int i = 0; i < position.length; i++) {
-			p = sphereposition[i];
-			sp = storedSphereposition[i];
+		System.arraycopy(isTopOfPartition, 0, storedIsTopOfPartition, 0, isTopOfPartition.length);
+		System.arraycopy(nodeToPartitionMap, 0, storedNodeToPartitonMap, 0, nodeToPartitionMap.length);
+		System.arraycopy(rootNode, 0, storedRootNode, 0, rootNode.length);
+		
+		int [] p, sp;
+		for (int i = 0; i < rootNodeToPartitionMap.length; i++) {
+			p = rootNodeToPartitionMap[i];
+			sp= storedRootNodeToPartitionMap[i];
 			sp[0] = p[0];
 			sp[1] = p[1];
 			sp[2] = p[2];
 		}
+
+//		// TODO: instead of copying all positions, only copy those of the partitions that changed in the last update
+//		double [] p, sp;
+//		for (int i = 0; i < position.length; i++) {
+//			p = position[i];
+//			sp = storedPosition[i];
+//			sp[0] = p[0];
+//			sp[1] = p[1];
+//		}
+//		for (int i = 0; i < position.length; i++) {
+//			p = sphereposition[i];
+//			sp = storedSphereposition[i];
+//			sp[0] = p[0];
+//			sp[1] = p[1];
+//			sp[2] = p[2];
+//		}
+		wasInitialised = false;
 	}
 	
 	@Override
@@ -356,17 +390,41 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
         branchLengths = storedBranchLengths;
         storedBranchLengths = tmp;
         
+		tmp = parentweight;
+		parentweight = storedParentweight;
+		storedParentweight = tmp;
+
         tmp = logPContributions;
         logPContributions = storedLogPContributions;
         storedLogPContributions = tmp;
         
-        double [][]tmp2 = position;
-        position = storedPosition;
-        storedPosition = tmp2;
-        
-        tmp2 = sphereposition;
-        sphereposition = storedSphereposition;
-        storedSphereposition = tmp2;
+        int [][]tmp3 = rootNodeToPartitionMap;
+        rootNodeToPartitionMap = storedRootNodeToPartitionMap;
+        storedRootNodeToPartitionMap = tmp3;
+    
+		boolean [] tmp4 = isTopOfPartition;
+		isTopOfPartition = storedIsTopOfPartition;
+		storedIsTopOfPartition = tmp4;
+		
+		int [] tmp5 = nodeToPartitionMap;
+		nodeToPartitionMap = storedNodeToPartitonMap;
+		storedNodeToPartitonMap = tmp5;
+		
+		tmp5 = rootNode;
+		rootNode = storedRootNode;
+		storedRootNode = tmp5;
+		
+//		  double [][]tmp2 = position;
+//        position = storedPosition;
+//        storedPosition = tmp2;
+//        
+//        tmp2 = sphereposition;
+//        sphereposition = storedSphereposition;
+//        storedSphereposition = tmp2;
+        if (wasInitialised) {
+			//initialiseSampledStates();
+        }
+		wasInitialised = false;
     }
 	
 	@Override
