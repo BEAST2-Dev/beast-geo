@@ -62,7 +62,7 @@ public class GeoPrior extends Distribution {
     // number of taxa in taxon set
     int nrOfTaxa = -1;
     // array of flags to indicate which taxa are in the set
-    boolean[] isInTaxaSet;
+    boolean[] isInTaxaSetX;
     Set<Integer> cladeSet = null;
 
 	boolean initialised = false;
@@ -122,7 +122,7 @@ public class GeoPrior extends Distribution {
 				isRoot = true;
 				taxonNr = tree.getRoot().getNr();
 			} else {
-				isInTaxaSet = new boolean[taxonSet.getTaxonCount()];
+				//isInTaxaSet = new boolean[taxonSet.getTaxonCount()];
 				List<String> names = taxonSet.asStringList();
 				int k = 0;
 	            taxonIndex = new int[nrOfTaxa];
@@ -131,27 +131,29 @@ public class GeoPrior extends Distribution {
 	                if (iTaxon < 0) {
 	                    throw new RuntimeException("Cannot find taxon " + sTaxon + " in data");
 	                }
-	                if (isInTaxaSet[iTaxon]) {
-	                    throw new RuntimeException("Taxon " + sTaxon + " is defined multiple times, while they should be unique");
-	                }
-	                isInTaxaSet[iTaxon] = true;
+	                //if (isInTaxaSet[iTaxon]) {
+	                //    throw new RuntimeException("Taxon " + sTaxon + " is defined multiple times, while they should be unique");
+	                //}
+	                //isInTaxaSet[iTaxon] = true;
 	                taxonIndex[k++] = iTaxon;
 	            }
 	            
 				// set up taxonNr
 	            isMonophyletic = false;
-	            if( false) {
-	                calcMRCAtime(tree.getRoot(), new int[1]);
-	            } else {
+                Node m;
+	            //if(false) {
+	            //    calcMRCAtime(tree.getRoot(), new int[1]);
+	            //    m = tree.getNode(taxonNr);
+	            //} else {
 	                nodesTraversed = new boolean[tree.getNodeCount()];
 	                nseen = 0;
-	                final Node m = getCommonAncestor();
+	                m = getCommonAncestor();
 	            	taxonNr = m.getNr();
 	                isMonophyletic = nseen == 2 * taxonIndex.length - 1;
-	            }
+	            //}
 				
 	            cladeSet = new HashSet<>();
-	            setUpCladeSet(tree.getNode(taxonNr));
+	            setUpCladeSet(m);
 			}
 		}
 		initialised = true;
@@ -198,7 +200,6 @@ public class GeoPrior extends Distribution {
 	private void setUpCladeSet(Node node) {
 		cladeSet.add(node.getNr());
 		for (Node child : node.getChildren()) {
-			cladeSet.add(child.getNr());
 			setUpCladeSet(child);
 		}
 	}
@@ -237,7 +238,12 @@ public class GeoPrior extends Distribution {
 			taxonNr = tree.getRoot().getNr();
 		} else {
 			if (!isTip) {
-				calcMRCAtime(tree.getRoot(), new int[1]);
+				//calcMRCAtime(tree.getRoot(), new int[1]);
+                nodesTraversed = new boolean[tree.getNodeCount()];
+                nseen = 0;
+                Node m = getCommonAncestor();
+            	taxonNr = m.getNr();
+                isMonophyletic = nseen == 2 * taxonIndex.length - 1;
 			}
 		}
 		this.location.getMatrixValues1(taxonNr, location);
@@ -261,32 +267,32 @@ public class GeoPrior extends Distribution {
      * @param node
      * @param nTaxonCount
      */
-    int calcMRCAtime(final Node node, final int[] nTaxonCount) {
-        if (node.isLeaf()) {
-            nTaxonCount[0]++;
-            if (isInTaxaSet[node.getNr()]) {
-                return 1;
-            } else {
-                return 0;
-            }
-        } else {
-            int iTaxons = calcMRCAtime(node.getLeft(), nTaxonCount);
-            int nTaxa = nTaxonCount[0];
-            nTaxonCount[0] = 0;
-            for (int i = 1; i < node.getChildCount(); i++) {
-            	Node child = node.getChild(i);
-                iTaxons += calcMRCAtime(child, nTaxonCount);
-                nTaxa += nTaxonCount[0];
-            }
-            nTaxonCount[0] = nTaxa;
-            if (iTaxons == nrOfTaxa) {
-            	taxonNr = node.getNr();
-            	isMonophyletic = (nTaxonCount[0] == nrOfTaxa);
-                return iTaxons + 1;                	
-           }
-            return iTaxons;
-        }
-    }
+//    int calcMRCAtime(final Node node, final int[] nTaxonCount) {
+//        if (node.isLeaf()) {
+//            nTaxonCount[0]++;
+//            if (isInTaxaSet[node.getNr()]) {
+//                return 1;
+//            } else {
+//                return 0;
+//            }
+//        } else {
+//            int iTaxons = calcMRCAtime(node.getLeft(), nTaxonCount);
+//            int nTaxa = nTaxonCount[0];
+//            nTaxonCount[0] = 0;
+//            for (int i = 1; i < node.getChildCount(); i++) {
+//            	Node child = node.getChild(i);
+//                iTaxons += calcMRCAtime(child, nTaxonCount);
+//                nTaxa += nTaxonCount[0];
+//            }
+//            nTaxonCount[0] = nTaxa;
+//            if (iTaxons == nrOfTaxa) {
+//            	taxonNr = node.getNr();
+//            	isMonophyletic = (nTaxonCount[0] == nrOfTaxa);
+//                return iTaxons + 1;                	
+//           }
+//            return iTaxons;
+//        }
+//    }
 
     
     

@@ -295,13 +295,18 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	}
 
 	void sanitycheck() {
+		int k = 0;
 		for (int i : sampleNumber) {
 			if (position[i][0] != sampledLocations.getValue(i*2) ||
 				position[i][1] != sampledLocations.getValue(i*2+1)) {
 				System.err.println(position[i][0] +"!="+ sampledLocations.getValue(i*2));
 				System.err.println(position[i][1] +"!="+ sampledLocations.getValue(i*2+1));
-				System.exit(0);
 			}
+			GeoPrior prior=  geopriorsInput.get().get(k);
+			if (prior.getTaxonNr() != i) {
+				System.err.println(prior.getTaxonNr() + "!=" + i);
+			}
+			k++;
 		}
 //		for (int i = 0; i < position.length; i++) {
 //			System.err.print("["+position[i][0] + "," + position[i][1] + "]");
