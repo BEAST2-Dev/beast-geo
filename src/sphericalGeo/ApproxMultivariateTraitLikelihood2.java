@@ -265,18 +265,18 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 			if (!isSampled[child1]) {
 				initByMean(node.getLeft());
 			} else {
-				parentweight[child1] = 1;
+				parentweight[child1] = 0;
 			}
 			if (!isSampled[child2]) {
 				initByMean(node.getRight());
 			} else {
-				parentweight[child2] = 1;
+				parentweight[child2] = 0;
 			}
 			
 			if (!isSampled[nodeNr]) {
 				setHalfWayPosition(nodeNr, child1, child2);
 			} else {
-				parentweight[nodeNr] = 1;
+				parentweight[nodeNr] = 0;
 			}
 		}
 	}		

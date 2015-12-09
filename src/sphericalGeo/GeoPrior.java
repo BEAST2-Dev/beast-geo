@@ -105,6 +105,7 @@ public class GeoPrior extends Distribution {
     * Need delayed initialisation in order for the tree to get set up.
 	* If this happens through a StateNodeInitialiser, node numbering can change.
 	**/
+	@SuppressWarnings("unused")
 	public void initialise() {
 		if (allInternalNodes) {
 		} else if (taxonInput.get() != null) {
@@ -311,10 +312,6 @@ public class GeoPrior extends Distribution {
     public void store() {
     	storedTaxonNr = taxonNr;
     	super.store();
-    	if (Double.isInfinite(logP)) {
-    		int h= 3;
-    		h++;
-    	}
     }
     
     @Override

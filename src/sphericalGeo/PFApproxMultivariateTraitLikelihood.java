@@ -16,7 +16,6 @@ import beast.evolution.tree.Node;
 import beast.evolution.tree.TreeInterface;
 //import beast.evolution.tree.TreeTraitMap;
 import beast.util.Randomizer;
-import org.apache.commons.math3.util.FastMath;
 
 @Description("Approximate likelihood by particle filter approximation")
 public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {

@@ -12,7 +12,6 @@ import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.evolution.alignment.Alignment;
-import beast.evolution.operators.AttachOperator;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.TreeInterface;
 

@@ -11,7 +11,6 @@ import beast.core.Description;
 import beast.core.Input;
 import beast.core.StateNode;
 import beast.core.StateNodeInitialiser;
-import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.branchratemodel.StrictClockModel;
@@ -175,11 +174,6 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 				} else {
 					if (prior.isMonoPhyletic()) {
 						int taxonNr = prior.getTaxonNr();
-						if (taxonNr == 38 && k == 1) {
-							int h = 3;
-							h++;
-							prior.getTaxonNr();
-						}
 						isSampled[taxonNr] = true;
 						sampleNumber.add(taxonNr);
 						int storedTaxonNr = prior.getStoredTaxonNr();
@@ -211,8 +205,8 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 				k++;
 			}
 			isMonoPhyletic = true;
-			RealParameter tmp = new RealParameter(d);
 			// RRB: assignFromWithoutID overrides sampledLocations.storedValues, so sampledLocations is invalid after restore
+			// RealParameter tmp = new RealParameter(d);
 			// sampledLocations.assignFromWithoutID(tmp);
 			sampledLocations.setValueSilently(d);
 			//System.err.println("Initialised");
@@ -268,30 +262,25 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		}
 		
         logP = Double.NaN;
-		try {
-			// check prior
-			if (sampledLocations != null) {
-				for (GeoPrior prior : geopriorsInput.get()) {
-					if (Double.isInfinite(prior.calculateLogP())) {
-						prior.calculateLogP();
-						logP = Double.NEGATIVE_INFINITY;
-						return logP;
-					}
+
+        // check prior
+		if (sampledLocations != null) {
+			for (GeoPrior prior : geopriorsInput.get()) {
+				if (Double.isInfinite(prior.calculateLogP())) {
+					prior.calculateLogP();
+					logP = Double.NEGATIVE_INFINITY;
+					return logP;
 				}
 			}
-			// calc likelihood
-			logP = 0.0;
-			calcBranchLengths();
-			calcPositions();
-			logP = calcLogP();
-			needsUpdate = false;
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+		// calc likelihood
+		logP = 0.0;
+		calcBranchLengths();
+		calcPositions();
+		logP = calcLogP();
+		needsUpdate = false;
+
 		//System.err.println("\nlocP(" + logP +") ");
-		//System.out.print('.');
 		sanitycheck();
 		return logP;
 	}
@@ -302,8 +291,6 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 				position[i][1] != sampledLocations.getValue(i*2+1)) {
 				System.err.println(position[i][0] +"!="+ sampledLocations.getValue(i*2));
 				System.err.println(position[i][1] +"!="+ sampledLocations.getValue(i*2+1));
-				int h = 3;
-				h++;
 			}
 		}
 //		for (int i = 0; i < position.length; i++) {
@@ -567,7 +554,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 			if (!isSampled[nodeNr]) {
 				setHalfWayPosition(nodeNr, child1, child2);
 			} else {
-				parentweight[nodeNr] = 1;
+				parentweight[nodeNr] = 0;
 				//System.err.print("skip" + nodeNr);
 			}
 		}

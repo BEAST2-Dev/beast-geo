@@ -54,7 +54,7 @@ public class AlignmentFromTraitMap extends Alignment {
         
 
         stateCounts = new ArrayList<Integer>();
-        for (String s : taxaNames) {
+        for (@SuppressWarnings("unused") String s : taxaNames) {
         	stateCounts.add(m_dataType.getStateCount());
         }
 
