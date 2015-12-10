@@ -96,17 +96,17 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 			if (node.isRoot()) {
 				for (int i = 0; i < particleCount; i++) {
 					double [] nodePosition = getPosition(i);
-					logP[i] = substModel.getLogLikelihood(child1.getPosition(i), nodePosition, branchLengths[iChild1]) +
-							substModel.getLogLikelihood(child2.getPosition(i), nodePosition, branchLengths[iChild2]);
+					logP[i] = substModel.getLogLikelihood(null, child1.getPosition(i), nodePosition, branchLengths[iChild1]) +
+							substModel.getLogLikelihood(null, child2.getPosition(i), nodePosition, branchLengths[iChild2]);
 				}
 			} else {
 				int iParent = node.getParent().getNr();
 				LeafParticleSet parent = particleSets[iParent];
 				for (int i = 0; i < particleCount; i++) {
 					double [] nodePosition = getPosition(i);
-					logP[i] = substModel.getLogLikelihood(child1.getPosition(i), nodePosition, branchLengths[iChild1]) +
-							substModel.getLogLikelihood(child2.getPosition(i), nodePosition, branchLengths[iChild2]) +
-							substModel.getLogLikelihood(nodePosition, parent.getPosition(i), branchLengths[node.getNr()]);
+					logP[i] = substModel.getLogLikelihood(null, child1.getPosition(i), nodePosition, branchLengths[iChild1]) +
+							substModel.getLogLikelihood(null, child2.getPosition(i), nodePosition, branchLengths[iChild2]) +
+							substModel.getLogLikelihood(null, nodePosition, parent.getPosition(i), branchLengths[node.getNr()]);
 				}
 			}
 			double max = logP[0];
@@ -305,16 +305,16 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		if (node.isRoot()) {
 			for (int i = 0; i < rangeSize; i++) {
 				double [] nodePosition = newPosition[i];
-				logP[i] = substModel.getLogLikelihood(pposition[iChild1], nodePosition, branchLengths[iChild1]) +
-						substModel.getLogLikelihood(pposition[iChild2], nodePosition, branchLengths[iChild2]);
+				logP[i] = substModel.getLogLikelihood(null, pposition[iChild1], nodePosition, branchLengths[iChild1]) +
+						substModel.getLogLikelihood(null, pposition[iChild2], nodePosition, branchLengths[iChild2]);
 			}
 		} else {
 			int iParent = node.getParent().getNr();
 			for (int i = 0; i < rangeSize; i++) {
 				double [] nodePosition = newPosition[i];
-				logP[i] = substModel.getLogLikelihood(pposition[iChild1], nodePosition, branchLengths[iChild1]) +
-						substModel.getLogLikelihood(pposition[iChild2], nodePosition, branchLengths[iChild2]) +
-						substModel.getLogLikelihood(nodePosition, pposition[iParent], branchLengths[node.getNr()]);
+				logP[i] = substModel.getLogLikelihood(null, pposition[iChild1], nodePosition, branchLengths[iChild1]) +
+						substModel.getLogLikelihood(null, pposition[iChild2], nodePosition, branchLengths[iChild2]) +
+						substModel.getLogLikelihood(null, nodePosition, pposition[iParent], branchLengths[node.getNr()]);
 			}
 		}
 		double max = logP[0];
@@ -340,7 +340,7 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 //							particleSets[node.getParent().getNr()].getPosition(i), 
 //							particleSets[node.getNr()].getPosition(i), 
 //							branchLengths[node.getNr()]);
-					logP[i] += substModel.getLogLikelihood(
+					logP[i] += substModel.getLogLikelihood(null, 
 							particlePosition[i][node.getParent().getNr()], 
 							particlePosition[i][node.getNr()], 
 							branchLengths[node.getNr()]);
@@ -397,7 +397,7 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 //							particleSets[node.getParent().getNr()].getPosition(i), 
 //							particleSets[node.getNr()].getPosition(i), 
 //							branchLengths[node.getNr()]);
-					logP += substModel.getLogLikelihood(
+					logP += substModel.getLogLikelihood(null, 
 							particlePosition[i][node.getParent().getNr()], 
 							particlePosition[i][node.getNr()], 
 							branchLengths[node.getNr()]);

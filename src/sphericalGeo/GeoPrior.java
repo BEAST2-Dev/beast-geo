@@ -45,27 +45,23 @@ public class GeoPrior extends Distribution {
 	boolean isMonophyletic = true;
 	boolean storedIsMonophyletic = true;
 	
-	public int getTaxonNr() {
-		if (taxonNr == -1 || cladeSet == null) {
-			return taxonNr;
-		}
-		Node node = tree.getNode(taxonNr);
-		while (!node.isRoot() && cladeSet.contains(node.getParent().getNr())) {
-			node = node.getParent();
-		}
-		taxonNr = node.getNr();
-		return taxonNr;
-	}
 	boolean isRoot;
 	boolean isTip = false;
 	boolean allInternalNodes = false;
 	
     // number of taxa in taxon set
     int nrOfTaxa = -1;
-    Set<Integer> cladeSet = null;
-    Set<Integer> storedCladeSet = null;
+    //Set<Integer> cladeSet = null;
+    //Set<Integer> storedCladeSet = null;
     
 	boolean initialised = false;
+	
+    // array of indices of taxa
+    int[] taxonIndex;
+    int[] storedTaxonIndex;
+	boolean [] nodesTraversed;
+	boolean [] storedNodesTraversed;
+    int nseen;
 
 	@Override
 	public void initAndValidate() throws Exception {
@@ -92,17 +88,33 @@ public class GeoPrior extends Distribution {
 		
         nrOfTaxa = taxonSetInput.get().asStringList().size();
         
-        storedCladeSet = new HashSet<>();
+        //storedCladeSet = new HashSet<>();
+        storedNodesTraversed = new boolean[tree.getNodeCount()];
 
 		super.initAndValidate();
 		//initialise();
 	}
 
-    // array of indices of taxa
-    int[] taxonIndex;
-    int[] storedTaxonIndex;
-	boolean [] nodesTraversed;
-    int nseen;
+	public int getTaxonNr() {
+		if (taxonNr == -1 || nodesTraversed == null) {
+			return taxonNr;
+		}
+		Node node = tree.getNode(taxonNr);
+		
+//		for (int i : cladeSet) {
+//			if (!nodesTraversed[i]) {
+//				int h = 3;
+//				h++;
+//			}
+//		}
+		
+		while (!node.isRoot() && nodesTraversed[node.getParent().getNr()]) {		
+			node = node.getParent();
+		}
+		taxonNr = node.getNr();
+		return taxonNr;
+	}
+
 
 	/** 
     * Need delayed initialisation in order for the tree to get set up.
@@ -158,8 +170,8 @@ public class GeoPrior extends Distribution {
 	                isMonophyletic = nseen == 2 * taxonIndex.length - 1;
 	            //}
 				
-	            cladeSet = new HashSet<>();
-	            setUpCladeSet(m);
+	           //cladeSet = new HashSet<>();
+	           //setUpCladeSet(m);
 			}
 		}
 		initialised = true;
@@ -203,12 +215,12 @@ public class GeoPrior extends Distribution {
         return n1;
     }
 
-	private void setUpCladeSet(Node node) {
-		cladeSet.add(node.getNr());
-		for (Node child : node.getChildren()) {
-			setUpCladeSet(child);
-		}
-	}
+	//private void setUpCladeSet(Node node) {
+	//	cladeSet.add(node.getNr());
+	//	for (Node child : node.getChildren()) {
+	//		setUpCladeSet(child);
+	//	}
+	//}
 
 	@Override
 	public double calculateLogP() throws Exception {
@@ -325,9 +337,9 @@ public class GeoPrior extends Distribution {
     	storedIsMonophyletic = isMonophyletic;
     	if (taxonIndex != null) {
     		System.arraycopy(taxonIndex, 0, storedTaxonIndex, 0, taxonIndex.length);
-
-    		storedCladeSet.clear();
-            storedCladeSet.addAll(cladeSet);
+    		System.arraycopy(nodesTraversed, 0, storedNodesTraversed, 0, nodesTraversed.length);
+    		//storedCladeSet.clear();
+            //storedCladeSet.addAll(cladeSet);
     	}
     	
     	
@@ -343,9 +355,13 @@ public class GeoPrior extends Distribution {
     	taxonIndex = storedTaxonIndex;
     	storedTaxonIndex = tmp;
     	
-    	Set<Integer> tmp2 = cladeSet;
-    	cladeSet = storedCladeSet;
-    	storedCladeSet = tmp2;
+    	//Set<Integer> tmp3 = cladeSet;
+    	//cladeSet = storedCladeSet;
+    	//storedCladeSet = tmp3;
+    	
+    	boolean [] tmp2 = nodesTraversed;
+    	nodesTraversed = storedNodesTraversed;
+    	storedNodesTraversed = tmp2;
     	
     	taxonNr = storedTaxonNr;
     	super.restore();

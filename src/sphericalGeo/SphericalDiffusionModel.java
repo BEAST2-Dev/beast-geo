@@ -80,16 +80,16 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 		double [] start = position[node.getParent().getNr()];
 		double [] stop = position[node.getNr()];
 		double time = branchLengths[node.getNr()];
-		return getLogLikelihood(start, stop, time);
+		return getLogLikelihood(node, start, stop, time);
     }
     
     // assumes start = {latitude, longitude}
     //         stop  = {latitude, longitude}
     // and -90 < latitude < 90, -180 < longitude < 180
-    public double getLogLikelihood(double [] start, double [] stop, double time) {
+    public double getLogLikelihood(Node node, double [] start, double [] stop, double time) {
 
     	if (fast) {
-    		return getLogLikelihood2(start, stop, time);
+    		return getLogLikelihood2(node, start, stop, time);
     	}
            
             if (time <= 1e-20) {
@@ -118,7 +118,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
             double angle = Math.acos(Math.sin(theta1) * Math.sin(theta2) + Math.cos(theta1) * Math.cos(theta2) * Math.cos(Deltalambda));
 
             final double tau = time / precision.getValue(0);
-            final double logN = calcLogN(tau);
+            final double logN = calcLogN(tau, node);
             final double logP = 0.5 * Math.log(angle * sin(angle)) - Math.log(tau) + -angle * angle / (tau * 2.0);
 
 //            double inverseVariance = precision.getValue(0) / time;
@@ -146,11 +146,17 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 		maxin = in[in.length - 1];
 	}
 	
-    private double lastTau = -1;
-    private double lastN = 0;
-    double calcLogN(double tau) {
-    	if (tau == lastTau) {
-    		return lastN;
+    private double [] lastTau;// = -1;
+    private double [] lastN;// = 0;
+    double calcLogN(double tau, Node node) {
+    	if (node != null) {
+	    	if (lastTau == null) {
+	    		lastTau = new double[node.getTree().getNodeCount()];
+	    		lastN = new double[lastTau.length];
+	    	}
+	    	if (tau == lastTau[node.getNr()]) {
+	    		return lastN[node.getNr()];
+	    	}
     	}
 
     	if (tau < minin) {
@@ -178,13 +184,22 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
     	double fWeight2 = (tau - in[i])/(in[i+1] - in[i]);
     	double fWeight1 = 1.0 - fWeight2;
 		// TODO Auto-generated method stub
-		lastN = logout1 * fWeight1 + logout2 * fWeight2;
-		lastTau = tau;
-		return lastN;
+		double logN = logout1 * fWeight1 + logout2 * fWeight2;
+    	if (node != null) {
+			lastN[node.getNr()] = logN;
+			lastTau[node.getNr()] = tau;
+    	}
+    	return logN;
 	}
 
+    
+    public static double log(double x) {
+    	System.err.println(x);
+        return 6 * (x - 1) / (x + 1 + 4 * (Math.sqrt(x)));
+    }
+    
 	//@Override
-    public double getLogLikelihood2(double[] start, double[] stop, double time) {
+    public double getLogLikelihood2(Node node, double[] start, double[] stop, double time) {
 
         if( time <= 1e-20 ) {
             return -1e100;
@@ -230,7 +245,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 
 //        final double inverseVariance = precision.getValue(0) / time;
         final double tau = time/precision.getValue(0);
-        final double logN = calcLogN(tau);
+        final double logN = calcLogN(tau, node);
         //final double logP = -angle * angle * inverseVariance / 2.0 + 0.5 * Math.log(angle * sin(angle)) + Math.log(inverseVariance);
 
         //final double logP = Math.log(Math.sqrt(angle * sin(angle)) / tau * exp(-angle * angle / (tau * 2.0));

@@ -191,7 +191,7 @@ public class RelaxedSphericalDiffusionModel extends SphericalDiffusionModel {
 //            return -1e100;
 //        }
         final double tau = 1.0/inverseVariance;
-        double logN = calcLogN(tau);
+        double logN = calcLogN(tau, null);
         final double logP = 0.5 * Math.log(angle * sin(angle)) - Math.log(tau) + -angle * angle / (tau * 2.0);
 
         //double logN = calcLogN(inverseVariance);
