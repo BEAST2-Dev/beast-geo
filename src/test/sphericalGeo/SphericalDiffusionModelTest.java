@@ -35,7 +35,7 @@ public class SphericalDiffusionModelTest extends TestCase {
 		double sum = 0;
 		for (int i = 1; i < NR_OF_STEPS; i++) {
 			end[1] = 180.0 * i/NR_OF_STEPS;
-			sum += Math.exp(model.getLogLikelihood(start, end, time))/NR_OF_STEPS;
+			sum += Math.exp(model.getLogLikelihood(null, start, end, time))/NR_OF_STEPS;
 		}
 		
 		// multiply by total length of interval = PI
@@ -59,7 +59,7 @@ public class SphericalDiffusionModelTest extends TestCase {
 		double sum = 0;
 		for (int i = 1; i < NR_OF_STEPS; i++) {
 			end[1] = 180.0 * i/NR_OF_STEPS;
-			sum += GreatCircleDistance.EARTHRADIUS * Math.PI * i/NR_OF_STEPS * Math.exp(model.getLogLikelihood(start, end, time));
+			sum += GreatCircleDistance.EARTHRADIUS * Math.PI * i/NR_OF_STEPS * Math.exp(model.getLogLikelihood(null, start, end, time));
 		}
 		
 		// multiply by total length of interval = PI
