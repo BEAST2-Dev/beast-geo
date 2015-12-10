@@ -43,6 +43,7 @@ public class GeoPrior extends Distribution {
 	private int taxonNr = -1;
 	
 	boolean isMonophyletic = true;
+	boolean storedIsMonophyletic = true;
 	
 	public int getTaxonNr() {
 		if (taxonNr == -1 || cladeSet == null) {
@@ -61,10 +62,9 @@ public class GeoPrior extends Distribution {
 	
     // number of taxa in taxon set
     int nrOfTaxa = -1;
-    // array of flags to indicate which taxa are in the set
-    boolean[] isInTaxaSetX;
     Set<Integer> cladeSet = null;
-
+    Set<Integer> storedCladeSet = null;
+    
 	boolean initialised = false;
 
 	@Override
@@ -91,6 +91,8 @@ public class GeoPrior extends Distribution {
 		}
 		
         nrOfTaxa = taxonSetInput.get().asStringList().size();
+        
+        storedCladeSet = new HashSet<>();
 
 		super.initAndValidate();
 		//initialise();
@@ -98,6 +100,7 @@ public class GeoPrior extends Distribution {
 
     // array of indices of taxa
     int[] taxonIndex;
+    int[] storedTaxonIndex;
 	boolean [] nodesTraversed;
     int nseen;
 
@@ -126,6 +129,9 @@ public class GeoPrior extends Distribution {
 				List<String> names = taxonSet.asStringList();
 				int k = 0;
 	            taxonIndex = new int[nrOfTaxa];
+	            if (storedTaxonIndex == null) {
+	            	storedTaxonIndex = new int[nrOfTaxa];
+	            }
 	            for (final String sTaxon : taxonset2.asStringList()) {
 	                final int iTaxon = names.indexOf(sTaxon);
 	                if (iTaxon < 0) {
@@ -316,12 +322,31 @@ public class GeoPrior extends Distribution {
 
     @Override
     public void store() {
+    	storedIsMonophyletic = isMonophyletic;
+    	if (taxonIndex != null) {
+    		System.arraycopy(taxonIndex, 0, storedTaxonIndex, 0, taxonIndex.length);
+
+    		storedCladeSet.clear();
+            storedCladeSet.addAll(cladeSet);
+    	}
+    	
+    	
     	storedTaxonNr = taxonNr;
     	super.store();
     }
     
     @Override
     public void restore() {
+    	isMonophyletic = storedIsMonophyletic;
+    	
+    	int [] tmp = taxonIndex;
+    	taxonIndex = storedTaxonIndex;
+    	storedTaxonIndex = tmp;
+    	
+    	Set<Integer> tmp2 = cladeSet;
+    	cladeSet = storedCladeSet;
+    	storedCladeSet = tmp2;
+    	
     	taxonNr = storedTaxonNr;
     	super.restore();
     }

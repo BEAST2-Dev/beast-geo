@@ -48,6 +48,10 @@ public class LocationOperator extends Operator {
 		}
 		if (!prior.isMonophyletic) {
 			prior.initialise();
+			if (!prior.isMonophyletic) {
+				// fail -- we should never move a non-monophyletic clade
+				return Double.NEGATIVE_INFINITY;
+			}
 		}
 		double [] location = prior.sample();
 		int k = prior.getTaxonNr();
