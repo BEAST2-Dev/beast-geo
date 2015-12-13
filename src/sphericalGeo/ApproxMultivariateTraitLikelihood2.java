@@ -36,6 +36,9 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 	double [] logPContributions;
 	double [] storedLogPContributions;
 	
+	
+	int [/*partitionCount*/][/*2*/] partitionNrCandidates;
+	
 	/** list of partitions that need recalculating **/
 	List<Integer> dirtyPartitionList = new ArrayList<>();
 	
@@ -94,8 +97,11 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		
 		int [] nextParitionNr = new int[1];
 		nextParitionNr[0] = isSampled[tree.getRoot().getNr()] ? -1 : 0;
+		if (partitionNrCandidates == null) {
+			partitionNrCandidates = new int[geopriorsInput.get().size()][];
+		}
 		initNodeToPartitionMap(tree.getRoot(), nextParitionNr, 0);
-		partitionCount = nextParitionNr[0] + 1;
+		partitionCount = Math.max(partitionCount, nextParitionNr[0] + 1);
 
 		if (rootNode == null) {
 			rootNode = new int[partitionCount];
@@ -140,9 +146,23 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		int nodeNr = node.getNr();
 		nodeToPartitionMap[nodeNr] = currentPartition;
 		if (isSampled[nodeNr]) {
-			for (Node child : node.getChildren()) {
-				nextParitionNr[0]++;
-				initNodeToPartitionMap(child, nextParitionNr, nextParitionNr[0]);
+			int k = sampleNumber.indexOf(nodeNr);
+			if (partitionNrCandidates[k] == null) {
+				partitionNrCandidates[k] = new int[node.getChildCount()];
+				int i = 0;
+				for (Node child : node.getChildren()) {
+					nextParitionNr[0]++;
+					partitionNrCandidates[k][i] = nextParitionNr[0];
+					initNodeToPartitionMap(child, nextParitionNr, nextParitionNr[0]);
+					i++;
+				} 
+			} else {
+				int i = 0;
+				for (Node child : node.getChildren()) {
+					nextParitionNr[0] = partitionNrCandidates[k][i];
+					initNodeToPartitionMap(child, nextParitionNr, nextParitionNr[0]);
+					i++;
+				} 
 			}
 		} else {
 			for (Node child : node.getChildren()) {
@@ -151,26 +171,32 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		}	
 	}
 
-	private boolean nodeToPartitionMapChanged(Node node, int [] nextParitionNr, int currentPartition) {
+	private boolean nodeToPartitionMapChanged(Node node, int [] nextParitionNr, int currentPartition, boolean[] dirtyPartitions) {
 		int nodeNr = node.getNr();
+		boolean changed = false;
 		if (nodeToPartitionMap[nodeNr] != currentPartition) {
-			return true;
+			dirtyPartitions[currentPartition] = true;
+			dirtyPartitions[nodeToPartitionMap[nodeNr]] = true;
+			changed = true;
 		}
 		if (isSampled[nodeNr]) {
+			int k = sampleNumber.indexOf(nodeNr);			
+			int i = 0;
 			for (Node child : node.getChildren()) {
-				nextParitionNr[0]++;
-				if (nodeToPartitionMapChanged(child, nextParitionNr, nextParitionNr[0])) {
-					return true;
+				nextParitionNr[0] = partitionNrCandidates[k][i];
+				if (nodeToPartitionMapChanged(child, nextParitionNr, nextParitionNr[0], dirtyPartitions)) {
+					changed = true;
 				}
+				i++;
 			}
 		} else {
 			for (Node child : node.getChildren()) {
-				if (nodeToPartitionMapChanged(child, nextParitionNr, currentPartition)) {
-					return true;
+				if (nodeToPartitionMapChanged(child, nextParitionNr, currentPartition, dirtyPartitions)) {
+					changed = true;
 				}
 			}
 		}
-		return false;
+		return changed;
 	}
 
 
@@ -427,38 +453,75 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		wasInitialised = false;
     }
 	
+	protected boolean geoPriorChanged(boolean[] dirtyPartitions) {
+		int k = 0;
+		boolean changed = false;
+		for (GeoPrior prior : geopriorsInput.get()) {
+			int taxonNr = prior.getTaxonNr();
+			if (taxonNr != taxonNrs[k]) {
+				int partition = nodeToPartitionMap[taxonNrs[k]];
+				int rootNode = this.rootNode[partition];
+				dirtyPartitions[rootNodeToPartitionMap[rootNode][0]] = true;
+				dirtyPartitions[rootNodeToPartitionMap[rootNode][1]] = true;
+				dirtyPartitions[rootNodeToPartitionMap[rootNode][2]] = true;
+
+				// need updated nodeToPartitionMap, rootNode and rootNodeToPartitionMap for this
+				priorChanged.add(k);
+				changed = true;
+			}
+			k++;
+		}
+		return changed;
+	}
+
+	List<Integer> priorChanged = new ArrayList<>();
+	
 	@Override
 	protected boolean requiresRecalculation() {
+		boolean [] dirtyPartitions = new boolean[partitionCount];
 		if (!initialised) {
 			initialiseSampledStates();
+			dirtyPartitions = new boolean[partitionCount];
+			Arrays.fill(dirtyPartitions, true);
 		}
-		boolean [] dirtyPartitions = new boolean[partitionCount];
 		
 		needsUpdate = true;
 		if (loggerLikelihood != null) {
 			loggerLikelihood.needsUpdate = true;
 		}
 		
-		if (geoPriorChanged()) {
-			initialiseSampledStates();
-			dirtyPartitions = new boolean[partitionCount];
-			Arrays.fill(dirtyPartitions, true);
+		boolean needsReInit = false;
+		priorChanged.clear();
+		if (geoPriorChanged(dirtyPartitions)) {
+			needsReInit = true;
+			//dirtyPartitions = new boolean[partitionCount];
+			//Arrays.fill(dirtyPartitions, true);
 		}
 		
 		if (tree.somethingIsDirty()){
 			int [] nextParitionNr = new int[1];
 			nextParitionNr[0] = isSampled[tree.getRoot().getNr()] ? -1 : 0;
-			if (nodeToPartitionMapChanged(tree.getRoot(), nextParitionNr, 0)) {
-				initialiseSampledStates();
-				dirtyPartitions = new boolean[partitionCount];
-				Arrays.fill(dirtyPartitions, true);
+			if (nodeToPartitionMapChanged(tree.getRoot(), nextParitionNr, 0, dirtyPartitions)) {
+				needsReInit = true;
+				//Arrays.fill(dirtyPartitions, true);
 			}
 		}
-
+		if (needsReInit) {
+			initialiseSampledStates();
+			
+			for (int k : priorChanged) {
+				int partition = nodeToPartitionMap[taxonNrs[k]];
+				int rootNode = this.rootNode[partition];
+				dirtyPartitions[rootNodeToPartitionMap[rootNode][0]] = true;
+				dirtyPartitions[rootNodeToPartitionMap[rootNode][1]] = true;
+				dirtyPartitions[rootNodeToPartitionMap[rootNode][2]] = true;
+			}
+		}
+		
 		if (substModel.isDirtyCalculation()) {
 			Arrays.fill(dirtyPartitions, true);
 		}
-		
+
 		if (((CalculationNode) clockModel).isDirtyCalculation() || tree.somethingIsDirty()) {
 			calcBranchLengths();
 			for (int i = 0; i < branchLengths.length; i++) {
@@ -469,6 +532,13 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 						dirtyPartitions[rootNodeToPartitionMap[i][2]] = true;
 					} else {
 						dirtyPartitions[nodeToPartitionMap[i]] = true;
+					}
+					if (storedIsTopOfPartition[i]) {
+						dirtyPartitions[storedRootNodeToPartitionMap[i][0]] = true;
+						dirtyPartitions[storedRootNodeToPartitionMap[i][1]] = true;
+						dirtyPartitions[storedRootNodeToPartitionMap[i][2]] = true;
+					} else {
+						dirtyPartitions[storedNodeToPartitonMap[i]] = true;						
 					}
 				}
 			}
@@ -497,6 +567,9 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 				}
 			}
 		}
+		
+		//System.err.println(Arrays.toString(dirtyPartitions));
+		//System.err.println(dirtyPartitions);
 		
 		dirtyPartitionList.clear();
 		for (int i = 0; i < partitionCount; i++) {
