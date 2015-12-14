@@ -1,10 +1,8 @@
 package sphericalGeo;
 
 import java.io.PrintStream;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import sphericalGeo.region.Region;
 import beast.core.Description;
@@ -38,7 +36,8 @@ public class GeoPrior extends Distribution {
 	Region region;
 	RealParameter location;
 	Tree tree;
-	TaxonSet taxonSet;
+	//TaxonSet taxonSet;
+	List<String> names;
 	private int storedTaxonNr = -1;
 	private int taxonNr = -1;
 	
@@ -65,29 +64,39 @@ public class GeoPrior extends Distribution {
 
 	@Override
 	public void initAndValidate() throws Exception {
+		if (taxonInput.get() != null && taxonSetInput.get() != null) {
+			throw new RuntimeException("At most one of taxon and taxonset should be specified");
+			// if none specified, inputs can still be valid if allinternalnodes = true
+		}
+		if (taxonInput.get() == null && taxonSetInput.get() == null && !allInternalNodesInput.get()) {
+			throw new RuntimeException("Specify one of taxon and taxonset, or set allInternalNodes=true");
+		}
+		
+		
 		region = regionInput.get();
 		location = locationInput.get();
 		if (location.getMinorDimension1() != 2) {
 			throw new RuntimeException("expected that location parameter to have minor dimension 2");
 		}
 		tree = treeInput.get();
-		taxonSet = tree.getTaxonset();
+		TaxonSet taxonSet = tree.getTaxonset();
 		if (location.getDimension() != taxonSet.getTaxonCount() * 4 - 2) {
 			Log.warning.println("Setting dimension of location parameter to have dimension 2 time number of taxa - 1 = " + (taxonSet.getTaxonCount() * 4 - 2)
 					+ " (from " + location.getDimension() +")");
 			location.setDimension(taxonSet.getTaxonCount() * 4 - 2);
 		}
-
+		names = taxonSet.asStringList();
 		allInternalNodes = allInternalNodesInput.get();
-		if (!allInternalNodes) {
-			if ((taxonSetInput.get() == null && taxonInput.get() == null) ||
-			    (taxonSetInput.get() != null && taxonInput.get() != null)) {
-				throw new Exception("Either taxon or taxonset must be specified");
-			}
+		
+		if (taxonSetInput.get() != null) {
+			nrOfTaxa = taxonSetInput.get().asStringList().size();
+		} else if (taxonInput.get() != null) {
+			nrOfTaxa = 1;
+		} else {
+			// allInternalNodes = true when we got here
+			nrOfTaxa = names.size();
 		}
 		
-        nrOfTaxa = taxonSetInput.get().asStringList().size();
-        
         //storedCladeSet = new HashSet<>();
         storedNodesTraversed = new boolean[tree.getNodeCount()];
 
@@ -120,42 +129,43 @@ public class GeoPrior extends Distribution {
     * Need delayed initialisation in order for the tree to get set up.
 	* If this happens through a StateNodeInitialiser, node numbering can change.
 	**/
-	@SuppressWarnings("unused")
 	public void initialise() {
 		if (allInternalNodes) {
 		} else if (taxonInput.get() != null) {
 			isTip = true;
 			String taxonName = taxonInput.get().getID();
-			List<String> names = taxonSet.asStringList();
+			//List<String> names = taxonSet.asStringList();
 			taxonNr = names.indexOf(taxonName);
 			if (taxonNr < 0) {
 				throw new RuntimeException("Could not find taxon " + taxonName + ". Typo perhaps?");
 			}
 		} else {
 			TaxonSet taxonset2 = taxonSetInput.get();
-			if (taxonset2.getTaxonCount() == taxonSet.getTaxonCount()) {
+			if (taxonset2.getTaxonCount() == names.size()) { //taxonSet.getTaxonCount()) {
 				isRoot = true;
 				taxonNr = tree.getRoot().getNr();
 			} else {
 				//isInTaxaSet = new boolean[taxonSet.getTaxonCount()];
-				List<String> names = taxonSet.asStringList();
-				int k = 0;
-	            taxonIndex = new int[nrOfTaxa];
-	            if (storedTaxonIndex == null) {
-	            	storedTaxonIndex = new int[nrOfTaxa];
-	            }
-	            for (final String sTaxon : taxonset2.asStringList()) {
-	                final int iTaxon = names.indexOf(sTaxon);
-	                if (iTaxon < 0) {
-	                    throw new RuntimeException("Cannot find taxon " + sTaxon + " in data");
-	                }
-	                //if (isInTaxaSet[iTaxon]) {
-	                //    throw new RuntimeException("Taxon " + sTaxon + " is defined multiple times, while they should be unique");
-	                //}
-	                //isInTaxaSet[iTaxon] = true;
-	                taxonIndex[k++] = iTaxon;
-	            }
-	            
+				//List<String> names = taxonSet.asStringList();
+				if (!initialised) {
+					int k = 0;
+		            taxonIndex = new int[nrOfTaxa];
+		            if (storedTaxonIndex == null) {
+		            	storedTaxonIndex = new int[nrOfTaxa];
+		            }
+		            for (final String sTaxon : taxonset2.asStringList()) {
+		                final int iTaxon = names.indexOf(sTaxon);
+		                if (iTaxon < 0) {
+		                    throw new RuntimeException("Cannot find taxon " + sTaxon + " in data");
+		                }
+		                //if (isInTaxaSet[iTaxon]) {
+		                //    throw new RuntimeException("Taxon " + sTaxon + " is defined multiple times, while they should be unique");
+		                //}
+		                //isInTaxaSet[iTaxon] = true;
+		                taxonIndex[k++] = iTaxon;
+		            }
+				}
+				
 				// set up taxonNr
 	            isMonophyletic = false;
                 Node m;

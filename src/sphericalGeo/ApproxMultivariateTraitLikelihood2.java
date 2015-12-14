@@ -8,6 +8,7 @@ import beast.core.CalculationNode;
 import beast.core.Citation;
 import beast.core.Description;
 import beast.evolution.tree.Node;
+import beast.evolution.tree.Tree;
 
 
 @Description(value="Approximate likelihood by MAP approximation of internal states optimised to take sampled nodes in account", 
@@ -499,11 +500,22 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		}
 		
 		if (tree.somethingIsDirty()){
-			int [] nextParitionNr = new int[1];
-			nextParitionNr[0] = isSampled[tree.getRoot().getNr()] ? -1 : 0;
-			if (nodeToPartitionMapChanged(tree.getRoot(), nextParitionNr, 0, dirtyPartitions)) {
-				needsReInit = true;
-				//Arrays.fill(dirtyPartitions, true);
+			// make sure something is filthy
+			boolean isFilthy = false;
+			for (Node node : tree.getNodesAsArray()) {
+				if (node.isDirty() == Tree.IS_FILTHY) {
+					isFilthy = true;
+					break;
+				}
+			}
+			if (isFilthy) {
+				// now do the more expensive check that partition numbers changed
+				int [] nextParitionNr = new int[1];
+				nextParitionNr[0] = isSampled[tree.getRoot().getNr()] ? -1 : 0;
+				if (nodeToPartitionMapChanged(tree.getRoot(), nextParitionNr, 0, dirtyPartitions)) {
+					needsReInit = true;
+					//Arrays.fill(dirtyPartitions, true);
+				}
 			}
 		}
 		if (needsReInit) {
