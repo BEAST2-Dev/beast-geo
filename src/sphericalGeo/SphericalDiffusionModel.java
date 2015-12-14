@@ -148,8 +148,10 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 	
     private double [] lastTau;// = -1;
     private double [] lastN;// = 0;
+    
     double calcLogN(double tau, Node node) {
     	if (node != null) {
+    		// check the per node cache
 	    	if (lastTau == null) {
 	    		lastTau = new double[node.getTree().getNodeCount()];
 	    		lastN = new double[lastTau.length];
@@ -157,7 +159,38 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 	    	if (tau == lastTau[node.getNr()]) {
 	    		return lastN[node.getNr()];
 	    	}
+			lastTau[node.getNr()] = tau;
     	}
+
+    	// try approximation of pieces of the curve by polynomials
+    	double logN;
+        if( 1e-6 <= tau && tau < 1e-1 ) {
+            final double a = -0.0087466200605258813, b = -0.16664983515519927, c = -1.4116091739448584e-07;
+            logN = (a * tau + b) * tau + c;
+        } else if( 1e-1 <= tau && tau <= 1 ) {
+        	final double a = -0.017361715075749726, b = -0.1617395191006793, c = -0.00064481343766429537;
+            logN = (a * tau + b) * tau + c;
+        } else if( tau < 1e-6 ) {
+        	logN = 0;
+        } else if (tau < 10) {
+	        // this is terrible for tau>10 but those kinds of values should not matter
+        	final double a = -0.14247308312783535, b = 1.2366027188629642, c= -1.7402299884011929;
+        	final double lt = FastMath.log(tau);
+	        logN = -FastMath.exp(lt * (a*lt + b) +c);
+        } else { // tau >= 10
+        	// fall back on original approximation
+        	logN  = calcLogN2(tau);
+        }
+
+        if (node != null) {
+        	lastN[node.getNr()] = logN;
+        }
+        return logN;
+    }
+
+    
+    /** approximation described in the GEO_SPHERE paper **/
+    double calcLogN2(double tau) {
 
     	if (tau < minin) {
     		return 0;
@@ -185,18 +218,46 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
     	double fWeight1 = 1.0 - fWeight2;
 		// TODO Auto-generated method stub
 		double logN = logout1 * fWeight1 + logout2 * fWeight2;
-    	if (node != null) {
-			lastN[node.getNr()] = logN;
-			lastTau[node.getNr()] = tau;
-    	}
     	return logN;
 	}
 
     
-    public static double log(double x) {
-    	System.err.println(x);
-        return 6 * (x - 1) / (x + 1 + 4 * (Math.sqrt(x)));
-    }
+//        static double log0(double x) {
+//            double y = (x-1.)/(1+x) ;
+//            // making this 2*y reduces accuracy to 1e-8 over [1e-8,2]
+//            return 2*(y*(1 + y*y/3));
+//        }
+//        static int N = 100;
+//
+//        static public double log(double x) {
+//            int v = 0;
+//            while( x < 1 ) {
+//                x *= Math.E;
+//                v -= 1;
+//            }
+//            while ( x > Math.E ) {
+//                x /= Math.E;
+//                v += 1;
+//            }
+//            // assert 1 <= x <= math.e
+//            int i = (int)(N*(x - 1)/(Math.E-1));
+//            return v + tab1[i] + log0(x * tab0[i]);
+//        }
+//
+//        static double[] tab0 = new double[N+1];
+//        static double[] tab1 = new double[N+1];
+//
+//        static {
+//            for(int i = 0; i < 101; ++i) {
+//                tab0[i] = 1/(1 + (1./N) * i * (Math.E - 1));
+//                tab1[i] = -Math.log(tab0[i]);
+//            }
+//        }
+//    
+//    public static double logBadApprox(double x) {
+//    	System.err.println(x);
+//        return 6 * (x - 1) / (x + 1 + 4 * (Math.sqrt(x)));
+//    }
     
 	//@Override
     public double getLogLikelihood2(Node node, double[] start, double[] stop, double time) {

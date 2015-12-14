@@ -525,7 +525,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 		if (((CalculationNode) clockModel).isDirtyCalculation() || tree.somethingIsDirty()) {
 			calcBranchLengths();
 			for (int i = 0; i < branchLengths.length; i++) {
-				if (Math.abs(branchLengths[i] - storedBranchLengths[i]) > 1e-10) {
+				if (branchLengths[i] != storedBranchLengths[i]) {
 					if (isTopOfPartition[i]) {
 						dirtyPartitions[rootNodeToPartitionMap[i][0]] = true;
 						dirtyPartitions[rootNodeToPartitionMap[i][1]] = true;
