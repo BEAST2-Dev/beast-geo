@@ -284,7 +284,7 @@ public class SLocationInputEditor extends ListInputEditor {
      */
     void convertTableDataToTrait() {
         String sTrait = "";
-        //Set<String> values = new HashSet<String>(); 
+        //Set<String> values = new HashSet<>(); 
         for (int i = 0; i < tableData.length; i++) {
             sTrait += sTaxa[i] + "=" + tableData[i][1] + " " + tableData[i][2];
             if (i < tableData.length - 1) {

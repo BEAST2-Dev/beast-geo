@@ -12,7 +12,7 @@ import beast.evolution.tree.Tree;
 
 @Description("Helper class for logging locations from ApproxMultivariateTraitLikelihood")
 public class TraitFunction extends RealParameter {
-	public Input<GenericTreeLikelihood> likelihoodInput = new Input<GenericTreeLikelihood>("likelihood", "trait likelihood to be logged", Validate.REQUIRED);
+	public Input<GenericTreeLikelihood> likelihoodInput = new Input<>("likelihood", "trait likelihood to be logged", Validate.REQUIRED);
 
 	ApproxMultivariateTraitLikelihood likelihood;
 	PFApproxMultivariateTraitLikelihood likelihood2;

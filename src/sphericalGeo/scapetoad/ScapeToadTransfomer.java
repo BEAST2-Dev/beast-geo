@@ -50,13 +50,13 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 	final static String DEFAULT_ATT_IDENTIFIER = "NAME";
 	final static String ATTRIBUTE = "weight";
 
-	public Input<File> shapeFileInput = new Input<File>("shapeFile", "file containing regions in .shp or .kml format", Validate.REQUIRED);
+	public Input<File> shapeFileInput = new Input<>("shapeFile", "file containing regions in .shp or .kml format", Validate.REQUIRED);
 
-	public Input<String> attIdentifierInput = new Input<String>("attIdentifier", "name of attribute in shape file that identifies a region", DEFAULT_ATT_IDENTIFIER);
-	public Input<String> weightInput = new Input<String>("value", "comma separated list of 'id=value' pairs where values representing relative size for each regions with ID from the shape file");
-	public Input<String> weightIdentifiedInput = new Input<String>("weightIdentifier", "name of attribute in shape file that identifies a weight", Validate.XOR, weightInput);
+	public Input<String> attIdentifierInput = new Input<>("attIdentifier", "name of attribute in shape file that identifies a region", DEFAULT_ATT_IDENTIFIER);
+	public Input<String> weightInput = new Input<>("value", "comma separated list of 'id=value' pairs where values representing relative size for each regions with ID from the shape file");
+	public Input<String> weightIdentifiedInput = new Input<>("weightIdentifier", "name of attribute in shape file that identifies a weight", Validate.XOR, weightInput);
 	
-	public Input<File> cartogramFileInput = new Input<File>("cartogram", "File containing cartogram. If specified and file does not exist, the cartogram will be calculated and stored there.");
+	public Input<File> cartogramFileInput = new Input<>("cartogram", "File containing cartogram. If specified and file does not exist, the cartogram will be calculated and stored there.");
 	
 
 	public Input<Boolean> isDensityInput = new Input<>("isDensity", "if true, weights are interpreted as densities, otherwise they are interpreted as mass", true);
@@ -117,7 +117,7 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 		
         // parse region values and store in map
 		if (weightInput.get() != null) {
-			map = new HashMap<String, Double>();
+			map = new HashMap<>();
 			String ts = weightInput.get();
 			String [] traits = ts.split(",");
 	        for (String trait : traits) {
@@ -319,14 +319,14 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 		org.w3c.dom.Document doc = factory.newDocumentBuilder().parse(path);
 		doc.normalize();
 
-		Map<String, List<List<Double>>> coordinates = new HashMap();
+		Map<String, List<List<Double>>> coordinates = new HashMap<>();
 
 		// grab 'coordinates' elements out of the KML file
 		NodeList oPlacemarks = doc.getElementsByTagName("Placemark");
 		for (int iNode = 0; iNode < oPlacemarks.getLength(); iNode++) {
 			Node oPlaceMark = oPlacemarks.item(iNode);
 			String id = getChild(oPlaceMark, "name").getTextContent();
-			List<List<Double>> polygons = new ArrayList<List<Double>>();
+			List<List<Double>> polygons = new ArrayList<>();
 			getPolygons(oPlaceMark, polygons);
 			coordinates.put(id, polygons);
 		}

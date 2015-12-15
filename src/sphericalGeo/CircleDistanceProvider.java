@@ -32,11 +32,11 @@ public class CircleDistanceProvider extends BEASTObject implements DistanceProvi
 
 		private final String ename;
 	}
-    public Input<TreeInterface> treeInput = new Input<TreeInterface>("tree", "phylogenetic beast.tree with sequence data in the leafs", Validate.REQUIRED);
-    public Input<Alignment> dataInput = new Input<Alignment>("data", "sequence data for the beast.tree", Validate.REQUIRED);
+    public Input<TreeInterface> treeInput = new Input<>("tree", "phylogenetic beast.tree with sequence data in the leafs", Validate.REQUIRED);
+    public Input<Alignment> dataInput = new Input<>("data", "sequence data for the beast.tree", Validate.REQUIRED);
 
-	public Input<Transformer> transformerInput = new Input<Transformer>("transformer","landscape transformer to capture some inheterogenuity in the diffusion process");
-	public Input<Method> distMethod = new Input<Method>("method", "for calculating distance between clade positions (for operator weights). sqrt takes " +
+	public Input<Transformer> transformerInput = new Input<>("transformer","landscape transformer to capture some inheterogenuity in the diffusion process");
+	public Input<Method> distMethod = new Input<>("method", "for calculating distance between clade positions (for operator weights). sqrt takes " +
 	         "square root of distance (default distance)",  Method.DISTANCE, Method.values());
 
 	private TreeInterface tree;

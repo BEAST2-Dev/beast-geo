@@ -11,12 +11,12 @@ import beast.core.Input.Validate;
 @Description("Defines geographical region through a bitmap")
 public class BitmapRegion extends Region {
 	public Input<File> bitmapFileInput = new Input<File>("file", "location of bitmap file on file system", Validate.REQUIRED);
-	public Input<String> bboxInput = new Input<String>("bbox", "bounding box covered by bitmap file, "
+	public Input<String> bboxInput = new Input<>("bbox", "bounding box covered by bitmap file, "
 			+ "It is specified as space separated list (in min-latitude min-longitude max-latitude max-longitude), "
             + " e.g. \"-47 120 -5 154\" to cover Australia. "
 			+ "default is -90 -180 90 180");
 	
-	public Input<Integer> regionColorInput = new Input<Integer>("color", "color in bitmap that specifies the region", 0x00FF00);
+	public Input<Integer> regionColorInput = new Input<>("color", "color in bitmap that specifies the region", 0x00FF00);
 
 	@Override
 	public void initAndValidate() throws Exception {

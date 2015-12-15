@@ -14,26 +14,26 @@ import beast.util.Randomizer;
 
 @Description("Maps nodes in a tree to entries of a parameter")
 public class TreeTraitMap extends CalculationNode /* implements TreeTrait<double[]>*/ {
-	public Input<TreeInterface> treeInput = new Input<TreeInterface>("tree", "tree for which to map the nodes", Validate.REQUIRED);
-	public Input<RealParameter> parameterInput = new Input<RealParameter>("parameter",
+	public Input<TreeInterface> treeInput = new Input<>("tree", "tree for which to map the nodes", Validate.REQUIRED);
+	public Input<RealParameter> parameterInput = new Input<>("parameter",
 			"paramater for which to map entries for", Validate.REQUIRED);
-	public Input<String> traitName = new Input<String>("traitName", "name of the trait", "unnamed");
+	public Input<String> traitName = new Input<>("traitName", "name of the trait", "unnamed");
     public enum Intent {
         NODE,
         BRANCH,
         WHOLE_TREE
     }
-    public Input<Intent> intent = new Input<Intent>("intent", "intent of the trait, one of " + Intent.values()
+    public Input<Intent> intent = new Input<>("intent", "intent of the trait, one of " + Intent.values()
 			+ " (Default whole tree)", Intent.WHOLE_TREE);
-	public Input<String> value = new Input<String>("value","initialisation values for traits in the form of " +
+	public Input<String> value = new Input<>("value","initialisation values for traits in the form of " +
 			"a comma separated string of taxon-name, value pairs. For example, for a two-dimensional trait " +
 			"the value could be Taxon1=10 20,Taxon2=20 30,Taxon3=10 10");
 
-	public Input<Boolean> initAsMeanInput =new Input<Boolean>("initByMean", "initialise internal nodes by taking the mean of its children", false);
-	public Input<Double> jitterInput =new Input<Double>("jitter", "amount of jitter used to ensure traits are not exactly the same when using initByMean", 0.0001);
+	public Input<Boolean> initAsMeanInput =new Input<>("initByMean", "initialise internal nodes by taking the mean of its children", false);
+	public Input<Double> jitterInput =new Input<>("jitter", "amount of jitter used to ensure traits are not exactly the same when using initByMean", 0.0001);
 	
-	public Input<String> randomizeupper = new Input<String>("randomizeupper", "if specified, used as upper bound for randomly initialising unassigned nodes");
-	public Input<String> randomizelower = new Input<String>("randomizelower", "if specified, used as lower bound for randomly initialising unassigned nodes");
+	public Input<String> randomizeupper = new Input<>("randomizeupper", "if specified, used as upper bound for randomly initialising unassigned nodes");
+	public Input<String> randomizelower = new Input<>("randomizelower", "if specified, used as lower bound for randomly initialising unassigned nodes");
 	TreeInterface tree;
 	RealParameter parameter;
 	

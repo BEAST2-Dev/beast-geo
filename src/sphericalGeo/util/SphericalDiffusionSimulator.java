@@ -10,7 +10,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.apache.commons.math.ConvergenceException;
@@ -29,20 +28,20 @@ import beast.evolution.tree.TreeInterface;
 
 @Description("Simulates spherical diffusion process on a tree")
 public class SphericalDiffusionSimulator extends beast.core.Runnable {
-    public Input<TreeInterface> treeInput = new Input<TreeInterface>("tree", "phylogenetic beast.tree with sequence data in the leafs", Validate.REQUIRED);
+    public Input<TreeInterface> treeInput = new Input<>("tree", "phylogenetic beast.tree with sequence data in the leafs", Validate.REQUIRED);
 
-    public Input<SiteModelInterface> siteModelInput = new Input<SiteModelInterface>("siteModel", "site model for leafs in the beast.tree", Validate.REQUIRED);
+    public Input<SiteModelInterface> siteModelInput = new Input<>("siteModel", "site model for leafs in the beast.tree", Validate.REQUIRED);
     
-    public Input<BranchRateModel.Base> branchRateModelInput = new Input<BranchRateModel.Base>("branchRateModel",
+    public Input<BranchRateModel.Base> branchRateModelInput = new Input<>("branchRateModel",
             "A model describing the rates on the branches of the beast.tree.");
 
-    public Input<RealParameter> startInput = new Input<RealParameter>("start","start location at the root of the tree");
+    public Input<RealParameter> startInput = new Input<>("start","start location at the root of the tree");
 
-    public Input<String> fileInput = new Input<String>("file","file where to store the leaf locations (default stdout)");
-    public Input<String> treeFileInput = new Input<String>("treefile","file where to store the tree (default stdout)");
-    public Input<String> treePNGFileInput = new Input<String>("pngfile","file where to store an image of the tree (default 'tree.png')", "tree.png");
+    public Input<String> fileInput = new Input<>("file","file where to store the leaf locations (default stdout)");
+    public Input<String> treeFileInput = new Input<>("treefile","file where to store the tree (default stdout)");
+    public Input<String> treePNGFileInput = new Input<>("pngfile","file where to store an image of the tree (default 'tree.png')", "tree.png");
     
-    public Input<Boolean> forceAngleInput = new Input<Boolean>("forceAngle","enforce that angle of next point is restricted by its parents direction", true);
+    public Input<Boolean> forceAngleInput = new Input<>("forceAngle","enforce that angle of next point is restricted by its parents direction", true);
 	
 	SphericalDiffusionModel substModel;
 	TreeInterface tree;
@@ -198,6 +197,8 @@ public class SphericalDiffusionSimulator extends beast.core.Runnable {
 	}
 	
 	class Panel extends JPanel {
+		private static final long serialVersionUID = 1L;
+
 		double min0 = -90, max0 = 90, min1 = -180, max1 = 180;
 		
 		@Override

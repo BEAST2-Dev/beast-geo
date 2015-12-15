@@ -24,7 +24,7 @@ import beast.evolution.tree.TreeInterface;
 @Citation("Remco R. Bouckaert. Phylogeography by diffusion on a sphere. bioRxiv, BIORXIV/2015/016311, 2015.")
 public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood implements StateNodeInitialiser { 
 	public Input<Boolean> scaleByBranchLengthInput = new Input<>("scale", "scale by branch lengths for initial position", false);
-	public Input<List<GeoPrior>> geopriorsInput = new Input<>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<GeoPrior>());
+	public Input<List<GeoPrior>> geopriorsInput = new Input<>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<>());
 	public Input<LocationParameter> locationInput = new Input<>("location",
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree");
 

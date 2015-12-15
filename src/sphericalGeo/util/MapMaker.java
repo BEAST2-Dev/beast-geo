@@ -114,7 +114,7 @@ public class MapMaker extends Runnable {
 		org.w3c.dom.Document doc = factory.newDocumentBuilder().parse(kmlFileInput.get());
 		doc.normalize();
 
-		List<List<Double>> coordinates = new ArrayList<List<Double>>();
+		List<List<Double>> coordinates = new ArrayList<>();
 
 		// grab 'coordinates' elements out of the KML file
 		NodeList oCoordinates = doc.getElementsByTagName("coordinates");

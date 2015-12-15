@@ -12,9 +12,9 @@ import beast.util.Randomizer;
 
 @Description("operator to samples locations from geo-priors")
 public class LocationOperator extends Operator {
-	public Input<RealParameter> locationInput = new Input<RealParameter>("location",
+	public Input<RealParameter> locationInput = new Input<>("location",
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree", Validate.REQUIRED);
-	public Input<ApproxMultivariateTraitLikelihood> likelihoodInput = new Input<ApproxMultivariateTraitLikelihood>("likelihood", 
+	public Input<ApproxMultivariateTraitLikelihood> likelihoodInput = new Input<>("likelihood", 
 			"likelihood over the locations", Validate.REQUIRED);
 	
 	RealParameter sampledLocations;

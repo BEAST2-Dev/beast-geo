@@ -27,7 +27,7 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
 	@Override
 	List<BEASTInterface> getAlignments(BeautiDoc doc) {
 		try {
-            List<String> trees = new ArrayList<String>();
+            List<String> trees = new ArrayList<>();
             doc.scrubAll(true, false);
             State state = (State) doc.pluginmap.get("state");
             for (StateNode node : state.stateNodeInput.get()) {
@@ -42,7 +42,7 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
             	PartitionContext context = new PartitionContext(name, name, name, tree);
 
             	Alignment alignment = (Alignment) doc.addAlignmentWithSubnet(context, template.get());
-            	List<BEASTInterface> list = new ArrayList<BEASTInterface>();
+            	List<BEASTInterface> list = new ArrayList<>();
             	list.add(alignment);
             	editAlignment(alignment, doc);
             	return list;

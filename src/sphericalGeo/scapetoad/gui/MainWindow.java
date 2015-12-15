@@ -25,14 +25,11 @@ package sphericalGeo.scapetoad.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.NoninvertibleTransformException;
-import java.net.URL;
 import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -47,7 +44,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JMenuBar;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -56,7 +52,6 @@ import javax.swing.JSplitPane;
 import sphericalGeo.scapetoad.core.IOManager;
 
 import com.vividsolutions.jump.workbench.model.Layer;
-import com.vividsolutions.jump.workbench.model.LayerManager;
 import com.vividsolutions.jump.workbench.model.LayerTreeModel;
 import com.vividsolutions.jump.workbench.ui.ErrorHandler;
 import com.vividsolutions.jump.workbench.ui.LayerViewPanel;
@@ -77,6 +72,7 @@ import com.vividsolutions.jump.workbench.ui.renderer.RenderingManager;
 public class MainWindow extends JFrame 
 	implements LayerViewPanelContext, ErrorHandler
 {
+	private static final long serialVersionUID = 1L;
 	
 	
 	MainPanel mMainPanel = null;
@@ -199,6 +195,8 @@ public class MainWindow extends JFrame
 class MainPanel extends JPanel
 {
 
+	private static final long serialVersionUID = 1L;
+
 	MainPanel (JFrame contentFrame)
 	{
 	
@@ -265,6 +263,7 @@ class MainPanel extends JPanel
 class LayerListPanel extends JPanel
 {
 
+	private static final long serialVersionUID = 1L;
 
 
 	/**
@@ -312,6 +311,7 @@ class LayerListPanel extends JPanel
 class MapPanel extends JPanel
 {
 
+	private static final long serialVersionUID = 1L;
 
 
 	/**
@@ -382,6 +382,7 @@ class MapPanel extends JPanel
 class MainToolbar extends JPanel
 {
 
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The default constructor for the map panel.
@@ -511,6 +512,7 @@ class MainToolbar extends JPanel
 class ActionZoomToFullExtent extends AbstractAction
 {
 	
+	private static final long serialVersionUID = 1L;
 	
 	public void actionPerformed(ActionEvent e)
 	{
@@ -539,6 +541,7 @@ class ActionZoomToFullExtent extends AbstractAction
 class ActionCreateCartogram extends AbstractAction
 {
 
+	private static final long serialVersionUID = 1L;
 
 	public void actionPerformed(ActionEvent e)
 	{
@@ -573,6 +576,7 @@ class ActionCreateCartogram extends AbstractAction
 class ExportShapeFileDialog extends JDialog
 {
 
+	private static final long serialVersionUID = 1L;
 
 	JButton mOkButton;
 	JButton mCancelButton;
@@ -689,6 +693,7 @@ class ExportShapeFileDialog extends JDialog
 class ExportShapeFileDialogAction extends AbstractAction
 {
 
+	private static final long serialVersionUID = 1L;
 
 	String mActionToPerform = "closeDialogWithoutSaving";
 	ExportShapeFileDialog mDialog = null;
@@ -754,6 +759,7 @@ class ExportShapeFileDialogAction extends AbstractAction
 class ExportSvgFileDialog extends JDialog
 {
 
+	private static final long serialVersionUID = 1L;
 
 	JButton mOkButton;
 	JButton mCancelButton;
@@ -944,6 +950,7 @@ class ExportSvgFileDialog extends JDialog
 class ExportSvgFileDialogAction extends AbstractAction
 {
 
+	private static final long serialVersionUID = 1L;
 
 	String mActionToPerform = "closeDialogWithoutSaving";
 	ExportSvgFileDialog mDialog = null;

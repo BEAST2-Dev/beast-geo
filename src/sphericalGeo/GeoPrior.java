@@ -20,17 +20,17 @@ import beast.util.Randomizer;
 
 @Description("Flat prior over a region -- emforces monophyly of the clade (if any)")
 public class GeoPrior extends Distribution {
-	public Input<Region> regionInput = new Input<Region>("region", "region to be in (or not, depending on 'isInside' flag). "
+	public Input<Region> regionInput = new Input<>("region", "region to be in (or not, depending on 'isInside' flag). "
 			+ "If not specified the MRCA node will be sampled (which may or may not be more efficient), but no restriction "
 			+ "is placed on the node.");//, Validate.REQUIRED);
-	public Input<Boolean> isInsideInput = new Input<Boolean>("isInside", "whether the prior is for being inside the region, instead of outside", true);
-	public Input<RealParameter> locationInput = new Input<RealParameter>("location",
+	public Input<Boolean> isInsideInput = new Input<>("isInside", "whether the prior is for being inside the region, instead of outside", true);
+	public Input<RealParameter> locationInput = new Input<>("location",
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree", Validate.REQUIRED);
-	public Input<Tree> treeInput = new Input<Tree>("tree", "beast tree (from which to get the taxon set)", Validate.REQUIRED);
+	public Input<Tree> treeInput = new Input<>("tree", "beast tree (from which to get the taxon set)", Validate.REQUIRED);
 
 	public Input<Boolean> allInternalNodesInput = new Input<>("allInternalNodes", "if true, apply prior to all internal nodes", false);
-	public Input<Taxon> taxonInput = new Input<Taxon>("taxon", "taxon associated with this region, if only a tip is restricted. Otherwise use 'taxonset'");
-	public Input<TaxonSet> taxonSetInput = new Input<TaxonSet>("taxonset",
+	public Input<Taxon> taxonInput = new Input<>("taxon", "taxon associated with this region, if only a tip is restricted. Otherwise use 'taxonset'");
+	public Input<TaxonSet> taxonSetInput = new Input<>("taxonset",
 			"specify the prior over an internal node that is the MRCA of set of taxa. Select all taxa for the root");//, Validate.XOR, taxonInput);
 
 	Region region;

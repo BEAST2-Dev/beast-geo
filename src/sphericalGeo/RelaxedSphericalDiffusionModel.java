@@ -43,8 +43,8 @@ import beast.math.distributions.ParametricDistribution;
 
 @Description("Diffusion model that assumes a normal diffusion process on a sphere and integrates out relaxed clock")
 public class RelaxedSphericalDiffusionModel extends SphericalDiffusionModel {
-    public Input<ParametricDistribution> rateDistInput = new Input<ParametricDistribution>("distr", "the distribution governing the rates among branches. Must have mean of 1. The precission parameter can be used to change the mean rate.", Input.Validate.REQUIRED);
-    public Input<Integer> numberOfDiscreteRatesInput = new Input<Integer>("numberOfDiscreteRates", "the number of discrete rate categories to approximate the rate distribution by", 10);
+    public Input<ParametricDistribution> rateDistInput = new Input<>("distr", "the distribution governing the rates among branches. Must have mean of 1. The precission parameter can be used to change the mean rate.", Input.Validate.REQUIRED);
+    public Input<Integer> numberOfDiscreteRatesInput = new Input<>("numberOfDiscreteRates", "the number of discrete rate categories to approximate the rate distribution by", 10);
 
     int nrOfDiscreteRates;
     private double[] rates;

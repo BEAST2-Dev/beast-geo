@@ -56,7 +56,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 
     private static final double RAD2DEG = 180 / Math.PI;
     private static final double DEG2RAD = Math.PI / 180;
-    public Input<RealParameter> precisionInput = new Input<RealParameter>("precision", "precision of diffusion process", Validate.REQUIRED);
+    public Input<RealParameter> precisionInput = new Input<>("precision", "precision of diffusion process", Validate.REQUIRED);
     public Input<Boolean> m_fast = new Input<>("fast", "Use an approximation for arccos for angles close to 0 "
     + "(|cos(x) > 0.9). In this range the approximation has an error of at most 1e-10, " +
             "and is faster than the Java version.", false);

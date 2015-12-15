@@ -1,7 +1,6 @@
 package sphericalGeo;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import beast.core.Description;
 import beast.core.Input;
@@ -12,7 +11,7 @@ import beast.evolution.alignment.Alignment;
 @Description("Creates and alignment of continuous data, such as a geographic location, from a trait set")
 public class AlignmentFromTraitMap extends Alignment {
 	
-	public Input<TreeTraitMap> traitInput = new Input<TreeTraitMap>("traitMap", "trait map to be interpreted as single site alignment");
+	public Input<TreeTraitMap> traitInput = new Input<>("traitMap", "trait map to be interpreted as single site alignment");
 
 	TreeTraitMap traitMap;
 
@@ -32,7 +31,7 @@ public class AlignmentFromTraitMap extends Alignment {
 		}
     	traitMap = traitInput.get();
     	patternIndex = new int[0];
-        counts = new ArrayList<List<Integer>>();
+        counts = new ArrayList<>();
     	if (traitMap == null) { // assume we are in beauti
     		return;
     	}
@@ -41,7 +40,7 @@ public class AlignmentFromTraitMap extends Alignment {
         	throw new Exception("Data type must be a LocationDataType, not " + m_dataType.getClass().getName());
         }
 
-        taxaNames = new ArrayList<String>();
+        taxaNames = new ArrayList<>();
         for (String name : traitMap.treeInput.get().getTaxonset().asStringList()) {
         	taxaNames.add(name);
         }
@@ -53,7 +52,7 @@ public class AlignmentFromTraitMap extends Alignment {
         }
         
 
-        stateCounts = new ArrayList<Integer>();
+        stateCounts = new ArrayList<>();
         for (@SuppressWarnings("unused") String s : taxaNames) {
         	stateCounts.add(m_dataType.getStateCount());
         }

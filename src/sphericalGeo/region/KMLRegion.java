@@ -2,7 +2,6 @@ package sphericalGeo.region;
 
 import java.io.File;
 
-import beast.app.beauti.BeautiDoc;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
@@ -22,7 +21,7 @@ import org.w3c.dom.NodeList;
 
 @Description("Geographical region defined by one or more polygons in a KML file")
 public class KMLRegion extends Region {
-	public Input<File> kmlFileInput = new Input<File>("kml", "kml file with polygons over admissable locations.", Validate.REQUIRED);
+	public Input<File> kmlFileInput = new Input<>("kml", "kml file with polygons over admissable locations.", Validate.REQUIRED);
 
 	public KMLRegion() {}
 	public KMLRegion(String kmlFile) throws Exception {initByName("kml", kmlFile);}
@@ -148,7 +147,7 @@ public class KMLRegion extends Region {
 		org.w3c.dom.Document doc = factory.newDocumentBuilder().parse(kmlFileInput.get());
 		doc.normalize();
 
-		List<List<Double>> coordinates = new ArrayList<List<Double>>();
+		List<List<Double>> coordinates = new ArrayList<>();
 
 		// grab 'coordinates' elements out of the KML file
 		NodeList oCoordinates = doc.getElementsByTagName("coordinates");

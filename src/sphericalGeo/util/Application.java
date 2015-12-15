@@ -93,7 +93,7 @@ public class Application {
 	}
 
 	protected void parseArgs(JSONObject args) throws Exception {
-		List<String> argList = new ArrayList<String>();
+		List<String> argList = new ArrayList<>();
 		for (String key : args.keySet()) {
 			argList.add("-" + key.trim());
 			argList.add(args.get(key).toString().trim());

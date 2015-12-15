@@ -30,13 +30,11 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.Vector;
 
 import sphericalGeo.scapetoad.StatusTracker;
 import sphericalGeo.scapetoad.SwingWorker;
 import sphericalGeo.scapetoad.gui.AppContext;
-import sphericalGeo.scapetoad.gui.CartogramWizard;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -68,6 +66,7 @@ import com.vividsolutions.jump.workbench.ui.renderer.style.LabelStyle;
  */
 public class Cartogram extends SwingWorker implements Serializable
 {
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The cartogram wizard. We need the wizard reference for updating

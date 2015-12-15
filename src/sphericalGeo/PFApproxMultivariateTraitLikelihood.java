@@ -19,17 +19,17 @@ import beast.util.Randomizer;
 
 @Description("Approximate likelihood by particle filter approximation")
 public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
-	public Input<Integer> nrOfParticlesInput = new Input<Integer>("nrOfParticles", "number of particles to use", 25);//100
-	public Input<Integer> nrOfIterationsInput = new Input<Integer>("nrOfIterations", "number of iterations to run the particle filter", 10);
-	public Input<Integer> rangeSizeInput = new Input<Integer>("nrrange", "number of random samples for placing a node", 10);//10
+	public Input<Integer> nrOfParticlesInput = new Input<>("nrOfParticles", "number of particles to use", 25);//100
+	public Input<Integer> nrOfIterationsInput = new Input<>("nrOfIterations", "number of iterations to run the particle filter", 10);
+	public Input<Integer> rangeSizeInput = new Input<>("nrrange", "number of random samples for placing a node", 10);//10
 	
-	public Input<Boolean> scaleByBranchLengthInput = new Input<Boolean>("scale", "scale by branch lengths for initial position", true);
+	public Input<Boolean> scaleByBranchLengthInput = new Input<>("scale", "scale by branch lengths for initial position", true);
 
-	public Input<List<GeoPrior>> geopriorsInput = new Input<List<GeoPrior>>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<>());
-	public Input<RealParameter> locationInput = new Input<RealParameter>("location",
+	public Input<List<GeoPrior>> geopriorsInput = new Input<>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<>());
+	public Input<RealParameter> locationInput = new Input<>("location",
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree");
 
-	public Input<Transformer> transformerInput = new Input<Transformer>("transformer","landscape transformer to capture some inheterogenuity in the diffusion process");
+	public Input<Transformer> transformerInput = new Input<>("transformer","landscape transformer to capture some inheterogenuity in the diffusion process");
 
 
 	double epsilon = 2.0;
@@ -207,7 +207,7 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		
 		List<GeoPrior> geopriors = geopriorsInput.get();
 		isSampled = new boolean[tree.getNodeCount()];
-		sampleNumber = new ArrayList<Integer>();
+		sampleNumber = new ArrayList<>();
 		if (geopriors.size() > 0) {
 			sampledLocations = locationInput.get();
 			for (GeoPrior prior : geopriors) {
