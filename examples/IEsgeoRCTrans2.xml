@@ -23,7 +23,7 @@
 
         <taxa id="geo" spec="sphericalGeo.AlignmentFromTraitMap">
             <traitMap id="traitmap.s:geo" spec="sphericalGeo.TreeTraitMap" initByMean="true" randomizelower="-90 -180" randomizeupper="90 180" traitName="location" tree="@Tree.t:IELex">
-                <parameter id="location.s:geo" dimension="390" minordimension="2">0.0 0.0</parameter>
+                <parameter id="location.s:geo" spec="sphericalGeo.LocationParameter" dimension="390" minordimension="2">0.0 0.0</parameter>
                 
                         
 Hittite=37.7874752477676 33.4357812970257,
