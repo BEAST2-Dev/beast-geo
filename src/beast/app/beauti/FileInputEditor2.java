@@ -44,7 +44,7 @@ public class FileInputEditor2 extends InputEditor.Base {
 				File file = Utils.getLoadFile(m_input.getTipText(), defaultFile, "All files", "");
 				try {
 					m_entry.setText(file.getName());
-					m_input.setValue(file, m_plugin);
+					m_input.setValue(file, m_beastObject);
 					String path = file.getPath();
 					Beauti.g_sDir = path;
 				} catch (Exception e) {
@@ -69,7 +69,7 @@ public class FileInputEditor2 extends InputEditor.Base {
 				file = origFile.substring(0, origFile.lastIndexOf(fileSep) + 1) + file;
 			}
 		}
-		m_input.setValue(file, m_plugin);	
+		m_input.setValue(file, m_beastObject);	
    	}
 	
 

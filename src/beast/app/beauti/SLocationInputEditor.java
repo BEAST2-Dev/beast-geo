@@ -65,7 +65,7 @@ public class SLocationInputEditor extends ListInputEditor {
 	public void init(Input<?> input, BEASTInterface plugin, int itemNr,	ExpandOption bExpandOption, boolean bAddButtons) {
         m_bAddButtons = bAddButtons;
         m_input = input;
-        m_plugin = plugin;
+        m_beastObject = plugin;
         this.itemNr = itemNr;
         m_bAddButtons = bAddButtons;
 		this.itemNr = itemNr;
@@ -78,9 +78,9 @@ public class SLocationInputEditor extends ListInputEditor {
 
 	public void initPanel(ApproxMultivariateTraitLikelihood likelihood_) {
 		likelihood = likelihood_;
-		m_plugin = likelihood.dataInput.get();
+		m_beastObject = likelihood.dataInput.get();
 		try {
-			m_input = m_plugin.getInput("traitSet");
+			m_input = m_beastObject.getInput("traitSet");
 		}catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -93,7 +93,7 @@ public class SLocationInputEditor extends ListInputEditor {
         	}
     		AlignmentFromTraitMap traitData = (AlignmentFromTraitMap) data;
             m_input = traitData.traitInput;
-            m_plugin = traitData;
+            m_beastObject = traitData;
             traitSet = traitData.traitInput.get();
             
             Box box = Box.createVerticalBox();

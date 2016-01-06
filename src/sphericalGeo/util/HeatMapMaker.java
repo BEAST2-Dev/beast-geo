@@ -245,9 +245,9 @@ public class HeatMapMaker extends Runnable {
 			doc.beautiConfig.initAndValidate();
 			
 			// suppress a few inputs that we don't want to expose to the user
-			doc.beautiConfig.suppressPlugins.add(sampler.getClass().getName() + ".mcmc");
-			doc.beautiConfig.suppressPlugins.add(sampler.getClass().getName() + ".value");
-			doc.beautiConfig.suppressPlugins.add(sampler.getClass().getName() + ".hosts");
+			doc.beautiConfig.suppressBEASTObjects.add(sampler.getClass().getName() + ".mcmc");
+			doc.beautiConfig.suppressBEASTObjects.add(sampler.getClass().getName() + ".value");
+			doc.beautiConfig.suppressBEASTObjects.add(sampler.getClass().getName() + ".hosts");
 		
 			// create panel with entries for the application
 			BEASTObjectPanel panel = new BEASTObjectPanel(sampler, sampler.getClass(), doc);
