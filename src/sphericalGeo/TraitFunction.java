@@ -3,6 +3,9 @@ package sphericalGeo;
 
 
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
@@ -14,21 +17,25 @@ import beast.evolution.tree.Tree;
 public class TraitFunction extends RealParameter {
 	public Input<GenericTreeLikelihood> likelihoodInput = new Input<>("likelihood", "trait likelihood to be logged", Validate.REQUIRED);
 
-	ApproxMultivariateTraitLikelihood likelihood;
-	PFApproxMultivariateTraitLikelihood likelihood2;
+	GenericTreeLikelihood likelihood;
 	Tree tree;
+
+	Method getPosition;
 	
 	@Override
 	public void initAndValidate() throws Exception {
 		if (likelihoodInput.get() instanceof ApproxMultivariateTraitLikelihood) {
 			likelihood = (ApproxMultivariateTraitLikelihood)likelihoodInput.get();
-			tree = ((Tree) (likelihood.treeInput.get()));
+		} else if (likelihoodInput.get() instanceof ApproxMultivariateTraitLikelihoodF) {
+			likelihood = (ApproxMultivariateTraitLikelihoodF)likelihoodInput.get();
 		} else if (likelihoodInput.get() instanceof PFApproxMultivariateTraitLikelihood) {
-			likelihood2 = (PFApproxMultivariateTraitLikelihood)likelihoodInput.get();
-	        tree = ((Tree) (likelihood2.treeInput.get()));
+			likelihood= (PFApproxMultivariateTraitLikelihood)likelihoodInput.get();
 		} else {
 			throw new RuntimeException("likelihood should be one of ApproxMultivariateTraitLikelihood or PFApproxMultivariateTraitLikelihood");
 		}
+        tree = ((Tree) (likelihood.treeInput.get()));
+		getPosition = likelihood.getClass().getMethod("getPosition", int.class);
+				
 	}
 
 	@Override
@@ -48,9 +55,13 @@ public class TraitFunction extends RealParameter {
 
 	@Override
 	public Double getMatrixValue(int i, int j) {
-		if (likelihood != null)
-		return likelihood.getPosition(i)[j];
-		return likelihood2.getPostion(i)[j];
+		try {
+			return ((double[]) getPosition.invoke(likelihood, i))[j];
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 0.0;
 	}
 
 }

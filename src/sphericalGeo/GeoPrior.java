@@ -132,19 +132,21 @@ public class GeoPrior extends Distribution {
 	public void initialise() {
 		if (allInternalNodes) {
 		} else if (taxonInput.get() != null) {
+			// prior over a single tip
 			isTip = true;
 			String taxonName = taxonInput.get().getID();
-			//List<String> names = taxonSet.asStringList();
 			taxonNr = names.indexOf(taxonName);
 			if (taxonNr < 0) {
 				throw new RuntimeException("Could not find taxon " + taxonName + ". Typo perhaps?");
 			}
 		} else {
+			// prior over a clade
 			TaxonSet taxonset2 = taxonSetInput.get();
 			if (taxonset2.getTaxonCount() == names.size()) { //taxonSet.getTaxonCount()) {
 				isRoot = true;
 				taxonNr = tree.getRoot().getNr();
 			} else {
+
 				//isInTaxaSet = new boolean[taxonSet.getTaxonCount()];
 				//List<String> names = taxonSet.asStringList();
 				if (!initialised) {
@@ -173,6 +175,7 @@ public class GeoPrior extends Distribution {
 	            //    calcMRCAtime(tree.getRoot(), new int[1]);
 	            //    m = tree.getNode(taxonNr);
 	            //} else {
+
 	                nodesTraversed = new boolean[tree.getNodeCount()];
 	                nseen = 0;
 	                m = getCommonAncestor();

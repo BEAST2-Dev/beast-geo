@@ -93,7 +93,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
     	}
            
             if (time <= 1e-20) {
-                    return -1e100;
+                    return -1e99;
             }
             if (start[0] == stop[0] && start[1] == stop[1]) {
                     return -1e100;
