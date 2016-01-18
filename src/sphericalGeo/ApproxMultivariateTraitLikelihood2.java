@@ -208,6 +208,8 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 			initialised = isMonoPhyletic;
 		}
 		
+		prepCalculation();
+		
 		if (!isMonoPhyletic) {
 			logP = Double.NEGATIVE_INFINITY;
 			return logP;
@@ -479,6 +481,10 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 	
 	@Override
 	protected boolean requiresRecalculation() {
+		return true;
+	}
+	
+	boolean prepCalculation() {
 		boolean [] dirtyPartitions = new boolean[partitionCount];
 		if (!initialised) {
 			initialiseSampledStates();

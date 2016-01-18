@@ -29,7 +29,7 @@ public class MultiGeoPrior extends MultiMonophyleticConstraint {
 	private List<GeoPrior> geoPriors;
 	
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		super.initAndValidate();
 
 		location = geopriorsInput.get().get(0).locationInput.get();

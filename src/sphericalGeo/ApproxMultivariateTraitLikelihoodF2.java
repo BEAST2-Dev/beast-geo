@@ -44,6 +44,9 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 	/** list of partitions that need recalculating **/
 	List<Integer> dirtyPartitionList = new ArrayList<>();
 	
+	List<Integer> storedDirtyPartitionList = new ArrayList<>();
+	List<Integer> storedDirtyPartitionList2 = new ArrayList<>();
+	
 	
 	boolean wasInitialised;
 	
@@ -75,6 +78,7 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 	@Override
 	void initialiseSampledStates() {
 		wasInitialised = true;
+		//System.err.print("M");
 		
 		super.initialiseSampledStates();
 		if (!isMonoPhyletic) {
@@ -218,6 +222,7 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 			initialised = isMonoPhyletic;
 		}
 		
+		preRecalculation();
 		
 		if (!isMonoPhyletic) {
 			logP = Double.NEGATIVE_INFINITY;
@@ -225,7 +230,6 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 		}
 
 		
-		preRecalculation();
 		
 		logP = 0.0;
 		try {
@@ -271,10 +275,16 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 			}
 
 			// logP = sum of contributions of all partitions
-			for (double c : logPContributions) {
-				logP += c;
-				//System.err.println(logP);
-			}
+			double[] l = logPContributions.clone();
+            Arrays.sort(l);
+            for(int k = l.length-1; k >= 0; --k) {
+                logP += l[k];
+            }
+						
+//			for (double c : logPContributions) {
+//				logP += c;
+//				//System.err.println(logP);
+//			}
 			
 // TODO: slightly more efficient way to sum instead of the loop just above		
 // what if everything is set to dirty?
@@ -288,6 +298,13 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 		}
 		//System.err.print("locP2(" + logP +")\n");
 		sanitycheck();
+		
+		storedDirtyPartitionList2.clear();
+		storedDirtyPartitionList2.addAll(storedDirtyPartitionList);
+		storedDirtyPartitionList.clear();
+		storedDirtyPartitionList.addAll(dirtyPartitionList);
+		
+		
 		return logP;
 	}
 	
@@ -379,6 +396,7 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 	
 	@Override
 	public void store() {
+		//System.err.print("store");
 		super.store();
 
 		System.arraycopy(branchLengths, 0, storedBranchLengths, 0, branchLengths.length);
@@ -423,6 +441,7 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 	
 	@Override
 	public void restore() {
+		//System.err.print("restore");
 		super.restore();
         
 		double[] tmp = branchLengths;
@@ -529,9 +548,9 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 			}
 			if (isFilthy) {
 				// now do the more expensive check that partition numbers changed
-				int [] nextParitionNr = new int[1];
-				nextParitionNr[0] = isSampled[tree.getRoot().getNr()] ? -1 : 0;
-				if (nodeToPartitionMapChanged(tree.getRoot(), nextParitionNr, 0, dirtyPartitions)) {
+				int [] nextPartitionNr = new int[1];
+				nextPartitionNr[0] = isSampled[tree.getRoot().getNr()] ? -1 : 0;
+				if (nodeToPartitionMapChanged(tree.getRoot(), nextPartitionNr, 0, dirtyPartitions)) {
 					needsReInit = true;
 					//Arrays.fill(dirtyPartitions, true);
 				}
@@ -555,25 +574,33 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 
 		if (((CalculationNode) clockModel).isDirtyCalculation() || tree.somethingIsDirty()) {
 			calcBranchLengths();
+			//System.err.print("t");
 			for (int i = 0; i < branchLengths.length; i++) {
 				if (branchLengths[i] != storedBranchLengths[i]) {
+					//System.err.print(" " + i);
 					if (isTopOfPartition[i]) {
 						dirtyPartitions[rootNodeToPartitionMap[i][0]] = true;
 						dirtyPartitions[rootNodeToPartitionMap[i][1]] = true;
 						dirtyPartitions[rootNodeToPartitionMap[i][2]] = true;
+						//System.err.print("["+rootNodeToPartitionMap[i][0] + " " + rootNodeToPartitionMap[i][1] + " " + rootNodeToPartitionMap[i][2] + "]");
 					} else {
 						dirtyPartitions[nodeToPartitionMap[i]] = true;
+						//System.err.print("["+nodeToPartitionMap[i] + "]");
 					}
 					if (storedIsTopOfPartition[i]) {
 						dirtyPartitions[storedRootNodeToPartitionMap[i][0]] = true;
 						dirtyPartitions[storedRootNodeToPartitionMap[i][1]] = true;
 						dirtyPartitions[storedRootNodeToPartitionMap[i][2]] = true;
+						//System.err.print("["+storedRootNodeToPartitionMap[i][0] + " " + storedRootNodeToPartitionMap[i][1] + " " + storedRootNodeToPartitionMap[i][2] + "]");
 					} else {
 						dirtyPartitions[storedNodeToPartitonMap[i]] = true;						
+						//System.err.print("["+storedNodeToPartitonMap[i] + "]");
 					}
 				}
 			}
 		}
+		
+//		System.err.println(dirtyPartitions[7] + " " + dirtyPartitions[8]);
 		
 		if (sampledLocations.somethingIsDirty()) {
 			for (int i : taxonNrs) {
@@ -608,7 +635,30 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 				dirtyPartitionList.add(i);
 			}
 		}
+//		System.err.print(partitionCount + ">>>" + dirtyPartitionList);
 		return true;
 	}
 
+	
+	
+	
+//	@Override
+//	public String getID() {
+//		if (logPContributions == null) {
+//			return super.getID();
+//		}
+//		StringBuilder buf = new StringBuilder();
+//		for (int i = 0; i < logPContributions.length; i++) {
+//			buf.append(storedLogPContributions[i] + " " + logPContributions[i] + " " + (storedLogPContributions[i] - logPContributions[i]) + "\n");
+//		}
+//		
+//		buf.append(dirtyPartitionList.toString().replaceAll("[\\[\\]]",""));
+//		buf.append("<=\n");
+//		buf.append(storedDirtyPartitionList.toString().replaceAll("[\\[\\]]",""));
+//		buf.append("<=\n");
+//		buf.append(storedDirtyPartitionList2.toString().replaceAll("[\\[\\]]",""));
+//		buf.append("<=\n");
+//		return buf.toString();
+//	}
+	
 }
