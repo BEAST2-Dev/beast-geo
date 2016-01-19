@@ -1,5 +1,6 @@
 package sphericalGeo;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -211,5 +212,31 @@ public class MultiGeoPrior extends MultiMonophyleticConstraint {
 			e.printStackTrace();
 		}
 		return Double.isFinite(logP);
+	}
+	
+	
+	
+	@Override
+	public void init(PrintStream out) throws Exception {
+		for (GeoPrior prior : geoPriors) {
+			out.append("Latt(" + prior.getID()+")\t");
+			out.append("Long(" + prior.getID()+")\t");
+		}
+		super.init(out);
+	}
+	
+	@Override
+	public void log(int sample, PrintStream out) {
+		for (GeoPrior prior : geoPriors) {
+			int taxonNr = prior.getTaxonNr();
+			out.append(location.getValue(taxonNr * 2)+"\t");
+			out.append(location.getValue(taxonNr * 2 + 1)+"\t");
+		}
+		super.log(sample, out);
+	}
+	
+	@Override
+	public void close(PrintStream out) {
+		super.close(out);
 	}
 }
