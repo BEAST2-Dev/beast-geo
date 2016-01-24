@@ -21,7 +21,7 @@ public class LocationOperator2 extends Operator {
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree", Validate.REQUIRED);
 	public Input<ApproxMultivariateTraitLikelihoodF> likelihoodInput = new Input<>("likelihood", 
 			"likelihood over the locations", Validate.REQUIRED);
-	public Input<Operator> operatorInput = new Input<>("operator", "(tree) operator to user before changing the locations");
+//	public Input<Operator> operatorInput = new Input<>("operator", "(tree) operator to user before changing the locations");
 
 	RealParameter sampledLocations;
 	int [] taxonNrs;
@@ -34,7 +34,7 @@ public class LocationOperator2 extends Operator {
 	double precision;
 	double [] parentweight;
 	double [] branchLengths;
-	Operator operator;
+//	Operator operator;
 	
 	double stdDevLat;
 	double stdDevLong;
@@ -49,33 +49,45 @@ public class LocationOperator2 extends Operator {
 		isSampled = new boolean[tree.getNodeCount()];
 		branchLengths = new double[tree.getNodeCount()];
 		parentweight = new double[tree.getNodeCount()];
-		operator = operatorInput.get();
+//		operator = operatorInput.get();
 	}
 	
 	@Override
 	public double proposal() {
 		double logHR = 0;
-		if (operator != null) {
-			logHR = operator.proposal();
-			if (logHR == Double.NEGATIVE_INFINITY) {
-				return logHR;
-			}
-		}
+//		if (operator != null) {
+//			logHR = operator.proposal();
+//			if (logHR == Double.NEGATIVE_INFINITY) {
+//				return logHR;
+//			}
+//		}
 		
 		taxonNrs = likelihood.taxonNrs;
 		if (taxonNrs == null || taxonNrs.length == 0) {
 			return logHR;
 		}
+		
+//		if (true || Randomizer.nextDouble() < 0.9) {
+//			// use random walk
+//			MultiGeoPrior multiGeoPrior = likelihood.multiGeopriorsInput.get();
+//			List<GeoPrior> geopriors = multiGeoPrior.geopriorsInput.get();
+//			int i = Randomizer.nextInt(geopriors.size());
+//
+//			int k = multiGeoPrior.getCladeTopNodeNr(i);
+//			double window = 2;
+//			sampledLocations.setValue(k * 2, sampledLocations.getValue(k*2) + window * (Randomizer.nextDouble() - 0.5));
+//			sampledLocations.setValue(k * 2 + 1, sampledLocations.getValue(k*2+1) + window * (Randomizer.nextDouble() - 0.5));
+//			return logHR;
+//		}
+		
+		
+		
 		MultiGeoPrior multiGeoPrior = likelihood.multiGeopriorsInput.get();
 		List<GeoPrior> geopriors = multiGeoPrior.geopriorsInput.get();
 		int i = Randomizer.nextInt(geopriors.size());
 		GeoPrior prior = geopriors.get(i);
 		if (prior.allInternalNodes) {
-			int k = tree.getLeafNodeCount() + Randomizer.nextInt(tree.getInternalNodeCount());
-			double [] location = prior.sample();
-			sampledLocations.setValue(k * 2, location[0]);
-			sampledLocations.setValue(k * 2 + 1, location[1]);
-			return logHR;
+			return Double.NEGATIVE_INFINITY;
 		}
 		if (!prior.isMonophyletic) {
 			prior.initialise();
@@ -87,7 +99,7 @@ public class LocationOperator2 extends Operator {
 		
 		List<Integer> sampleNumber = new ArrayList<>();
 		for (GeoPrior geoprior : geopriors) {
-			if (geoprior.region != null) {
+			if (geoprior.region != null || Randomizer.nextDouble() < 0.25) {
 				int taxonNr = geoprior.getTaxonNr();
 				sampleNumber.add(taxonNr);
 				isSampled[geoprior.getTaxonNr()] = true;
@@ -104,7 +116,7 @@ public class LocationOperator2 extends Operator {
 		Double [] orgValues = sampledLocations.getValues();
 		
 		for (GeoPrior geoprior : geopriors) {
-			if (geoprior.region != null) {
+			if (geoprior.region == null) {
 				int taxonNr = geoprior.getTaxonNr();
 				double lat = position[taxonNr][0] + Randomizer.nextGaussian() * stdDevLat;
 				sampledLocations.setValue(taxonNr * 2, lat);
@@ -124,7 +136,7 @@ public class LocationOperator2 extends Operator {
 		NormalDistribution normalLong2 = new NormalDistributionImpl(0, backwardStdDevLong);
 		
 		for (GeoPrior geoprior : geopriors) {
-			if (geoprior.region != null) {
+			if (geoprior.region == null) {
 				int taxonNr = geoprior.getTaxonNr();
 				double lat = position[taxonNr][0] - sampledLocations.getValue(taxonNr * 2);
 				double long_ = position[taxonNr][1] - sampledLocations.getValue(taxonNr * 2 + 1);
@@ -147,7 +159,7 @@ public class LocationOperator2 extends Operator {
 		double meanLat = 0, meanLong = 0, squaredLat = 0, squaredLong = 0;
 		int k = 0;
 		for (GeoPrior geoprior : geopriors) {
-			if (geoprior.region != null) {
+			if (geoprior.region == null) {
 				int taxonNr = geoprior.getTaxonNr();
 				double lat = sampledLocations.getValue(taxonNr * 2);
 				double diff = (lat - position[taxonNr][0]);
