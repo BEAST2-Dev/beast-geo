@@ -217,7 +217,7 @@ public class MultiGeoPrior extends MultiMonophyleticConstraint {
 	
 	
 	@Override
-	public void init(PrintStream out) throws Exception {
+	public void init(PrintStream out) {
 		for (GeoPrior prior : geoPriors) {
 			out.append("Latt(" + prior.getID()+")\t");
 			out.append("Long(" + prior.getID()+")\t");

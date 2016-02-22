@@ -57,7 +57,7 @@ public class FileInputEditor2 extends InputEditor.Base {
 	}
 
 	@Override
-	protected void setValue(Object o) throws Exception {
+	protected void setValue(Object o) {
 		String file = o.toString();
 		if (file.equals("")) {
 			return;

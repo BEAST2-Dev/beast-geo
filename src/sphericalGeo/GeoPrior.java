@@ -364,7 +364,7 @@ public class GeoPrior extends Distribution {
     
     
     @Override
-    public void init(PrintStream out) throws Exception {
+    public void init(PrintStream out) {
         out.print(getID() + ".latitude\t");
         out.print(getID() + ".longitude\t");
     }
