@@ -24,7 +24,7 @@ public class AlignmentFromTraitMap extends Alignment {
 	}
 
 	@Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
 		
 		if (taxonSetInput.get() != null && taxonSetInput.get().getTaxonCount() == 0) {
 			taxonSetInput.setValue(null, this);
@@ -37,7 +37,7 @@ public class AlignmentFromTraitMap extends Alignment {
     	}
     	m_dataType = userDataTypeInput.get();
         if (!(m_dataType instanceof LocationDataType)) {
-        	throw new Exception("Data type must be a LocationDataType, not " + m_dataType.getClass().getName());
+        	throw new IllegalArgumentException("Data type must be a LocationDataType, not " + m_dataType.getClass().getName());
         }
 
         taxaNames = new ArrayList<>();

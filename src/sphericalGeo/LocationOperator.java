@@ -22,7 +22,7 @@ public class LocationOperator extends Operator {
 	ApproxMultivariateTraitLikelihood likelihood;
 	
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		sampledLocations = locationInput.get();
 
 		likelihood = likelihoodInput.get();

@@ -19,7 +19,7 @@ public class Region extends BEASTObject {
 	boolean traversesMapBoundary = false;
 
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
         image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 	}
 	

@@ -66,7 +66,7 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 	
 	
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		super.initAndValidate();
 
 		branchLengths = new double[tree.getNodeCount()];
@@ -216,7 +216,7 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 
 
 	@Override
-	public double calculateLogP() throws Exception {
+	public double calculateLogP() {
 		if (!initialised) {
 			initialiseSampledStates();
 			initialised = isMonoPhyletic;
@@ -637,6 +637,13 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 		}
 //		System.err.print(partitionCount + ">>>" + dirtyPartitionList);
 		return true;
+	}
+
+	public double getNodeLogP(Node node) {
+		if (node.isRoot()) {
+			return 0.0;
+		}
+		return substModel.getLogLikelihood(node, position, branchLengths);
 	}
 
 	

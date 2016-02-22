@@ -7,7 +7,7 @@ import beast.evolution.datatype.DataType;
 public class LocationDataType extends DataType.Base {
 	
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		// nothing to do
 	}
 	

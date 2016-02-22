@@ -50,7 +50,7 @@ public class HeatMapMaker extends Runnable {
 	
 	
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		width = widthInput.get();
 		height = heightInput.get();
         image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);

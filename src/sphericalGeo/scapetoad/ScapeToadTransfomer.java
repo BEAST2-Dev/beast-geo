@@ -4,7 +4,9 @@ package sphericalGeo.scapetoad;
 import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.DecimalFormat;
@@ -15,9 +17,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -92,7 +96,7 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 	Map<String,Double> map;
 	
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		// input sanity checks
 		if (deformationAmountInput.get() < 0 || deformationAmountInput.get() > 100) {
 			throw new RuntimeException("deformationAmount must be between 0 and 100");
@@ -124,7 +128,7 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 	            trait = trait.replaceAll("\\s+", " ");
 	            String[] sStrs = trait.split("=");
 	            if (sStrs.length != 2) {
-	                throw new Exception("could not parse trait: " + trait);
+	                throw new IllegalArgumentException("could not parse trait: " + trait);
 	            }
 	            String ID = sStrs[0].trim();
 	            String value = sStrs[1].trim();
@@ -139,17 +143,27 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 		AppContext.layerManager = new LayerManager();
 		AppContext.layerManager.addCategory("Original layers");
 
-		Layer lyr = createLayer(shapeFileInput.get().getPath());
+		Layer lyr;
+		try {
+			lyr = createLayer(shapeFileInput.get().getPath());
+		} catch (IllegalParametersException | SAXException | IOException | ParserConfigurationException e) {
+			throw new IllegalArgumentException(e);
+		}
 		
 		File file = null;
 		if (cartogramFileInput.get() != null) {
 			file = cartogramFileInput.get();
 		}
 		if (file != null && file.exists()) {
-			FileInputStream fis = new FileInputStream(file);
-			ObjectInputStream in = new ObjectInputStream(fis);
-			cartogramGrid = (CartogramGrid) in.readObject();
-			in.close();
+			FileInputStream fis;
+			try {
+				fis = new FileInputStream(file);
+				ObjectInputStream in = new ObjectInputStream(fis);
+				cartogramGrid = (CartogramGrid) in.readObject();
+				in.close();
+			} catch (IOException | ClassNotFoundException e) {
+				throw new IllegalArgumentException(e);
+			}
 		} else {
 			Cartogram cartogram;
 			cartogram = calcCartogram(lyr);
@@ -169,10 +183,14 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 			updateRunningStatus(1000, "Done!", "");	
 			
 			if (file != null) {
-				FileOutputStream fos = new FileOutputStream(file);
-				ObjectOutputStream out = new ObjectOutputStream(fos);
-				out.writeObject(cartogram.getGrid());
-				out.close();
+				try {
+					FileOutputStream fos = new FileOutputStream(file);
+					ObjectOutputStream out = new ObjectOutputStream(fos);
+					out.writeObject(cartogram.getGrid());
+					out.close();
+				} catch (IOException e) {
+					throw new IllegalArgumentException(e);
+				}
 			}
 			cartogramGrid = cartogram.getGrid();
 		}
@@ -242,7 +260,7 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
       return result;
     }
 
-	private Layer createLayer(String path) throws Exception {
+	private Layer createLayer(String path) throws IllegalParametersException, SAXException, IOException, ParserConfigurationException {
 		Log.warning.println("Processing file " + shapeFileInput.get().getPath());
 		if (path.toLowerCase().endsWith(".shp")) {
 			Layer lyr = IOManager.readShapefile(shapeFileInput.get().getPath());
@@ -272,10 +290,13 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
      * Main method to read a shapefile.  Most of the work is done in the org.geotools.* package.
      *
      *@param dp 'InputFile' or 'DefaultValue' to specify output .shp file.
+     * @throws ParserConfigurationException 
+     * @throws IOException 
+     * @throws SAXException 
      *
      */
     private FeatureCollection readKML(String kmlfile)
-        throws IllegalParametersException, Exception {
+        throws IllegalParametersException, SAXException, IOException, ParserConfigurationException {
     	Map<String,List<List<Double>>> map = parseKML(kmlfile);
 
     	//List<com.vividsolutions.jts.geom.Geometry> geometryList = new ArrayList<>();
@@ -313,7 +334,7 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
         return featureCollection;
     }
 
-	private Map<String,List<List<Double>>> parseKML(String path) throws Exception {
+	private Map<String,List<List<Double>>> parseKML(String path) throws SAXException, IOException, ParserConfigurationException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setValidating(false);
 		org.w3c.dom.Document doc = factory.newDocumentBuilder().parse(path);
@@ -370,7 +391,7 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 
 
 
-	Cartogram calcCartogram(Layer lyr) throws Exception {
+	Cartogram calcCartogram(Layer lyr) {
 		// Get the name of the selected layer.
 		String selectedLayer = lyr.getName();
 		

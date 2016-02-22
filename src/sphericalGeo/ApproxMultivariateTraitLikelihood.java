@@ -68,7 +68,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	boolean storedIsMonoPhyletic = false;
 	
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		super.initAndValidate();
 		clockModel = branchRateModelInput.get();
 		if (clockModel == null) {
@@ -256,7 +256,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 
 
 	@Override
-	public double calculateLogP() throws Exception {
+	public double calculateLogP() {
 		if (!initialised) {
 			initialiseSampledStates();
 			initialised = isMonoPhyletic;
@@ -960,7 +960,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 
 
 	@Override
-	public void initStateNodes() throws Exception {
+	public void initStateNodes() {
 		initialiseSampledStates();
 		initialised = false;
 	}

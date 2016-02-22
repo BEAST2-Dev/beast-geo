@@ -56,7 +56,7 @@ public class RelaxedSphericalDiffusionModel extends SphericalDiffusionModel {
     double [][] cache;
 
     @Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
         super.initAndValidate();
         
         nrOfDiscreteRates = numberOfDiscreteRatesInput.get();

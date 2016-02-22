@@ -69,7 +69,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
     boolean fast = false;
 
     @Override
-    public void initAndValidate() throws Exception {
+    public void initAndValidate() {
         precision = precisionInput.get();
         fast = m_fast.get();
 
@@ -87,14 +87,20 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
     //         stop  = {latitude, longitude}
     // and -90 < latitude < 90, -180 < longitude < 180
     public double getLogLikelihood(Node node, double [] start, double [] stop, double time) {
+//        if (time <= 1e-4) {
+//        	time = 1e-4;
+//        }
+        if (time <= 1e-20) {
+            return -1e99;
+        }
+//        if (time <= 1e-4) {
+//        	return -20;
+//        }
 
     	if (fast) {
     		return getLogLikelihood2(node, start, stop, time);
     	}
            
-            if (time <= 1e-20) {
-                    return -1e99;
-            }
             if (start[0] == stop[0] && start[1] == stop[1]) {
                     return -1e100;
             }

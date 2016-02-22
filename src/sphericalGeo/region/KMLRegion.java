@@ -1,6 +1,7 @@
 package sphericalGeo.region;
 
 import java.io.File;
+import java.io.IOException;
 
 import beast.core.Description;
 import beast.core.Input;
@@ -15,9 +16,11 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 @Description("Geographical region defined by one or more polygons in a KML file")
 public class KMLRegion extends Region {
@@ -27,13 +30,18 @@ public class KMLRegion extends Region {
 	public KMLRegion(String kmlFile) throws Exception {initByName("kml", kmlFile);}
 	
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		Log.info.println("Processing " + kmlFileInput.get());
-		List<List<Double>> coordinates = parseKML();
-		calcAdmissableNodes(coordinates);
+		List<List<Double>> coordinates;
+		try {
+			coordinates = parseKML();
+			calcAdmissableNodes(coordinates);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
-	private void calcAdmissableNodes(List<List<Double>> coordinates) throws Exception {
+	private void calcAdmissableNodes(List<List<Double>> coordinates) {
 		boolean debug = Boolean.valueOf(System.getProperty("beast.debug"));
 		boolean traversesMapCenter = false;
 		for (List<Double> coords : coordinates) {
@@ -141,7 +149,7 @@ public class KMLRegion extends Region {
 
 	}
 
-	private List<List<Double>> parseKML() throws Exception {
+	private List<List<Double>> parseKML() throws SAXException, IOException, ParserConfigurationException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setValidating(false);
 		org.w3c.dom.Document doc = factory.newDocumentBuilder().parse(kmlFileInput.get());

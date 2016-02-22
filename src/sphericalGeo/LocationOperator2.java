@@ -40,7 +40,7 @@ public class LocationOperator2 extends Operator {
 	double stdDevLong;
 
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		sampledLocations = locationInput.get();
 		likelihood = likelihoodInput.get();
 		tree = likelihood.tree;

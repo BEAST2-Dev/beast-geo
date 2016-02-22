@@ -63,7 +63,7 @@ public class GeoPrior extends Distribution {
     int nseen;
 
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		if (taxonInput.get() != null && taxonSetInput.get() != null) {
 			throw new RuntimeException("At most one of taxon and taxonset should be specified");
 			// if none specified, inputs can still be valid if allinternalnodes = true
@@ -272,7 +272,7 @@ public class GeoPrior extends Distribution {
 	//}
 
 	@Override
-	public double calculateLogP() throws Exception {
+	public double calculateLogP() {
 		if (!initialised || region == null) {
 			logP = 0;
 			return logP;

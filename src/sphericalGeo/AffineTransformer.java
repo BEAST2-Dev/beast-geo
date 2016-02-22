@@ -25,18 +25,18 @@ public class AffineTransformer extends BEASTObject implements Transformer {
 	
 	
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		center = centerInput.get();
 		if (center != null && center.getDimension() != 2) {
-			throw new Exception("Center should have a dimension of 2");
+			throw new IllegalArgumentException("Center should have a dimension of 2");
 		}
 		angle = angleInput.get();
 		if (angle != null && angle.getDimension() != 1) {
-			throw new Exception("angle should have a dimension of 1");
+			throw new IllegalArgumentException("angle should have a dimension of 1");
 		}
 		scale = scaleInput.get();
 		if (scale != null && scale.getDimension() != 1) {
-			throw new Exception("scale should have a dimension of 1");
+			throw new IllegalArgumentException("scale should have a dimension of 1");
 		}
 	}
 

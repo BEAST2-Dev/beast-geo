@@ -41,7 +41,7 @@ public class MapMaker extends Runnable {
 	double minLat = -90, maxLat = 90, minLong = -180, maxLong = 180;
 
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		if (!kmlFileInput.get().exists()) {
 			throw new RuntimeException("kml file " + kmlFileInput.get().getPath() + "does not exist");
 		}

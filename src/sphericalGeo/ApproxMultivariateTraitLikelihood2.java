@@ -62,7 +62,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 	
 	
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		super.initAndValidate();
 
 		branchLengths = new double[tree.getNodeCount()];
@@ -202,7 +202,7 @@ public class ApproxMultivariateTraitLikelihood2 extends ApproxMultivariateTraitL
 
 
 	@Override
-	public double calculateLogP() throws Exception {
+	public double calculateLogP() {
 		if (!initialised) {
 			initialiseSampledStates();
 			initialised = isMonoPhyletic;

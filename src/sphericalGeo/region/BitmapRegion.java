@@ -1,6 +1,7 @@
 package sphericalGeo.region;
 
 import java.io.File;
+import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
@@ -19,14 +20,18 @@ public class BitmapRegion extends Region {
 	public Input<Integer> regionColorInput = new Input<>("color", "color in bitmap that specifies the region", 0x00FF00);
 
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		regionColor = regionColorInput.get();
 		parseBBox();
 		File file = bitmapFileInput.get();
 		if (!file.exists()) {
 			throw new RuntimeException("Cannot find file " + file.getName());
 		}
-		image = ImageIO.read(file);
+		try {
+			image = ImageIO.read(file);
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
+		}
 		width = image.getWidth();
 		height = image.getHeight();
 	}

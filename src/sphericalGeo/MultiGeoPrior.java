@@ -81,7 +81,7 @@ public class MultiGeoPrior extends MultiMonophyleticConstraint {
 	}
 
 	@Override
-	public double calculateLogP() throws Exception {
+	public double calculateLogP() {
 		if (!needsUpdate) {
 			return logP;
 		}
@@ -134,7 +134,7 @@ public class MultiGeoPrior extends MultiMonophyleticConstraint {
 		return logP;
 	}
 
-	private void initialise() throws Exception {
+	private void initialise() {
 		nodeToCladeGroup = MonoCladesMapping.setupNodeGroup(tree, this);
 
 		int geoPriorCount = geoPriors.size();

@@ -52,7 +52,7 @@ public class SphericalDiffusionSimulator extends beast.core.Runnable {
 	boolean forceAngle;
 	
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		clockModel = branchRateModelInput.get();
 		SiteModel siteModel = (SiteModel) siteModelInput.get();
 		substModel = (SphericalDiffusionModel) siteModel.substModelInput.get();

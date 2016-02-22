@@ -44,7 +44,7 @@ public class CircleDistanceProvider extends BEASTObject implements DistanceProvi
     private Method distanceMethod;
 
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		distanceMethod = distMethod.get();
 		tree = treeInput.get();
 		

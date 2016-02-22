@@ -23,7 +23,7 @@ public class TraitFunction extends RealParameter {
 	Method getPosition;
 	
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		if (likelihoodInput.get() instanceof ApproxMultivariateTraitLikelihood) {
 			likelihood = (ApproxMultivariateTraitLikelihood)likelihoodInput.get();
 		} else if (likelihoodInput.get() instanceof ApproxMultivariateTraitLikelihoodF) {
@@ -34,7 +34,11 @@ public class TraitFunction extends RealParameter {
 			throw new RuntimeException("likelihood should be one of ApproxMultivariateTraitLikelihood or PFApproxMultivariateTraitLikelihood");
 		}
         tree = ((Tree) (likelihood.treeInput.get()));
-		getPosition = likelihood.getClass().getMethod("getPosition", int.class);
+		try {
+			getPosition = likelihood.getClass().getMethod("getPosition", int.class);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new IllegalArgumentException(e);
+		}
 				
 	}
 

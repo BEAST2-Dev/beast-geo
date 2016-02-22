@@ -45,7 +45,7 @@ public class TreeTraitMap extends CalculationNode /* implements TreeTrait<double
 
 	double [] traitvalues;
 	@Override
-	public void initAndValidate() throws Exception {
+	public void initAndValidate() {
 		tree = treeInput.get();
 		int nNodes = tree.getNodeCount();
 		parameter = parameterInput.get();
@@ -117,7 +117,7 @@ public class TreeTraitMap extends CalculationNode /* implements TreeTrait<double
 			            String sTaxonID = normalize(sStrs[0]);
 			            int iTaxon = sTaxa.indexOf(sTaxonID);
 			            if (iTaxon < 0) {
-			                throw new Exception("Trait (" + sTaxonID + ") is not a known taxon. Spelling error perhaps?");
+			                throw new IllegalArgumentException("Trait (" + sTaxonID + ") is not a known taxon. Spelling error perhaps?");
 			            }
 			            String sTraitValue = normalize(sStrs[1]);
 			            String [] sTraitValues = sTraitValue.split("\\s");
@@ -125,7 +125,7 @@ public class TreeTraitMap extends CalculationNode /* implements TreeTrait<double
 			            	values[iTaxon * dim + i] = Double.parseDouble(sTraitValues[i]);
 			            }
 			            if (bDone[iTaxon]) {
-			            	throw new Exception("Trait for taxon " + sTaxa.get(iTaxon)+ " defined twice");
+			            	throw new IllegalArgumentException("Trait for taxon " + sTaxa.get(iTaxon)+ " defined twice");
 			            }
 			            bDone[iTaxon] = true;
 		            }
