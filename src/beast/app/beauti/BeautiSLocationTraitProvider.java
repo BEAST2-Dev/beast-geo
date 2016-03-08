@@ -54,7 +54,7 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
 	}
 	
 	@Override
-	int matches(Alignment alignment) {
+	protected int matches(Alignment alignment) {
 		for (Object o : alignment.getOutputs()) {
 			BEASTInterface  output = (BEASTInterface) o;
 			if (output instanceof sphericalGeo.ApproxMultivariateTraitLikelihood) {
