@@ -169,17 +169,17 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 			Cartogram cartogram;
 			cartogram = calcCartogram(lyr);
 			
-			updateRunningStatus(975, "Writing file /tmp/deformationLayer.svg", "");	
+			updateRunningStatus(975, "Writing file deformationLayer.svg", "");	
 			Layer deformationLAyer = AppContext.layerManager.getLayer("Deformation grid");
 			Layer[] lyrs = new Layer[1];
 			lyrs[0] = deformationLAyer;
-			IOManager.writeSvg(lyrs, "/tmp/deformationLayer.svg" );
+			IOManager.writeSvg(lyrs, "deformationLayer.svg" );
 			
-			updateRunningStatus(990, "Writing file /tmp/toadmap.svg", "");	
+			updateRunningStatus(990, "Writing file toadmap.svg", "");	
 			Layer[] lyrs2 = new Layer[2];
 			lyrs2[0] = deformationLAyer;
 			lyrs2[1] = lyr;
-			IOManager.writeSvg(lyrs2, "/tmp/toadmap.svg" );
+			IOManager.writeSvg(lyrs2, "toadmap.svg" );
 
 			updateRunningStatus(1000, "Done!", "");	
 			

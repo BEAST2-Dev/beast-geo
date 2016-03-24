@@ -3,11 +3,9 @@ package beast.app.beauti;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.regex.Matcher;
@@ -17,13 +15,11 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.CellEditorListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -33,9 +29,6 @@ import sphericalGeo.Transformer;
 import beast.app.beauti.BeautiDoc;
 import beast.app.beauti.GuessPatternDialog;
 import beast.app.draw.BEASTObjectDialog;
-import beast.app.draw.BEASTObjectInputEditor;
-import beast.app.draw.InputEditor;
-import beast.app.draw.InputEditorFactory;
 import beast.app.draw.ListInputEditor;
 import beast.app.draw.SmallLabel;
 //import beast.continuous.SampledMultivariateTraitLikelihood;
@@ -524,7 +517,7 @@ public class SLocationInputEditor extends ListInputEditor {
 	}
 
 	private void transform() {
-		BEASTInterface transformer = (BEASTInterface) likelihood.transformerInput.get();
+		ScapeToadTransfomer transformer = (ScapeToadTransfomer) likelihood.transformerInput.get();
 		if (transformer == null) {
 			transformer = new ScapeToadTransfomer();
 			transformer.setID("transform" + likelihood.getID());
@@ -536,6 +529,9 @@ public class SLocationInputEditor extends ListInputEditor {
 		if (dlg.showDialog()) {
             dlg.accept(transformer, doc);
         }
+		if (transformer.weightIdentifiedInput.get() != null && transformer.weightIdentifiedInput.get().matches("^\\s*$")) {
+			transformer.weightIdentifiedInput.setValue(null, transformer);
+		}
 		File shapeFile = ((ScapeToadTransfomer) transformer).shapeFileInput.get();
 		if (shapeFile == null || shapeFile.getName().equals("[[none]]")) {
 			likelihood.transformerInput.setValue(null, likelihood);

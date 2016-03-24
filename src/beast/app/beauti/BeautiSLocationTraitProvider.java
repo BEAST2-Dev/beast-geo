@@ -9,22 +9,24 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.border.EmptyBorder;
 
-import sphericalGeo.AlignmentFromTraitMap;
 import sphericalGeo.ApproxMultivariateTraitLikelihood;
-import sphericalGeo.TreeTraitMap;
+import sphericalGeo.TraitFunction;
 import beast.app.beauti.BeautiAlignmentProvider;
 import beast.app.beauti.BeautiDoc;
 import beast.app.beauti.PartitionContext;
 import beast.app.util.Utils;
 import beast.core.BEASTInterface;
 import beast.core.Description;
+import beast.core.Logger;
+import beast.core.MCMC;
 import beast.core.State;
 import beast.core.StateNode;
 import beast.evolution.alignment.Alignment;
-import beast.evolution.alignment.Sequence;
 import beast.evolution.alignment.Taxon;
 import beast.evolution.alignment.TaxonSet;
+import beast.evolution.likelihood.GenericTreeLikelihood;
 import beast.evolution.tree.Tree;
+import beast.evolution.tree.TreeWithMetaDataLogger;
 import beast.util.NexusParser;
 import beast.util.TreeParser;
 
@@ -113,6 +115,28 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
             	List<BEASTInterface> list = new ArrayList<>();
             	list.add(alignment);
             	editAlignment(alignment, doc);
+            	
+            	// add tree logger
+            	GenericTreeLikelihood likelihood = null;
+            	for (BEASTInterface o : alignment.getOutputs()) {
+            		if (o instanceof GenericTreeLikelihood) {
+            			likelihood = (GenericTreeLikelihood) o;
+            		}
+            	}
+            	
+            	TraitFunction locationTrait = new TraitFunction();
+            	locationTrait.initByName("likelihood", likelihood, "value", "0.0");
+            	locationTrait.setID("location.geo");
+            	TreeWithMetaDataLogger treelogger = new TreeWithMetaDataLogger();
+            	treelogger.initByName("tree", treeParser, "metadata", locationTrait);
+            	treelogger.setID("TreeWithMetaDataLogger");
+
+            	Logger logger = new Logger();
+            	logger.initByName("log", treelogger, "logEvery", 1000, "mode", "tree", "fileName", id + ".trees");
+            	logger.setID("TreeLogger");
+            	
+            	MCMC mcmc = (MCMC) doc.pluginmap.get("mcmc");
+            	mcmc.loggersInput.setValue(logger, mcmc);
             	return list;
             }
         } catch (Exception e) {
