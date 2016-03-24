@@ -26,15 +26,15 @@ import beast.util.NexusParser;
 
 @Description("Creates heat map of locations with colour representing time")
 public class HeatMapMaker extends Runnable {
-	public Input<File> treesetInput = new Input<>("treeSet","file containing tree set annotated with locations", new File("data.trees"));
-	public Input<File> bgInput = new Input<>("background","image file with a map for the background", new File("World.png"));
+	public Input<File> treesetInput = new Input<>("treeSet","file containing tree set annotated with locations", new File("/Users/remco/IE.trees"));
+	public Input<File> bgInput = new Input<>("background","image file with a map for the background", new File("/Users/remco/data/map/World98b.png"));
 	public Input<String> bboxInput = new Input<>("boundingBox","bounding box of the background image", "-90 -180 90 180");
-	public Input<String> tagInput = new Input<>("tag","tag used in annotated of locations", "location");
+	public Input<String> tagInput = new Input<>("tag","tag used in annotated of locations", "locations.geo");
 	public Input<Integer> widthInput = new Input<>("width","width of the heat map", 1024);
 	public Input<Integer> heightInput = new Input<>("height","heightof the heat map", 1024);
 	public Input<Double> maxTimeInput = new Input<>("maxTime","maximum time (all older nodes will be coloured red)", Double.POSITIVE_INFINITY);
-	public Input<File> outputInput = new Input<>("output","where to save the file", new File("/tmp/heatmap.png"));
-	public Input<Integer> discSizeInput = new Input<>("discSize","size of the dots used to draw heat map", 1);
+	public Input<OutFile> outputInput = new Input<>("output","where to save the file", new OutFile("/tmp/heatmap.png"));
+	public Input<Integer> discSizeInput = new Input<>("discSize","size of the dots used to draw heat map", 10);
 	public Input<Double> translucencyInput = new Input<>("translucency","translucency of the dots used to draw heat map (a number between 0=invisible and 1=solid)", 0.2);
 	public Input<Double> saturationInput = new Input<>("saturation","saturation of colour for the dots", 0.9);
 	public Input<Double> brightnessInput = new Input<>("brightness","brightnessof colour for the dots ", 0.9);
@@ -263,6 +263,7 @@ public class HeatMapMaker extends Runnable {
 				sampler.initAndValidate();
 				sampler.run();
 			}
+			System.exit(0);
 			return;
 		}
 

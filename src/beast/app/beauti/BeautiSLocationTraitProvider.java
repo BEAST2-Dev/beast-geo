@@ -1,6 +1,7 @@
 package beast.app.beauti;
 
 import java.awt.Frame;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,21 +9,30 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.border.EmptyBorder;
 
+import sphericalGeo.AlignmentFromTraitMap;
 import sphericalGeo.ApproxMultivariateTraitLikelihood;
+import sphericalGeo.TreeTraitMap;
 import beast.app.beauti.BeautiAlignmentProvider;
 import beast.app.beauti.BeautiDoc;
 import beast.app.beauti.PartitionContext;
+import beast.app.util.Utils;
 import beast.core.BEASTInterface;
 import beast.core.Description;
 import beast.core.State;
 import beast.core.StateNode;
 import beast.evolution.alignment.Alignment;
+import beast.evolution.alignment.Sequence;
+import beast.evolution.alignment.Taxon;
+import beast.evolution.alignment.TaxonSet;
 import beast.evolution.tree.Tree;
+import beast.util.NexusParser;
+import beast.util.TreeParser;
 
 
 /** trait provided for spherical diffusion model **/
 @Description("Location provider for BEAUti template to set up spherical diffusion models")
 public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
+	final static String FIXED_TREE = "[[Fixed tree]]";
 
 	@Override
 	protected List<BEASTInterface> getAlignments(BeautiDoc doc) {
@@ -35,9 +45,13 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
                     trees.add(BeautiDoc.parsePartition(((Tree) node).getID()));
                 }
             }
+            trees.add(FIXED_TREE);
             TraitDialog2 dlg = new TraitDialog2(doc, trees);
             if (dlg.showDialog("Create new location")) {
             	String tree = dlg.tree;
+            	if (tree.equals(FIXED_TREE)) {
+            		return getTree(doc);
+            	}
             	String name = dlg.name;
             	PartitionContext context = new PartitionContext(name, name, name, tree);
 
@@ -52,6 +66,62 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
 		}
         return null;
 	}
+	
+	
+	protected List<BEASTInterface> getTree(BeautiDoc doc) {
+		try {
+            File file = Utils.getLoadFile("Open tree file with fixed tree");
+            if (file != null) {
+            	NexusParser parser = new NexusParser();
+            	parser.parseFile(file);
+            	if (parser.trees == null || parser.trees.size() == 0) {
+            		JOptionPane.showMessageDialog(null, "Did not find any tree in the file -- giving up.");
+            		return null;
+            	}
+            	if (parser.trees.size() > 1) {
+            		JOptionPane.showMessageDialog(null, "Found more than one tree in the file -- expected only 1!");
+            		return null;
+            	}
+            	Tree tree = parser.trees.get(0);
+            	
+            	// create dummy alignment
+            	List<Taxon> seqs = new ArrayList<>();
+            	for (String name : tree.getTaxaNames()) {
+            		seqs.add(new Taxon(name));
+            	}
+            	TaxonSet taxa = new TaxonSet();
+            	taxa.initByName("taxon", seqs);
+
+            	TreeParser treeParser = new TreeParser();
+            	treeParser.initByName("newick", tree.getRoot().toNewick(),
+            			"IsLabelledNewick", true,
+            			"taxonset", taxa,
+            			"adjustTipHeights", false,
+            			"estimate", false
+            			);
+            	String id = file.getName();
+            	if (id.lastIndexOf('.') > -1) {
+            		id = id.substring(0, id.lastIndexOf('.'));
+            	}
+
+            	treeParser.setID("Tree.t:" + id);
+            	doc.registerPlugin(treeParser);
+            	
+            	PartitionContext context = new PartitionContext(id, id, id, id);
+
+            	Alignment alignment = (Alignment) doc.addAlignmentWithSubnet(context, template.get());
+            	List<BEASTInterface> list = new ArrayList<>();
+            	list.add(alignment);
+            	editAlignment(alignment, doc);
+            	return list;
+            }
+        } catch (Exception e) {
+        	e.printStackTrace();
+        	JOptionPane.showMessageDialog(null, "Something went wrong: " + e.getMessage());
+        }
+		return null;
+	}
+
 	
 	@Override
 	protected int matches(Alignment alignment) {

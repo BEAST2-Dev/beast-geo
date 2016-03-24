@@ -3,8 +3,11 @@ package beast.app.beauti;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.regex.Matcher;
@@ -14,18 +17,25 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.CellEditorListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import sphericalGeo.ApproxMultivariateTraitLikelihood;
+import sphericalGeo.Transformer;
 import beast.app.beauti.BeautiDoc;
 import beast.app.beauti.GuessPatternDialog;
+import beast.app.draw.BEASTObjectDialog;
+import beast.app.draw.BEASTObjectInputEditor;
+import beast.app.draw.InputEditor;
+import beast.app.draw.InputEditorFactory;
 import beast.app.draw.ListInputEditor;
 import beast.app.draw.SmallLabel;
 //import beast.continuous.SampledMultivariateTraitLikelihood;
@@ -37,6 +47,7 @@ import sphericalGeo.AlignmentFromTraitMap;
 import beast.evolution.alignment.TaxonSet;
 import beast.evolution.tree.TreeInterface;
 import sphericalGeo.TreeTraitMap;
+import sphericalGeo.scapetoad.ScapeToadTransfomer;
 
 
 @Description("Location editor for BEAUti template to set up spherical diffusion models")
@@ -429,6 +440,16 @@ public class SLocationInputEditor extends ListInputEditor {
     private Box createButtonBox2() {
         Box buttonBox = Box.createHorizontalBox();
 
+        JButton transformButton = new JButton("Transform");
+        transformButton.setName("Transform");
+        transformButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	transform();
+            }
+        });
+        buttonBox.add(transformButton);
+
         buttonBox.add(Box.createHorizontalGlue());
 
         JButton manipulateButton = new JButton("Manipulate latitude");
@@ -499,6 +520,25 @@ public class SLocationInputEditor extends ListInputEditor {
 			return sValue;
 		} catch (javax.script.ScriptException es) {
 			return es.getMessage();
+		}
+	}
+
+	private void transform() {
+		BEASTInterface transformer = (BEASTInterface) likelihood.transformerInput.get();
+		if (transformer == null) {
+			transformer = new ScapeToadTransfomer();
+			transformer.setID("transform" + likelihood.getID());
+			likelihood.transformerInput.setValue(transformer, likelihood);
+		}
+		
+		
+		BEASTObjectDialog dlg = new BEASTObjectDialog(transformer, Transformer.class, doc);
+		if (dlg.showDialog()) {
+            dlg.accept(transformer, doc);
+        }
+		File shapeFile = ((ScapeToadTransfomer) transformer).shapeFileInput.get();
+		if (shapeFile == null || shapeFile.getName().equals("[[none]]")) {
+			likelihood.transformerInput.setValue(null, likelihood);
 		}
 	}
 

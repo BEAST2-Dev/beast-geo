@@ -45,6 +45,7 @@ import sphericalGeo.scapetoad.core.CartogramGrid;
 import sphericalGeo.scapetoad.core.CartogramLayer;
 import sphericalGeo.scapetoad.core.IOManager;
 import sphericalGeo.scapetoad.gui.AppContext;
+import sphericalGeo.util.OutFile;
 import beast.core.BEASTObject;
 import beast.core.Input;
 import beast.core.Input.Validate;
@@ -60,13 +61,13 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 	public Input<String> weightInput = new Input<>("value", "comma separated list of 'id=value' pairs where values representing relative size for each regions with ID from the shape file");
 	public Input<String> weightIdentifiedInput = new Input<>("weightIdentifier", "name of attribute in shape file that identifies a weight", Validate.XOR, weightInput);
 	
-	public Input<File> cartogramFileInput = new Input<>("cartogram", "File containing cartogram. If specified and file does not exist, the cartogram will be calculated and stored there.");
+	public Input<OutFile> cartogramFileInput = new Input<>("cartogram", "File containing cartogram. If specified and file does not exist, the cartogram will be calculated and stored there.");
 	
 
 	public Input<Boolean> isDensityInput = new Input<>("isDensity", "if true, weights are interpreted as densities, otherwise they are interpreted as mass", true);
 	public Input<Integer> deformationAmountInput = new Input<>("deformationAmount", "Defines the amount of deformation. This is an integer value between" +
 			" 0 and 100. The default value is 50", 50);
-	public Input<Boolean> isAdvancedInput = new Input<>("advanced", "if true the advanced parameters should be taken in account, otherwise these are estimated.", false);
+	public Input<Boolean> isAdvancedInput = new Input<>("advanced", "if true the advanced parameters (below) should be taken in account, otherwise these are estimated.", false);
 		
 
 	public Input<Integer> gridSizeXInput = new Input<>("gridSizeX", "A first grid is applied to the main transformation layer. "
