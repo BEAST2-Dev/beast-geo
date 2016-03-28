@@ -223,7 +223,7 @@ DQ315776_2000_17.9831869307_84.5569572724=17.9831869307 84.5569572724           
 
     <logger fileName="$(tree).trees" id="treelog.t:HBV" logEvery="1000" mode="tree">
         <log branchratemodel="@RelaxedClock.c:geo" id="TreeWithMetaDataLogger.t:HBV" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:HBV">
-            <metadata id="location.geo" likelihood="@slocationtreeLikelihood.geo" spec="sphericalGeo.TraitFunction">0.0</metadata>
+            <metadata id="locationgeo" likelihood="@slocationtreeLikelihood.geo" spec="sphericalGeo.TraitFunction">0.0</metadata>
         </log>
     </logger>
 

@@ -45,7 +45,7 @@ import sphericalGeo.scapetoad.core.CartogramGrid;
 import sphericalGeo.scapetoad.core.CartogramLayer;
 import sphericalGeo.scapetoad.core.IOManager;
 import sphericalGeo.scapetoad.gui.AppContext;
-import sphericalGeo.util.OutFile;
+import beast.app.util.OutFile;
 import beast.core.BEASTObject;
 import beast.core.Input;
 import beast.core.Input.Validate;

@@ -110,16 +110,23 @@ The estimate box now can be checked.
 \includegraphics[scale=0.4]{figures/BEAUti_transform6}
 \end{center}
 
-We do not wan the standard deviation for the relaxed clock to get out of hand, so set an upper limit of 2 on it. Select the menu "View/Show Initialisation Panel" and set the upper field to 2;
+We do not wan the standard deviation for the relaxed clock to get out of hand, so set an alarm limit of 5 on it. Select the menu "View/Show Initialisation Panel" and set the upper field to 5;
 
 \begin{center}
-\includegraphics[scale=0.4]{figures/BEAUti_transform7}
+\includegraphics[scale=0.4]{figures/BEAUti_transform7} 
 \end{center}
 
-In the MCMC panel, set the chain length to 1 million. {\bf\color{red}(TODO: maybe less, needs testing)}
-Save the file as a IE.xml using the "File/Save" menu.
+In the MCMC panel, set the chain length to 1 million, and set logging frequency for trees to 10000. Save the file as a IE.xml using the "File/Save" menu. Now you can run the file in BEAST, check convergence in Tracer (for 1 million, it does not convergence, so ESSs are poor, but for the purpose of this tutorial it gives a good indication of the geography. You can resume for another million states or more to get full convergence.) To visualise the result using {\tt spread} create a summary tree from a terminal using
+\begin{verbatim}
+/path/to/treeannotator -hpd2D 0.8 -b 10 IE.trees > IE.tree
+\end{verbatim}
+This creates 80\% HPD areas in the annotated tree. Do not forget the -hpd2D argument, otherwise no HPD regions will be shown. 
+In {\tt spread}, go to the continuous tab, select IE.tree as tree, and select 'location1' and 'location2' for 'latitude attribute name' and 'longitude attribute name' respectively. Then under the 'output' tab, click 'Plot' to visualise in {\tt spread}, or 'Generate' to generate a KML file that can be shown in Google earth. See the spherical geography tutorial for details.
 
-Now we are going to add a transformation to the analysis. Go to the partitions panel, and double click the IE entry on say the file. The table editor for locations pops up again, where you click the "Transformer" button.
+
+\section*{Inhomogeneous phylogeography}
+
+Now we are going to add a transformation to the analysis. In BEAUti, go to the partitions panel, and double click the IE entry on say the file. The table editor for locations pops up again, where you click the "Transformer" button.
 
 \begin{center}
 \includegraphics[scale=0.4]{figures/BEAUti_transform8}
@@ -176,36 +183,38 @@ Higher numbers of iterations also imply longer treatment times.
 Default 3, ignored if advanced=false.\\
 
 {\tt gridLayerSize}: The visualisation grid layer size. After starting the BEAST run, two files are produced:
-{\tt /tmp/scapetoad.svg} containing the deformation grid and original shapes but transformed, and 
-{\tt /tmp/deformationLayer.svg} which contains only the deformation grid. These can be used to see whether the transformation is somewhat reasonable. This is the gridsize which is produced for visual effect only in the sag files. 
+{\tt scapetoad.svg} containing the deformation grid and original shapes but transformed, and 
+{\tt deformationLayer.svg} which contains only the deformation grid. These can be used to see whether the transformation is somewhat reasonable. This is the gridsize which is produced for visual effect only in the sag files. 
 Default 100.
 
-{\bf Note:} do not use File/Save, since it will overwrite the file IE.xml saver earlier. Save the file as a IEtransform.xml using the "File/Save as" menu.
+
+Go to the MCMC panel, and set the tracelog file name to IEtransformed.log, and the tree log file name to IEtransformed.trees, and make sure the log frequency is set to once very 10 thousand.
+\begin{center}
+\includegraphics[scale=0.4]{figures/BEAUti_transform20}
+\end{center}
+
+{\bf Note:} do not use File/Save, since it will overwrite the file IE.xml saved earlier. Save the file as a IEtransform.xml using the "File/Save as" menu.
 
 \subsection*{Running BEAST and analysing the output}
 
 Running BEAST and analysing the results on the two files is similar as the phylogeography tutorial. Use tracer to check convergence, and use spread with Google Earth and/or the HeatMapMaker application via the BEAST AppStore to visualise the geographical history over the tree. For details, refer to the phylogeography tutorial.
 
-When running BEAST, two SVG files are written: deformationLayer.svg and toadmap.svg. These contains information of the transformed map.
+When running BEAST, two SVG files are written: toadmap.svg avd deformationLayer.svg. These contains information of the transformed map, the toadmap contains the regions, and the deformation layer only the transformed grid, and look like this:
 
-\includegraphics[width=0.5\textwidth]{../paper/gridorg}
-\includegraphics[width=0.5\textwidth]{../paper/grid2}
+\includegraphics[width=0.5\textwidth]{figures/deformationlayer.pdf}
+\includegraphics[width=0.5\textwidth]{figures/toadmap.pdf}
 
-{\bf \color{red}
-TODO: show deformation layer
+After running the analysis in BEAST, check the log file in Tracer (again, 1 million states is not sufficient to get to convergence. You can run for longer if you like to get full convergence by resuming the run.).
 
-TODO: show taodmap layer
+To create a heatmap, open the BEAST AppStore and launch the HeatMapMaker. In the dialog that pops up, select IEtransformed.trees for tree set, set bounding box to -20 -30 70 120, set tag to 'location', height to 512,  and click OK. A heatmap png and /tmp/legend.png (which shows colours associated with some time in the past) file will be generated that looks something like this.
 
-TODO: show root location for IE.xml
+\includegraphics[width=0.75\textwidth]{figures/IEheatmap}
+\includegraphics[width=0.25\textwidth]{figures/IElegend}
 
-TODO: show root location for IEtrans.xml
+Do these differ much from the non-transformed analysis?
 
-TODO: show heatmap
-}
-
-
-\section*{Advanced}
-\subsection*{Editing the XML for a transformer}
+\section*{Advanced geographical analyses by editing the XML}
+\subsection*{Adding a transformer}
 To add a transformer by editing the XML instead of BEAUti you do the following: Once the shape file is created, add the following element to the {\tt sphericalGeo.ApproxMultivariateTraitLikelihood}. If you have information in a shape file, add something like
 
 \begin{verbatim}

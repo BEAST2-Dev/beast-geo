@@ -19,6 +19,7 @@ import beast.app.beauti.BeautiConfig;
 import beast.app.beauti.BeautiDoc;
 import beast.app.draw.BEASTObjectDialog;
 import beast.app.draw.BEASTObjectPanel;
+import beast.app.util.Application;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
@@ -42,13 +43,14 @@ public class MapMaker extends Runnable {
 
 	@Override
 	public void initAndValidate() {
+	}
+	
+	public void run() throws Exception {
 		if (!kmlFileInput.get().exists()) {
 			throw new RuntimeException("kml file " + kmlFileInput.get().getPath() + "does not exist");
 		}
 		parseBBox();
-	}
-	
-	public void run() throws Exception {
+
 		Log.info.println("Parsing KML file...");
 		List<List<Double>> coordinates = parseKML();
 		Log.info.println("Creating map...");

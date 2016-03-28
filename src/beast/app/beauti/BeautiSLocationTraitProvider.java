@@ -126,7 +126,7 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
             	
             	TraitFunction locationTrait = new TraitFunction();
             	locationTrait.initByName("likelihood", likelihood, "value", "0.0");
-            	locationTrait.setID("location.geo");
+            	locationTrait.setID("location");
             	TreeWithMetaDataLogger treelogger = new TreeWithMetaDataLogger();
             	treelogger.initByName("tree", treeParser, "metadata", locationTrait);
             	treelogger.setID("TreeWithMetaDataLogger");

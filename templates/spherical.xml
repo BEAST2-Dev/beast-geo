@@ -48,7 +48,7 @@ suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.freq
     <operator id='StrictClockRateScaler.c:$(n)' spec='ScaleOperator' scaleFactor="0.75" weight="3" parameter='@clockRate.c:$(n)'/>
 
 
-	<metadata id="locations.$(n)" spec='sphericalGeo.TraitFunction' likelihood='@slocationtreeLikelihood.$(n)' value="0.0"/>
+	<metadata id="locations$(n)" spec='sphericalGeo.TraitFunction' likelihood='@slocationtreeLikelihood.$(n)' value="0.0"/>
 ]]>
 
          <connect srcID='slocationtreeLikelihood.$(n)'      targetID='likelihood' inputName='distribution' if="isInitializing"/>
@@ -72,9 +72,9 @@ suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.freq
          <connect srcID='sprecision.s:$(n)'                targetID='tracelog' inputName='log' if='inlikelihood(sprecision.s:$(n)) and sprecision.s:$(n)/estimate=true'/>
          <connect srcID='clockRate.c:$(n)'                 targetID='tracelog' inputName='log' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
 
-         <connect srcID='locations.$(n)'                    targetID='TreeWithMetaDataLogger.t:$(n)' inputName='metadata' if='inposterior(slocationtreeLikelihood.$(n))'/>
+         <connect srcID='locations$(n)'                    targetID='TreeWithMetaDataLogger.t:$(n)' inputName='metadata' if='inposterior(slocationtreeLikelihood.$(n))'/>
          <!-- for *BEAST analysis -->
-         <connect srcID='locations.$(n)'                    targetID='SpeciesTreeLoggerX' inputName='metadata' if='inposterior(speciescoalescent)'/>
+         <connect srcID='locations$(n)'                    targetID='SpeciesTreeLoggerX' inputName='metadata' if='inposterior(speciescoalescent)'/>
          
 	</subtemplate>
 

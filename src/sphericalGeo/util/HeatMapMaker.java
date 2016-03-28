@@ -17,6 +17,8 @@ import beast.app.beauti.BeautiConfig;
 import beast.app.beauti.BeautiDoc;
 import beast.app.draw.BEASTObjectDialog;
 import beast.app.draw.BEASTObjectPanel;
+import beast.app.util.Application;
+import beast.app.util.OutFile;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Runnable;

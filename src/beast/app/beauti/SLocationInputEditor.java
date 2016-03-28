@@ -31,6 +31,7 @@ import beast.app.beauti.GuessPatternDialog;
 import beast.app.draw.BEASTObjectDialog;
 import beast.app.draw.ListInputEditor;
 import beast.app.draw.SmallLabel;
+import beast.app.util.OutFile;
 //import beast.continuous.SampledMultivariateTraitLikelihood;
 import beast.core.BEASTInterface;
 import beast.core.Description;
@@ -522,6 +523,7 @@ public class SLocationInputEditor extends ListInputEditor {
 			transformer = new ScapeToadTransfomer();
 			transformer.setID("transform" + likelihood.getID());
 			likelihood.transformerInput.setValue(transformer, likelihood);
+			transformer.cartogramFileInput.setValue(new OutFile("cartogram.ser"), transformer);
 		}
 		
 		

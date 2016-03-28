@@ -1,6 +1,6 @@
-<addon name='GEO_SPHERE' version='0.2.0'>
+<addon name='GEO_SPHERE' version='0.3.0'>
 	<depends on='beast2' atleast='2.4.0'/>
-	<depends on='BEASTLabs' atleast='1.4.0'/>
+	<depends on='BEASTLabs' atleast='1.5.0'/>
     <addonapp description="HeatMapMaker"
               class="sphericalGeo.util.HeatMapMaker"
               args=""
