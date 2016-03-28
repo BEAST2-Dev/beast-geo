@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='noAutoSetClockRate' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" version="2.0">
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+<map name="Uniform" >beast.math.distributions.Uniform</map>
+<map name="Exponential" >beast.math.distributions.Exponential</map>
+<map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
+<map name="Normal" >beast.math.distributions.Normal</map>
+<map name="Beta" >beast.math.distributions.Beta</map>
+<map name="Gamma" >beast.math.distributions.Gamma</map>
+<map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+<map name="prior" >beast.math.distributions.Prior</map>
+<map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+<map name="OneOnX" >beast.math.distributions.OneOnX</map>
+
+
+<run id="mcmc" spec="MCMC" chainLength="1000000">
+    <state id="state" storeEvery="5000">
+        <parameter id="ucldStdev.c:IE" lower="0.0" name="stateNode" upper="5.0">0.1</parameter>
+        <stateNode id="rateCategories.c:IE" spec="parameter.IntegerParameter" dimension="194">1</stateNode>
+        <parameter id="ucldMean.c:IE" name="stateNode">1.0</parameter>
+    </state>
+
+    <distribution id="posterior" spec="util.CompoundDistribution">
+        <distribution id="prior" spec="util.CompoundDistribution">
+            <prior id="MeanRatePrior.c:IE" name="distribution" x="@ucldMean.c:IE">
+                <Uniform id="Uniform.0" name="distr" upper="Infinity"/>
+            </prior>
+            <prior id="ucldStdevPrior.c:IE" name="distribution" x="@ucldStdev.c:IE">
+                <Gamma id="Gamma.0" name="distr">
+                    <parameter id="RealParameter.0" estimate="false" name="alpha">0.5396</parameter>
+                    <parameter id="RealParameter.01" estimate="false" name="beta">0.3819</parameter>
+                </Gamma>
+            </prior>
+        </distribution>
+        <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
+            <distribution id="slocationtreeLikelihood.IE" spec="sphericalGeo.ApproxMultivariateTraitLikelihood">
+                <transformer id="transformslocationtreeLikelihood.IE" spec="sphericalGeo.scapetoad.ScapeToadTransfomer" shapeFile="/Users/remco/workspace/beast-geo/examples/transform/IE2.kml" value="Caucasus=1000,Dummy=10,TopLeft=10,TopRight=10"/>
+                <data
+id="IE"
+spec="sphericalGeo.AlignmentFromTraitMap">
+                    <traitMap id="traitmap.s:IE" spec="sphericalGeo.TreeTraitMap" initByMean="true" randomizelower="-90 -180" randomizeupper="90 180" traitName="location">
+                        <tree id="Tree.t:IE" spec="beast.util.TreeParser" IsLabelledNewick="true" adjustTipHeights="false" estimate="false" newick="((((((Albanian_Corinth:0.6835161159900762,Albanian_Sicily:0.6835161157917726):0.2482413600029476,(Albanian_Gheg:0.5259141956460249,Albanian_Tosk:0.5259141955904125):0.4058432807179555):5.345485845174791,((Ancient_Greek:0.6900160837747871,(Greek:0.543517541111215,Greek_Lesbos:0.543517541111215):2.543935295609999):2.2007602325161306,(Armenian:2.253774630169694,Classical_Armenian:0.8114094166937624):3.0344384383161858):0.9890302520405081):0.9576784386320272,((((((((((Assamese:1.1048411433252525,Oriya:1.1048411432390175):0.33221071200734453,Bengali:1.4370518555410827):0.49555099655675594,((Bihari:1.351444576415708,(Hindi:0.8059843404708378,(Lahnda:0.4646383326097414,Urdu:0.4646383326298107):0.3413460078546091):0.5454602367305528):0.3336712460911544,(Gujarati:1.1887077429414639,Marathi:1.1887077429528485):0.496408080778739):0.24748702770704334):0.26524598343658656,(Nepali:1.9613578015191973,Sindhi:1.9613578017424853):0.2364910329569616):0.29069874654505856,Sinhalese:2.4885475815165847):0.29575333170239926,Kashmiri:2.784300912897023):0.8135438727804098,Pali:1.0569886496608092):0.7432319024832577,Vedic_Sanskrit:1.3410766894524073):1.2323970180994364,((Avestan:1.2985090567967887,((Ossetic_Digor:0.2615655508665746,Ossetic_Iron:0.26156555086633126):3.07587770268751,Wakhi:3.3374432560554492):0.4586157032538605):0.040650882288133516,(((((Baluchi:1.5593180251975127,Kurdish:1.5593180254105867):0.475674218355298,(Persian:0.8226701400076184,Tajik:0.8226701400081033):1.2123221033302283):0.5035421107558928,(Pashto:0.7560643048369258,Waziri:0.7560643048370164):1.7824700486737264):0.6169527753459985,Old_Persian:0.7174488946703903):0.15534220614428662,((Sarikoli:1.5964565549727316,Shughni:1.5964565549727316):1.4145062958348769,Sogdian:3.0109628515535913):0.2998664844921315):0.5258805045356922):1.7367638660594809):1.4047689246977608,(((((((Belarusian:0.33864090226004606,Ukrainian:0.3386409022599999):0.25114815039955385,Russian:0.5897890525217653):0.2699702433682205,Polish:0.8597592956872893):0.2882343199661026,((Czech:0.44892189400647275,Slovak:0.44892189400666105):0.43147996085419305,(Sorbian_Lower:0.19989485156360054,Sorbian_Upper:0.19989485156365205):0.6805070030767544):0.26759176095209014):0.33843789318586115,((((Bulgarian:0.5685932577058939,Macedonian:0.5685932577058939):0.35243350864184286,Serbo-Croatian:0.9210267660339007):0.32817392215559593,Old_Church_Slavonic:0.26886744121135653):0.05239359177765035,Slovenian:1.3015942800484241):0.1848372288702249):1.6141472248969269,((Latvian:1.3496085223729697,Lithuanian:1.3496085223729697):0.8501039276447653,Old_Prussian:1.6626373254092561):0.9008662839284316):3.5768494963272977,(((((Breton:0.7274367095279457,Cornish:0.7274367095279457):0.82112069227367,Welsh:1.5485574004764198):1.6576811836217527,((Irish:0.865310191813748,Scottish_Gaelic:0.8653101918257526):0.6728020867019682,Old_Irish:0.3025402165574631):1.6681263059532885):2.4315348642028978,(((((((Catalan:1.0867680738946426,(Portuguese:0.6151662410214209,Spanish:0.6151662410257854):0.47160183353827545):0.31132120033436195,((French:0.31359322346607943,Walloon:0.31359322346435103):0.4353846526018552,Provencal:0.7489778760487749):0.6491113984783325):0.1507801437026508,(((Friulian:0.7285659617091698,Romansh:0.7285659617357263):0.3057266264579823,Ladin:1.034292587915684):0.30466540046418444,Italian:1.3389579882403675):0.2099114301461169):0.15594326396042035,((Sardinian_Cagliari:0.5340935199468664,Sardinian_Nuoro:0.5340935199722789):0.23752242892847253,Sardinian_Logudoro:0.7716159488809238):0.9331967338363603):0.19957831978596552,(Romanian:0.9449434779881472,Vlach:0.9449434779876622):0.9594475238218099):0.4147941526452392,Latin:0.3150821350651922):2.1135112966488423,(Oscan:1.0770514554295616,Umbrian:1.0634199210044848):1.179370299703927):1.205076996565297):0.23797367343601028,(((((Danish:0.2707616081531645,Swedish:0.2707616081531645):0.17610059723205485,Norwegian_Riksmal:0.4468622053864326):0.6391987347473247,((Faroese:0.560204497250675,Icelandic:0.5602044972482485):0.3889256474915559,Old_Norse:0.1869253170018359):0.13693079533950403):0.7844299826615799,((((Dutch:0.3450458028063492,Flemish:0.34504580285902353):0.29120526764736354,Frisian:0.6362510707828575):0.6875858988797594,((German:0.4822007701382969,Luxembourgish:0.4822007701382969):0.8097359507247655,Old_High_German:0.2628430454424233):0.031900248962320354):0.23528627733172325,(English:1.2160292431168882,Old_English:0.22061004146162322):0.34309400368559473):0.3113676756727122):0.6884779167977584,Gothic:0.9103083467305009):3.3167782808040043):0.8016811094771477):0.3008143993975416):0.25667912897537626):0.29464810356443305,(Tocharian_A:0.5374954666515501,Tocharian_B:0.5544043837677837):5.631475591895757):0.693368185192563,(Hittite:1.880458448951443,(Luvian:0.35234001432048956,Lycian:1.2815446689853154):1.5649239082226813):2.981395389407796):0.0">
+                            <taxonset id="TaxonSet.0" spec="TaxonSet">
+                                <taxon id="Albanian_Corinth" spec="Taxon"/>
+                                <taxon id="Albanian_Gheg" spec="Taxon"/>
+                                <taxon id="Albanian_Sicily" spec="Taxon"/>
+                                <taxon id="Albanian_Tosk" spec="Taxon"/>
+                                <taxon id="Ancient_Greek" spec="Taxon"/>
+                                <taxon id="Armenian" spec="Taxon"/>
+                                <taxon id="Assamese" spec="Taxon"/>
+                                <taxon id="Avestan" spec="Taxon"/>
+                                <taxon id="Baluchi" spec="Taxon"/>
+                                <taxon id="Belarusian" spec="Taxon"/>
+                                <taxon id="Bengali" spec="Taxon"/>
+                                <taxon id="Bihari" spec="Taxon"/>
+                                <taxon id="Breton" spec="Taxon"/>
+                                <taxon id="Bulgarian" spec="Taxon"/>
+                                <taxon id="Catalan" spec="Taxon"/>
+                                <taxon id="Classical_Armenian" spec="Taxon"/>
+                                <taxon id="Cornish" spec="Taxon"/>
+                                <taxon id="Czech" spec="Taxon"/>
+                                <taxon id="Danish" spec="Taxon"/>
+                                <taxon id="Dutch" spec="Taxon"/>
+                                <taxon id="English" spec="Taxon"/>
+                                <taxon id="Faroese" spec="Taxon"/>
+                                <taxon id="Flemish" spec="Taxon"/>
+                                <taxon id="French" spec="Taxon"/>
+                                <taxon id="Frisian" spec="Taxon"/>
+                                <taxon id="Friulian" spec="Taxon"/>
+                                <taxon id="German" spec="Taxon"/>
+                                <taxon id="Gothic" spec="Taxon"/>
+                                <taxon id="Greek" spec="Taxon"/>
+                                <taxon id="Greek_Lesbos" spec="Taxon"/>
+                                <taxon id="Gujarati" spec="Taxon"/>
+                                <taxon id="Hindi" spec="Taxon"/>
+                                <taxon id="Hittite" spec="Taxon"/>
+                                <taxon id="Icelandic" spec="Taxon"/>
+                                <taxon id="Irish" spec="Taxon"/>
+                                <taxon id="Italian" spec="Taxon"/>
+                                <taxon id="Kashmiri" spec="Taxon"/>
+                                <taxon id="Kurdish" spec="Taxon"/>
+                                <taxon id="Ladin" spec="Taxon"/>
+                                <taxon id="Lahnda" spec="Taxon"/>
+                                <taxon id="Latin" spec="Taxon"/>
+                                <taxon id="Latvian" spec="Taxon"/>
+                                <taxon id="Lithuanian" spec="Taxon"/>
+                                <taxon id="Luvian" spec="Taxon"/>
+                                <taxon id="Luxembourgish" spec="Taxon"/>
+                                <taxon id="Lycian" spec="Taxon"/>
+                                <taxon id="Macedonian" spec="Taxon"/>
+                                <taxon id="Marathi" spec="Taxon"/>
+                                <taxon id="Nepali" spec="Taxon"/>
+                                <taxon id="Norwegian_Riksmal" spec="Taxon"/>
+                                <taxon id="Old_Church_Slavonic" spec="Taxon"/>
+                                <taxon id="Old_English" spec="Taxon"/>
+                                <taxon id="Old_High_German" spec="Taxon"/>
+                                <taxon id="Old_Irish" spec="Taxon"/>
+                                <taxon id="Old_Norse" spec="Taxon"/>
+                                <taxon id="Old_Persian" spec="Taxon"/>
+                                <taxon id="Old_Prussian" spec="Taxon"/>
+                                <taxon id="Oriya" spec="Taxon"/>
+                                <taxon id="Oscan" spec="Taxon"/>
+                                <taxon id="Ossetic_Digor" spec="Taxon"/>
+                                <taxon id="Ossetic_Iron" spec="Taxon"/>
+                                <taxon id="Pali" spec="Taxon"/>
+                                <taxon id="Pashto" spec="Taxon"/>
+                                <taxon id="Persian" spec="Taxon"/>
+                                <taxon id="Polish" spec="Taxon"/>
+                                <taxon id="Portuguese" spec="Taxon"/>
+                                <taxon id="Provencal" spec="Taxon"/>
+                                <taxon id="Romanian" spec="Taxon"/>
+                                <taxon id="Romansh" spec="Taxon"/>
+                                <taxon id="Russian" spec="Taxon"/>
+                                <taxon id="Sardinian_Cagliari" spec="Taxon"/>
+                                <taxon id="Sardinian_Logudoro" spec="Taxon"/>
+                                <taxon id="Sardinian_Nuoro" spec="Taxon"/>
+                                <taxon id="Sarikoli" spec="Taxon"/>
+                                <taxon id="Scottish_Gaelic" spec="Taxon"/>
+                                <taxon id="Serbo-Croatian" spec="Taxon"/>
+                                <taxon id="Shughni" spec="Taxon"/>
+                                <taxon id="Sindhi" spec="Taxon"/>
+                                <taxon id="Sinhalese" spec="Taxon"/>
+                                <taxon id="Slovak" spec="Taxon"/>
+                                <taxon id="Slovenian" spec="Taxon"/>
+                                <taxon id="Sogdian" spec="Taxon"/>
+                                <taxon id="Sorbian_Lower" spec="Taxon"/>
+                                <taxon id="Sorbian_Upper" spec="Taxon"/>
+                                <taxon id="Spanish" spec="Taxon"/>
+                                <taxon id="Swedish" spec="Taxon"/>
+                                <taxon id="Tajik" spec="Taxon"/>
+                                <taxon id="Tocharian_A" spec="Taxon"/>
+                                <taxon id="Tocharian_B" spec="Taxon"/>
+                                <taxon id="Ukrainian" spec="Taxon"/>
+                                <taxon id="Umbrian" spec="Taxon"/>
+                                <taxon id="Urdu" spec="Taxon"/>
+                                <taxon id="Vedic_Sanskrit" spec="Taxon"/>
+                                <taxon id="Vlach" spec="Taxon"/>
+                                <taxon id="Wakhi" spec="Taxon"/>
+                                <taxon id="Walloon" spec="Taxon"/>
+                                <taxon id="Waziri" spec="Taxon"/>
+                                <taxon id="Welsh" spec="Taxon"/>
+                            </taxonset>
+                        </tree>
+                        <parameter id="location.s:IE" spec="sphericalGeo.LocationParameter" dimension="390" minordimension="2">0.0 0.0</parameter>
+                        Albanian_Corinth=37.9683334850582 23.5258329215863,
+Albanian_Gheg=42.2265854672629 20.8761781434291,
+Albanian_Sicily=38.0018116756757 13.6335986216216,
+Albanian_Tosk=40.2555909357993 20.4078893269557,
+Ancient_Greek=37.9724605624413 23.7495907945741,
+Armenian=40.0723733405928 45.305168062311,
+Assamese=26.5425291713748 92.5875510677967,
+Avestan=34.3395388882309 56.5832053759183,
+Baluchi=26.587957378949 62.5580635441686,
+Belarusian=53.3986072792712 28.4809632063919,
+Bengali=23.4537729409676 89.9336333317797,
+Bihari=26.6473101417446 86.2514416915889,
+Breton=48.3080773846578 -4.03400156622516,
+Bulgarian=42.9902253468905 23.2769954250417,
+Catalan=41.75 2.0,
+Classical_Armenian=40.14457720932 45.0845970375941,
+Cornish=50.3557791496575 -4.89972956692107,
+Czech=49.7852348957672 15.4915899544974,
+Danish=55.8494836237628 9.8066851638111,
+Dutch=51.7629408602076 5.23107930242214,
+English=54.4879166094099 -3.5209377168078,
+Faroese=62.0426917877632 -6.83240407959032,
+Flemish=51.0059158860294 2.9809946875,
+French=47.1074154598239 1.11449788231361,
+Frisian=53.1023277955801 5.71783664640884,
+Friulian=45.8725428995984 13.2862703614458,
+German=50.2613386999753 11.1383979707624,
+Gothic=53.9886795942125 16.5001262863809,
+Greek=39.6965740080697 22.4244833145042,
+Greek_Lesbos=39.25 26.25,
+Gujarati=21.6757849717439 71.837266176159,
+Hindi=25.9196611535088 79.5549765906433,
+Hittite=37.7874752477676 33.4357812970257,
+Icelandic=65.1921619246137 -19.8554940975495,
+Irish=53.4532551964426 -8.19735624567699,
+Italian=41.9972471395463 14.0357282757183,
+Kashmiri=34.1156788411215 74.8373988785047,
+Kurdish=37.5676567980605 44.6699618824466,
+Ladin=46.6082063793103 11.8927536896552,
+Lahnda=31.5439738685377 74.4524172200886,
+Latin=42.0664213170021 12.3966635937599,
+Latvian=56.8718099744214 25.0341541608855,
+Lithuanian=55.2173662032521 23.8645842057536,
+Luvian=38.5 35.4,
+Luxembourgish=49.710969183187 6.08277790087829,
+Lycian=36.5625517018681 29.8445306993837,
+Macedonian=41.8685345277435 21.7308628277435,
+Marathi=19.0076071776128 75.4682634517418,
+Nepali=28.9661199765101 81.7191401912752,
+Norwegian_Riksmal=63.5093535944724 11.0867957740995,
+Old_Church_Slavonic=41.0483881792338 23.5698633759189,
+Old_English=51.071658942709 -1.78055413744826,
+Old_High_German=48.8451711709015 11.6826782642743,
+Old_Irish=53.363002759729 -8.37437151730888,
+Old_Norse=65.3318294673867 -19.5330516027461,
+Old_Persian=31.4735553369275 49.7135856082214,
+Old_Prussian=54.0876293990659 19.8936967892766,
+Oriya=21.1044867495426 84.4083078544998,
+Oscan=40.8585186099626 15.6505861410831,
+Ossetic_Digor=43.052279132357 43.8201799375788,
+Ossetic_Iron=43.034486 44.520986,
+Pali=24.53 82.25,
+Pashto=32.4642422895257 68.3275074219367,
+Persian=32.5892853680905 56.497464338956,
+Polish=51.5090908904423 19.2212679089872,
+Portuguese=39.5937373891324 -8.06735775679228,
+Provencal=43.7826152546075 6.12639570307167,
+Romanian=46.2282614049859 25.556100646872,
+Romansh=46.57 9.80,
+Russian=56.0 38.0,
+Sardinian_Cagliari=39.3850265162393 8.83315765128205,
+Sardinian_Logudoro=40.483316 8.56566455555556,
+Sardinian_Nuoro=40.5621072037037 9.65639736419753,
+Sarikoli=37.91 75.14,
+Scottish_Gaelic=57.1495963989066 -5.77410260889693,
+Serbo-Croatian=43.6695141808383 20.6942472711936,
+Shughni=37.50 71.79,
+Sindhi=24.0147216043201 68.5026427741777,
+Sinhalese=7.41611554337899 80.7595922694064,
+Slovak=48.9377120833334 19.8098520947368,
+Slovenian=46.0272344938271 14.9180192204586,
+Sogdian=40.4 69.4,
+Sorbian_Lower=51.6695048 13.9499768666667,
+Sorbian_Upper=51.4629079970864 14.395760374776,
+Spanish=41.1694070669931 -4.44456782718208,
+Swedish=60.0 15.0,
+Tajik=38.7838124193206 69.7926755573248,
+Tocharian_A=42.9264431934901 89.3577819848532,
+Tocharian_B=42.2295853119231 85.639904267671,
+Ukrainian=48.0557674197214 31.3759894414153,
+Umbrian=42.6101677513016 12.8381987416551,
+Urdu=29.1633352808989 78.5478286853933,
+Vedic_Sanskrit=30.4044570967343 75.2925736923182,
+Vlach=40.586 21.395,
+Wakhi=37.0896278316136 73.2784554214728,
+Walloon=50.1993967535211 5.05004061971831,
+Waziri=32.0 69.5,
+Welsh=51.75 -4.25                    </traitMap>
+                    <userDataType id="LocationDataType.0" spec="sphericalGeo.LocationDataType"/>
+                </data>
+                <tree idref="Tree.t:IE"/>
+                <siteModel id="geoContSiteModel.s:IE" spec="SiteModel">
+                    <substModel id="sdiffusionModel.s:IE" spec="sphericalGeo.SphericalDiffusionModel" fast="true">
+                        <parameter id="sprecision.s:IE" lower="0.0" name="precision">100.0</parameter>
+                    </substModel>
+                </siteModel>
+                <branchRateModel id="RelaxedClock.c:IE" spec="beast.evolution.branchratemodel.UCRelaxedClockModel" clock.rate="@ucldMean.c:IE" rateCategories="@rateCategories.c:IE" tree="@Tree.t:IE">
+                    <LogNormal id="LogNormalDistributionModel.c:IE" S="@ucldStdev.c:IE" meanInRealSpace="true" name="distr">
+                        <parameter id="RealParameter.02" estimate="false" lower="0.0" name="M" upper="1.0">1.0</parameter>
+                    </LogNormal>
+                </branchRateModel>
+            </distribution>
+        </distribution>
+    </distribution>
+
+    <operator id="ucldStdevScaler.c:IE" spec="ScaleOperator" parameter="@ucldStdev.c:IE" scaleFactor="0.5" weight="3.0"/>
+
+    <operator id="CategoriesRandomWalk.c:IE" spec="IntRandomWalkOperator" parameter="@rateCategories.c:IE" weight="10.0" windowSize="1"/>
+
+    <operator id="CategoriesSwapOperator.c:IE" spec="SwapOperator" intparameter="@rateCategories.c:IE" weight="10.0"/>
+
+    <operator id="CategoriesUniform.c:IE" spec="UniformOperator" parameter="@rateCategories.c:IE" weight="10.0"/>
+
+    <operator id="ucldMeanScaler.c:IE" spec="ScaleOperator" parameter="@ucldMean.c:IE" scaleFactor="0.5" weight="1.0"/>
+
+    <logger id="tracelog" fileName="IEtransformed.log" logEvery="10000" model="@posterior" sanitiseHeaders="true" sort="smart">
+        <log idref="posterior"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+        <log idref="slocationtreeLikelihood.IE"/>
+        <log idref="sprecision.s:IE"/>
+        <log idref="ucldStdev.c:IE"/>
+        <log id="rate.c:IE" spec="beast.evolution.branchratemodel.RateStatistic" branchratemodel="@RelaxedClock.c:IE" tree="@Tree.t:IE"/>
+        <log idref="ucldMean.c:IE"/>
+    </logger>
+
+    <logger id="screenlog" logEvery="10000">
+        <log idref="posterior"/>
+        <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+    </logger>
+
+    <logger id="TreeLogger" fileName="IEtransformed.trees" logEvery="10000" mode="tree">
+        <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:IE">
+            <metadata id="location" spec="sphericalGeo.TraitFunction" likelihood="@slocationtreeLikelihood.IE">0.0</metadata>
+        </log>
+    </logger>
+
+</run>
+
+</beast>
