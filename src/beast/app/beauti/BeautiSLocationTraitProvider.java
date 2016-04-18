@@ -72,7 +72,7 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
 	
 	protected List<BEASTInterface> getTree(BeautiDoc doc) {
 		try {
-            File file = Utils.getLoadFile("Open tree file with fixed tree");
+            File file = Utils.getLoadFile("Open tree file with fixed tree", new File(Beauti.g_sDir), "Tree file", "tree","tre","txt","nxs");
             if (file != null) {
             	NexusParser parser = new NexusParser();
             	parser.parseFile(file);
