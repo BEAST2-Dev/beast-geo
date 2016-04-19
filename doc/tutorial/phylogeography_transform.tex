@@ -1,7 +1,7 @@
 \documentclass{article}
 \usepackage{url,graphicx,color}
 
-\newcommand{\BEASTVersion}{2.4}
+\newcommand{\BEASTVersion}{2.4.1}
 \newcommand{\TracerVersion}{1.6}
 \newcommand{\FigTreeVersion}{1.4.2}
 
@@ -20,7 +20,7 @@
 \section{Introduction}
 
 
-In this tutorial we describe how to set up an analysis using inhomogeneous diffusion as described in  \cite{somewhatIP} with the full Bayesian framework for phylogeography \cite{sphericalgeo}. It is assumed that you have done other tutorials (especially the 'Continuous phylogeography on a sphere' tutorial) and know how to run BEAST and Tracer.
+In this tutorial we describe how to set up an analysis using inhomogeneous diffusion as described in  \cite{somewhatIP} with the full Bayesian framework for phylogeography \cite{sphericalgeo}. It is assumed that you have done other tutorials (especially the 'Continuous phylogeography on a sphere' tutorial) and know how to run BEAST, Tracer, SPREAD and create a heatmap using the HeatMapMaker app, as outlined in the 'Continuous phylogeography on a sphere' tutorial.
 
 Somewhat heterogeneous diffusion can be achieved by transforming the Mercator projection, thus getting a new map where the standard diffusion process is run. The transformation can be based on a cartogram, where the area is transformed such that higher density shapes are blown up and lower density ones are shrunk. The image above shows the standard Mercator projection world map left and a cartogram where country sizes represent population sizes on the right. To use a cartogram transformation, create a file containing shapes in ESRI shape file or KML file. ESRI shape files allow attributes to be associated directly with shapes, which can be used as density or weight. For KML files, each shape has a name, and in the BEAST XML you can specify for each of these names the weight it should get.
 
@@ -30,7 +30,7 @@ You will need the following software at your disposal:
 
 \begin{itemize}
 
-\item {\bf BEAST} - This package contains the BEAST program, BEAUti, TreeAnnotator and other utility programs. This tutorial is written for BEAST v{\BEASTVersion}. It is available for download from \\* \texttt{http://beast2.org/}.
+\item {\bf BEAST} - This package contains the BEAST program, BEAUti, TreeAnnotator and other utility programs. This tutorial is written for BEAST v{\BEASTVersion}\footnote{It will not work as smooth with BEAST v2.4.0.}. It is available for download from \\* \texttt{http://beast2.org/}.
 \item {\bf Tracer} - this program is used to explore the output of BEAST (and other Bayesian MCMC programs). It graphically and
 quantitively summarises the distributions of continuous parameters and provides diagnostic information. At the time of
 writing, the current version is v{\TracerVersion}. It is available for download from \texttt{http://beast.bio.ed.ac.uk/}.i
@@ -67,19 +67,19 @@ Select the \beast-geo{} entry in the list, and click the Install button. After a
 
 \subsection*{BEAUti}
 
-Select the menu "File/Set working dir/\beast-geo" since we are going to work with files from the beast-geo package (you may need to restart BEAUti if you just installed the package).
+Select the menu ``File/Set working dir/\beast-geo" since we are going to work with files from the beast-geo package (you may need to restart BEAUti if you just installed the package).
 
 \begin{center}
 \includegraphics[scale=0.4]{figures/BEAUti_setWD}
 \end{center}
 
-Select the "File/Add Spherical Geography" menu item  and a dialog pops up that asks for a trait name and a tree. Use 'geo' for trait name and Since we will use a fixed tree, leave the selection on '[[fixed tree]]'.
+Select the ``File/Add Spherical Geography" menu item  and a dialog pops up that asks for a trait name and a tree. Use 'geo' for trait name and Since we will use a fixed tree, leave the selection on '[[fixed tree]]'.
 
 \begin{center}
 \includegraphics[scale=0.4]{figures/BEAUti_transform1}
 \end{center}
 
-A file selection dialog pops up. Select the file "examples/transform/IE.tree" from the beast-geo folder. The file IE.tree contains a tree in NEXUS format. Now, a dialog pops up with a table of locations and a list of languages from the tree.
+A file selection dialog pops up. Select the file ``examples/transform/IE.tree" from the beast-geo folder. The file IE.tree contains a tree in NEXUS format. Now, a dialog pops up with a table of locations and a list of languages from the tree.
 
 \begin{center}
 \includegraphics[scale=0.4]{figures/BEAUti_transform2}
@@ -110,13 +110,13 @@ The estimate box now can be checked.
 \includegraphics[scale=0.4]{figures/BEAUti_transform6}
 \end{center}
 
-We do not wan the standard deviation for the relaxed clock to get out of hand, so set an alarm limit of 5 on it. Select the menu "View/Show Initialisation Panel" and set the upper field to 5;
+We do not wan the standard deviation for the relaxed clock to get out of hand, so set an alarm limit of 5 on it. Select the menu ``View/Show Initialisation Panel" and set the upper field to 5;
 
 \begin{center}
 \includegraphics[scale=0.4]{figures/BEAUti_transform7} 
 \end{center}
 
-In the MCMC panel, set the chain length to 1 million, and set logging frequency for trees to 10000. Save the file as a IE.xml using the "File/Save" menu. Now you can run the file in BEAST, check convergence in Tracer (for 1 million, it does not convergence, so ESSs are poor, but for the purpose of this tutorial it gives a good indication of the geography. You can resume for another million states or more to get full convergence.) To visualise the result using {\tt spread} create a summary tree from a terminal using
+In the MCMC panel, set the chain length to 1 million, and set logging frequency for trees to 10000. Save the file as a IE.xml using the ``File/Save" menu. Now you can run the file in BEAST, check convergence in Tracer (for 1 million, it does not convergence, so ESSs are poor, but for the purpose of this tutorial it gives a good indication of the geography. You can resume for another million states or more to get full convergence.) To visualise the result using {\tt spread} create a summary tree from a terminal using
 \begin{verbatim}
 /path/to/treeannotator -hpd2D 0.8 -b 10 IE.trees > IE.tree
 \end{verbatim}
@@ -126,7 +126,7 @@ In {\tt spread}, go to the continuous tab, select IE.tree as tree, and select 'l
 
 \section*{Inhomogeneous phylogeography}
 
-Now we are going to add a transformation to the analysis. In BEAUti, go to the partitions panel, and double click the IE entry on say the file. The table editor for locations pops up again, where you click the "Transformer" button.
+Now we are going to add a transformation to the analysis. In BEAUti, go to the partitions panel, and double click the IE entry on say the file. The table editor for locations pops up again, where you click the ``Transform" button.
 
 \begin{center}
 \includegraphics[scale=0.4]{figures/BEAUti_transform8}
@@ -138,17 +138,19 @@ A shape file or KML file can be used as input to the cartogram. KML files can ea
 \includegraphics[scale=0.4]{figures/IEmap.png}
 \end{center}
 
-Select examples/transform/IE.kml in the \beast-geo{} folder for the shape file by clicking the "browse" button next to the "Shape file" entry.
+Select examples/transform/IE.kml in the \beast-geo{} folder for the shape file by clicking the ``browse" button next to the ``Shape file" entry.
 
-Each of the areas has a name; Caucasus, Dummy, TopLeft and TopRight. To set the relative weights for each of the different areas, fill in\\ "Caucasus=1000,Dummy=10,TopLeft=10,TopRight=10" in the entry for "value". 
+Each of the areas has a name; Caucasus, Dummy, TopLeft and TopRight. To set the relative weights for each of the different areas, fill in\\ ``Caucasus=1000,Dummy=10,TopLeft=10,TopRight=10" in the entry for ``value". 
 
 If you specify the file for the Cartogram entry, the cartogram (which can take a bit of time to be calculated) is saved in that file, and next time BEAST will attempt to read that file first, so the cartogram does not have to be recalculated. Of course, this means when changing the shape file that you have to remove the cartogram file, otherwise the analysis will run with the old shape file.
+
+You want to make sure that the path of the cartogram entry exists, otherwise no file will be written. 
 
 The transfomer has the following general attributes:\\
 
 {\tt shapeFile}: file containing regions in .shp or .kml format. Must be specified.\\
 
-{\tt attIdentifier}: name of attribute in shape file that identifies a region, default "NAME".\\
+{\tt attIdentifier}: name of attribute in shape file that identifies a region, default ``NAME".\\
 
 {\tt value}: comma separated list of 'id=value' pairs where values representing relative size for each regions with ID from the shape file.\\
 
@@ -193,7 +195,7 @@ Go to the MCMC panel, and set the tracelog file name to IEtransformed.log, and t
 \includegraphics[scale=0.4]{figures/BEAUti_transform20}
 \end{center}
 
-{\bf Note:} do not use File/Save, since it will overwrite the file IE.xml saved earlier. Save the file as a IEtransform.xml using the "File/Save as" menu.
+{\bf Note:} do not use File/Save, since it will overwrite the file IE.xml saved earlier. Save the file as a IEtransform.xml using the ``File/Save as" menu.
 
 \subsection*{Running BEAST and analysing the output}
 
@@ -242,13 +244,13 @@ At this point in time, there is no BEAUti support to allow sampling of tip locat
 First, you need to add an entry to the state, and add operators.
 Second, you have to define a set of regions, either by KML or by colouring a bitmap image in Mercatore projection. KML regions can be drawn in google-earth and bitmap images in Mercator projection can be produced using the MapMaker utility that you can start from the BEAST AppStore. Once you created a world map with MapMaker, you can colour in the region you want to sample from.
 
-To set up the state, add the following line (where "geo" is the name used for the geography partition)
+To set up the state, add the following line (where ``geo" is the name used for the geography partition)
 
 \begin{verbatim}
 <stateNode idref="location.s:geo"/>
 \end{verbatim}
 
-Note that the "s:" in "location.s:geo" is important!
+Note that the ``s:" in ``location.s:geo" is important!
 Next, add a LocationOperator to the set of operators (inside the MCMC element, where the other operators are):
 
 \begin{verbatim}
@@ -288,7 +290,7 @@ Now we defined a region, suppose you want to sample taxon AF182802 from the regi
 <geoprior>
 \end{verbatim}
 
-inside the element with id="slocationtreeLikelihood.geo" (where 'geo' is the name of the partition for spherical geography, and 'hbv' the name of the partition with the alignment).
+inside the element with id='slocationtreeLikelihood.geo' (where 'geo' is the name of the partition for spherical geography, and `hbv' the name of the partition with the alignment).
 
 
 If you have many regions and tips you want to sample, to prettify the XML and make it somewhat more readable, you can create these maps:
@@ -342,9 +344,9 @@ Putting a prior on the root means we have to sample the root location, which ess
 
 \subsubsection*{Putting a prior on a monophyletic clade}
 
-First, specify a monophyletic clade in the priors panel in BEAUti; hit the little '+' button at the bottom, and a dialog pops up where you can specify a taxon set. Once you have given the clade a name (say "myclade") and close the dialog, in the proirs panel a new entry appears for the clade. Select the 'monophyletic' check box. Note that the clade must be monophyletic, otherwise the sampler does not work.
+First, specify a monophyletic clade in the priors panel in BEAUti; hit the little '+' button at the bottom, and a dialog pops up where you can specify a taxon set. Once you have given the clade a name (say ``myclade") and close the dialog, in the priors panel a new entry appears for the clade. Select the 'monophyletic' check box. Note that the clade must be monophyletic, otherwise the sampler does not work.
 
-To specify the prior, add the following to the element with id="slocationtreeLikelihood.geo"
+To specify the prior, add the following to the element with {\tt id="slocationtreeLikelihood.geo"}
 
 \begin{verbatim}
 <geoprior location='@location.s:geo' tree='@Tree.t:hbv' region='@China'>
