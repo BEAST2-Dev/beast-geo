@@ -20,7 +20,7 @@
 \section{Introduction}
 
 
-In this tutorial we describe how to set up an analysis using inhomogeneous diffusion as described in  \cite{somewhatIP} with the full Bayesian framework for phylogeography \cite{sphericalgeo}. It is assumed that you have done other tutorials (especially the 'Continuous phylogeography on a sphere' tutorial) and know how to run BEAST, Tracer, SPREAD and create a heatmap using the HeatMapMaker app, as outlined in the 'Continuous phylogeography on a sphere' tutorial.
+In this tutorial we describe how to set up an analysis using inhomogeneous diffusion as described in  \cite{somewhatIP} with the full Bayesian framework for phylogeography \cite{sphericalgeo}. It is assumed that you have done other tutorials (especially the `Continuous phylogeography on a sphere' tutorial) and know how to run BEAST, Tracer, SPREAD and create a heatmap using the HeatMapMaker app, as outlined in the `Continuous phylogeography on a sphere' tutorial.
 
 Somewhat heterogeneous diffusion can be achieved by transforming the Mercator projection, thus getting a new map where the standard diffusion process is run. The transformation can be based on a cartogram, where the area is transformed such that higher density shapes are blown up and lower density ones are shrunk. The image above shows the standard Mercator projection world map left and a cartogram where country sizes represent population sizes on the right. To use a cartogram transformation, create a file containing shapes in ESRI shape file or KML file. ESRI shape files allow attributes to be associated directly with shapes, which can be used as density or weight. For KML files, each shape has a name, and in the BEAST XML you can specify for each of these names the weight it should get.
 
@@ -73,7 +73,7 @@ Select the menu ``File/Set working dir/\beast-geo" since we are going to work wi
 \includegraphics[scale=0.4]{figures/BEAUti_setWD}
 \end{center}
 
-Select the ``File/Add Spherical Geography" menu item  and a dialog pops up that asks for a trait name and a tree. Use 'geo' for trait name and Since we will use a fixed tree, leave the selection on '[[fixed tree]]'.
+Select the ``File/Add Spherical Geography" menu item  and a dialog pops up that asks for a trait name and a tree. Use `geo' for trait name and Since we will use a fixed tree, leave the selection on `[[fixed tree]]'.
 
 \begin{center}
 \includegraphics[scale=0.4]{figures/BEAUti_transform1}
@@ -85,8 +85,8 @@ A file selection dialog pops up. Select the file ``examples/transform/IE.tree" f
 \includegraphics[scale=0.4]{figures/BEAUti_transform2}
 \end{center}
 
-You can fill in the individual entries by hand, but if you press the 'Guess latitude' button, a dialog pops up that helps you fill these entries.
-The easiest way to populate the table is by importing it from a file containing the table in comma separated format. Select the 'read from file' option and click 'browse'. Select the file 'examples/transform/IElocations.dat' in the beast-geo package folder.
+You can fill in the individual entries by hand, but if you press the `Guess latitude' button, a dialog pops up that helps you fill these entries.
+The easiest way to populate the table is by importing it from a file containing the table in comma separated format. Select the `read from file' option and click `browse'. Select the file `examples/transform/IElocations.dat' in the beast-geo package folder.
 
 \begin{center}
 \includegraphics[scale=0.4]{figures/BEAUti_transform3}
@@ -98,7 +98,7 @@ After clicking OK, the table with locations will be populated and look something
 \includegraphics[scale=0.4]{figures/BEAUti_transform4}
 \end{center}
 
-Click 'Close' and you have created a partition called IE that is shown in the partition panel. Now we can set up the clock model by switching to the clock model panel. By default, a relaxed clock is assumed, but for this data a relaxed log normal fits much better, so select this model from the drop down box. The 'estimate' box for the clock rate will be greyed out, but since we want to estimate the rate, select the menu 'Mode/Automatically set clock rate' and make sure it is not checked. 
+Click `Close' and you have created a partition called IE that is shown in the partition panel. Now we can set up the clock model by switching to the clock model panel. By default, a relaxed clock is assumed, but for this data a relaxed log normal fits much better, so select this model from the drop down box. The `estimate' box for the clock rate will be greyed out, but since we want to estimate the rate, select the menu `Mode/Automatically set clock rate' and make sure it is not checked. 
 
 \begin{center}
 \includegraphics[scale=0.4]{figures/BEAUti_transform5}
@@ -121,7 +121,7 @@ In the MCMC panel, set the chain length to 1 million, and set logging frequency 
 /path/to/treeannotator -hpd2D 0.8 -b 10 IE.trees > IE.tree
 \end{verbatim}
 This creates 80\% HPD areas in the annotated tree. Do not forget the -hpd2D argument, otherwise no HPD regions will be shown. 
-In {\tt spread}, go to the continuous tab, select IE.tree as tree, and select 'location1' and 'location2' for 'latitude attribute name' and 'longitude attribute name' respectively. Then under the 'output' tab, click 'Plot' to visualise in {\tt spread}, or 'Generate' to generate a KML file that can be shown in Google earth. See the spherical geography tutorial for details.
+In {\tt spread}, go to the continuous tab, select IE.tree as tree, and select `location1' and `location2' for `latitude attribute name' and `longitude attribute name' respectively. Then under the `output' tab, click `Plot' to visualise in {\tt spread}, or `Generate' to generate a KML file that can be shown in Google earth. See the spherical geography tutorial for details.
 
 
 \section*{Inhomogeneous phylogeography}
@@ -152,7 +152,7 @@ The transfomer has the following general attributes:\\
 
 {\tt attIdentifier}: name of attribute in shape file that identifies a region, default ``NAME".\\
 
-{\tt value}: comma separated list of 'id=value' pairs where values representing relative size for each regions with ID from the shape file.\\
+{\tt value}: comma separated list of `id=value' pairs where values representing relative size for each regions with ID from the shape file.\\
 
 {\tt weightIdentifier}: name of attribute in shape file that identifies a weight, either specify weightIdentifier or value, but no both.\\
 
@@ -208,7 +208,7 @@ When running BEAST, two SVG files are written: toadmap.svg avd deformationLayer.
 
 After running the analysis in BEAST, check the log file in Tracer (again, 1 million states is not sufficient to get to convergence. You can run for longer if you like to get full convergence by resuming the run.).
 
-To create a heatmap, open the BEAST AppStore and launch the HeatMapMaker. In the dialog that pops up, select IEtransformed.trees for tree set, set bounding box to -20 -30 70 120, set tag to 'location', height to 512,  and click OK. A heatmap png and /tmp/legend.png (which shows colours associated with some time in the past) file will be generated that looks something like this.
+To create a heatmap, open the BEAST AppStore and launch the HeatMapMaker. In the dialog that pops up, select IEtransformed.trees for tree set, set bounding box to -20 -30 70 120, set tag to `location', height to 512,  and click OK. A heatmap png and /tmp/legend.png (which shows colours associated with some time in the past) file will be generated that looks something like this.
 
 \includegraphics[width=0.75\textwidth]{figures/IEheatmap}
 \includegraphics[width=0.25\textwidth]{figures/IElegend}
