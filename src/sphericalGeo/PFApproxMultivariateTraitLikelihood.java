@@ -18,7 +18,7 @@ import beast.evolution.tree.TreeInterface;
 import beast.util.Randomizer;
 
 @Description("Approximate likelihood by particle filter approximation")
-public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
+public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood implements LocationProvider {
 	public Input<Integer> nrOfParticlesInput = new Input<>("nrOfParticles", "number of particles to use", 25);//100
 	public Input<Integer> nrOfIterationsInput = new Input<>("nrOfIterations", "number of iterations to run the particle filter", 10);
 	public Input<Integer> rangeSizeInput = new Input<>("nrrange", "number of random samples for placing a node", 10);//10
@@ -149,7 +149,7 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 	double [][] position;
 	double [] branchLengths;
 	double [] sumLengths;
-	boolean needsUpdate = true;
+	public boolean needsUpdate = true;
 	
 	LeafParticleSet [] particleSets;
 	
@@ -534,7 +534,7 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood {
 		return true;
 	}
 
-	public double[] getPostion(int iDim) {
+	public double[] getPosition(int iDim) {
 		if (needsUpdate) {
 			try {
 				calculateLogP();

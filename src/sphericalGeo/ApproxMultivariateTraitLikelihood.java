@@ -22,7 +22,7 @@ import beast.evolution.tree.TreeInterface;
 
 @Description("Approximate likelihood by MAP approximation of internal states")
 @Citation("Remco R. Bouckaert. Phylogeography by diffusion on a sphere. bioRxiv, BIORXIV/2015/016311, 2015.")
-public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood implements StateNodeInitialiser { 
+public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood implements StateNodeInitialiser, LocationProvider { 
 	public Input<Boolean> scaleByBranchLengthInput = new Input<>("scale", "scale by branch lengths for initial position", false);
 	public Input<List<GeoPrior>> geopriorsInput = new Input<>("geoprior", "geographical priors on tips, root or clades restricting these nodes to a region", new ArrayList<>());
 	public Input<LocationParameter> locationInput = new Input<>("location",
@@ -818,7 +818,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	/** return randomized position **/
 	public double[] getPosition(int iDim) {
 		if (!logAverage) {
-			return loggerLikelihood.getPostion(iDim);
+			return loggerLikelihood.getPosition(iDim);
 		} else {
 			if (needsUpdate) {
 				try {

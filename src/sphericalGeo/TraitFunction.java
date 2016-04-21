@@ -15,31 +15,18 @@ import beast.evolution.tree.Tree;
 
 @Description("Helper class for logging locations from ApproxMultivariateTraitLikelihood")
 public class TraitFunction extends RealParameter {
-	public Input<GenericTreeLikelihood> likelihoodInput = new Input<>("likelihood", "trait likelihood to be logged", Validate.REQUIRED);
+	public Input<LocationProvider> likelihoodInput = new Input<>("likelihood", "trait likelihood to be logged", Validate.REQUIRED);
 
-	GenericTreeLikelihood likelihood;
+	LocationProvider likelihood;
 	Tree tree;
 
-	Method getPosition;
-	
 	@Override
 	public void initAndValidate() {
-		if (likelihoodInput.get() instanceof ApproxMultivariateTraitLikelihood) {
-			likelihood = (ApproxMultivariateTraitLikelihood)likelihoodInput.get();
-		} else if (likelihoodInput.get() instanceof ApproxMultivariateTraitLikelihoodF) {
-			likelihood = (ApproxMultivariateTraitLikelihoodF)likelihoodInput.get();
-		} else if (likelihoodInput.get() instanceof PFApproxMultivariateTraitLikelihood) {
-			likelihood= (PFApproxMultivariateTraitLikelihood)likelihoodInput.get();
+		if (likelihoodInput.get() instanceof GenericTreeLikelihood) {
+	        tree = ((Tree) ((GenericTreeLikelihood) likelihood).treeInput.get());
 		} else {
-			throw new RuntimeException("likelihood should be one of ApproxMultivariateTraitLikelihood or PFApproxMultivariateTraitLikelihood");
+			throw new RuntimeException("likelihood should have derived from GenericTreeLikelihood");
 		}
-        tree = ((Tree) (likelihood.treeInput.get()));
-		try {
-			getPosition = likelihood.getClass().getMethod("getPosition", int.class);
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException(e);
-		}
-				
 	}
 
 	@Override
@@ -59,13 +46,7 @@ public class TraitFunction extends RealParameter {
 
 	@Override
 	public Double getMatrixValue(int i, int j) {
-		try {
-			return ((double[]) getPosition.invoke(likelihood, i))[j];
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return 0.0;
+		return likelihood.getPosition(i)[j];
 	}
 
 }
