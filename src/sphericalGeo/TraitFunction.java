@@ -22,7 +22,8 @@ public class TraitFunction extends RealParameter {
 
 	@Override
 	public void initAndValidate() {
-		if (likelihoodInput.get() instanceof GenericTreeLikelihood) {
+		likelihood = likelihoodInput.get();
+		if (likelihood instanceof GenericTreeLikelihood) {
 	        tree = ((Tree) ((GenericTreeLikelihood) likelihood).treeInput.get());
 		} else {
 			throw new RuntimeException("likelihood should have derived from GenericTreeLikelihood");
