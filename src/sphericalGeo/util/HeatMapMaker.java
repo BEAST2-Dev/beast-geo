@@ -18,7 +18,9 @@ import beast.app.beauti.BeautiDoc;
 import beast.app.draw.BEASTObjectDialog;
 import beast.app.draw.BEASTObjectPanel;
 import beast.app.util.Application;
+import beast.app.util.ConsoleApp;
 import beast.app.util.OutFile;
+import beast.app.util.Utils;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Runnable;
@@ -28,14 +30,14 @@ import beast.util.NexusParser;
 
 @Description("Creates heat map of locations with colour representing time")
 public class HeatMapMaker extends Runnable {
-	public Input<File> treesetInput = new Input<>("treeSet","file containing tree set annotated with locations", new File("/Users/remco/IE.trees"));
-	public Input<File> bgInput = new Input<>("background","image file with a map for the background", new File("/Users/remco/data/map/World98b.png"));
+	public Input<File> treesetInput = new Input<>("treeSet","file containing tree set annotated with locations");//, new File("IE.trees"));
+	public Input<File> bgInput = new Input<>("background","image file with a map for the background");//, new File("/Users/remco/data/map/World98b.png"));
 	public Input<String> bboxInput = new Input<>("boundingBox","bounding box of the background image", "-90 -180 90 180");
-	public Input<String> tagInput = new Input<>("tag","tag used in annotated of locations", "locations.geo");
+	public Input<String> tagInput = new Input<>("tag","tag used in annotated of locations", "location");
 	public Input<Integer> widthInput = new Input<>("width","width of the heat map", 1024);
 	public Input<Integer> heightInput = new Input<>("height","heightof the heat map", 1024);
 	public Input<Double> maxTimeInput = new Input<>("maxTime","maximum time (all older nodes will be coloured red)", Double.POSITIVE_INFINITY);
-	public Input<OutFile> outputInput = new Input<>("output","where to save the file", new OutFile("/tmp/heatmap.png"));
+	public Input<OutFile> outputInput = new Input<>("output","where to save the file", new OutFile("heatmap.png"));
 	public Input<Integer> discSizeInput = new Input<>("discSize","size of the dots used to draw heat map", 10);
 	public Input<Double> translucencyInput = new Input<>("translucency","translucency of the dots used to draw heat map (a number between 0=invisible and 1=solid)", 0.2);
 	public Input<Double> saturationInput = new Input<>("saturation","saturation of colour for the dots", 0.9);
@@ -50,7 +52,7 @@ public class HeatMapMaker extends Runnable {
 	int height;
 	String tag;
 	
-	
+	final static String DIR_SEPARATOR = (Utils.isWindows() ? "\\\\" : "/");
 	@Override
 	public void initAndValidate() {
 		width = widthInput.get();
@@ -64,23 +66,36 @@ public class HeatMapMaker extends Runnable {
 		Graphics g = image.getGraphics();
 
 		File bg = bgInput.get();
-		if (bg != null && bg.exists()) {
-			BufferedImage bgImage = ImageIO.read(bg);
-			parseBBox();
-			g.drawImage(bgImage, 0, 0, width, height, 
-					(int) (bgImage.getWidth() * (180 + minLong) / 360.0),
-					(int) (bgImage.getHeight() * (90 - maxLat) / 180.0), 
-					(int) (bgImage.getWidth() * (180 + maxLong) / 360.0), 
-					(int) (bgImage.getHeight() * (90 - minLat) / 180.0), null);
-
+		if (bg != null) {
+			if (bg.exists()) {
+				System.out.println("Loading background image " + bg.getPath());
+				BufferedImage bgImage = ImageIO.read(bg);
+				parseBBox();
+				g.drawImage(bgImage, 0, 0, width, height, 
+						(int) (bgImage.getWidth() * (180 + minLong) / 360.0),
+						(int) (bgImage.getHeight() * (90 - maxLat) / 180.0), 
+						(int) (bgImage.getWidth() * (180 + maxLong) / 360.0), 
+						(int) (bgImage.getHeight() * (90 - minLat) / 180.0), null);
+			} else {
+				System.out.println("Could not find backgroung image " + bg.getPath());
+			}
+		} else {
+			System.out.println("No background image");
 		}
 
 		// get trees
+		System.out.print("Parsing trees " + treesetInput.get().getPath() + " ... ");
 		NexusParser parser = new NexusParser();
 		parser.parseFile(treesetInput.get());
 		List<Tree> trees = parser.trees;
+		if (trees == null) {
+			System.out.println("File did not contain any trees. Is this a tree set file?");
+			return;
+		}
+		System.out.println(" done");
 		
 		// get dots
+		System.out.print("Drawing dots...");
 		List<Dot> dots = new ArrayList<>();
 		for (Tree tree: trees) {
 			collectDots(tree.getRoot(),dots);
@@ -113,12 +128,16 @@ public class HeatMapMaker extends Runnable {
 			int x = (int)( (dot.longitude - minLong) * width/(maxLong-minLong));  
 			g.fillOval(x-halfRadius, y-halfRadius, radius, radius);
 		}
+		System.out.println(" done");
 		
 		// write file
+		System.out.print("Writing file " + outputInput.get().getPath());
 		ImageIO.write(image, "png", outputInput.get());
+		System.out.println(" done");
 		
 		
 		// create legend
+		System.out.print("Writing legend " + outputInput.get().getParent() + DIR_SEPARATOR + "legend.png ");
         image = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
         g = image.getGraphics();
         g.setColor(Color.white);
@@ -133,7 +152,8 @@ public class HeatMapMaker extends Runnable {
         for (int i = 0; i < 10; i++) {
         	g.drawString(""+ (oldest * (10 - i)/ 10), 100, 200*i/10);
         }
-		ImageIO.write(image, "png", new File("/tmp/legend.png"));
+		ImageIO.write(image, "png", new File(outputInput.get().getParent() + DIR_SEPARATOR + "legend.png"));
+		System.out.println(" done");
 		
 	}
 
@@ -237,8 +257,9 @@ public class HeatMapMaker extends Runnable {
         }
     }
 
+    static ConsoleApp app;
 	public static void main(String[] args) throws Exception {
-		HeatMapMaker sampler = new HeatMapMaker();
+		HeatMapMaker heatMapMaker = new HeatMapMaker();
 	
 		if (args.length == 0) {
 			// create BeautiDoc and beauti configuration
@@ -247,32 +268,34 @@ public class HeatMapMaker extends Runnable {
 			doc.beautiConfig.initAndValidate();
 			
 			// suppress a few inputs that we don't want to expose to the user
-			doc.beautiConfig.suppressBEASTObjects.add(sampler.getClass().getName() + ".mcmc");
-			doc.beautiConfig.suppressBEASTObjects.add(sampler.getClass().getName() + ".value");
-			doc.beautiConfig.suppressBEASTObjects.add(sampler.getClass().getName() + ".hosts");
+			doc.beautiConfig.suppressBEASTObjects.add(heatMapMaker.getClass().getName() + ".mcmc");
+			doc.beautiConfig.suppressBEASTObjects.add(heatMapMaker.getClass().getName() + ".value");
+			doc.beautiConfig.suppressBEASTObjects.add(heatMapMaker.getClass().getName() + ".hosts");
 		
 			// create panel with entries for the application
-			BEASTObjectPanel panel = new BEASTObjectPanel(sampler, sampler.getClass(), doc);
+			BEASTObjectPanel panel = new BEASTObjectPanel(heatMapMaker, heatMapMaker.getClass(), doc);
 			
 			// wrap panel in a dialog
 			BEASTObjectDialog dialog = new BEASTObjectDialog(panel, null);
 	
 			// show the dialog
 			if (dialog.showDialog()) {
-				dialog.accept(sampler, doc);
+				dialog.accept(heatMapMaker, doc);
 				// create a console to show standard error and standard output
-				//ConsoleApp app = new ConsoleApp("PathSampler", "Path Sampler: " + sampler.model1Input.get().getPath());
-				sampler.initAndValidate();
-				sampler.run();
+				//ConsoleApp 
+				app = new ConsoleApp("HeatMapMaker", "Heat Map Maker: " + heatMapMaker.treesetInput.get().getPath(), null);
+				heatMapMaker.initAndValidate();
+				heatMapMaker.run();
 			}
-			System.exit(0);
+			System.out.println("All done");
 			return;
 		}
 
-		Application main = new Application(sampler);
+		Application main = new Application(heatMapMaker);
 		main.parseArgs(args, false);
-		sampler.initAndValidate();
-		sampler.run();
+		heatMapMaker.initAndValidate();
+		heatMapMaker.run();
+		System.out.println("All done");
 	}
 
 
