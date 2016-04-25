@@ -140,7 +140,11 @@ A shape file or KML file can be used as input to the cartogram. KML files can ea
 
 Select examples/transform/IE.kml in the \beast-geo{} folder for the shape file by clicking the ``browse" button next to the ``Shape file" entry.
 
-Each of the areas has a name; Caucasus, Dummy, TopLeft and TopRight. To set the relative weights for each of the different areas, fill in\\ ``Caucasus=1000,Dummy=10,TopLeft=10,TopRight=10" in the entry for ``value". 
+Each of the areas has a name; Caucasus, Dummy, TopLeft and TopRight. To set the relative weights for each of the different areas, fill in
+
+{\tt Caucasus=1000,Dummy=10,TopLeft=10,TopRight=10}
+
+ in the entry for ``value". 
 
 If you specify the file for the Cartogram entry, the cartogram (which can take a bit of time to be calculated) is saved in that file, and next time BEAST will attempt to read that file first, so the cartogram does not have to be recalculated. Of course, this means when changing the shape file that you have to remove the cartogram file, otherwise the analysis will run with the old shape file.
 
@@ -208,7 +212,7 @@ When running BEAST, two SVG files are written: toadmap.svg avd deformationLayer.
 
 After running the analysis in BEAST, check the log file in Tracer (again, 1 million states is not sufficient to get to convergence. You can run for longer if you like to get full convergence by resuming the run.).
 
-To create a heatmap, open the BEAST AppStore and launch the HeatMapMaker. In the dialog that pops up, select IEtransformed.trees for tree set, set bounding box to -20 -30 70 120, set tag to `location', height to 512,  and click OK. A heatmap png and /tmp/legend.png (which shows colours associated with some time in the past) file will be generated that looks something like this.
+To create a heatmap, open the BEAST AppStore and launch the HeatMapMaker. In the dialog that pops up, select IEtransformed.trees for tree set, set bounding box to -20 -30 70 120, set tag to `location', height to 512. To create background, select an image of a world map in mercator projections (you can download one for example from \url{https://www.cs.auckland.ac.nz/~remco/geo/World98.png}). After setting up everything, click OK. A {\tt heatmap.png} and {\tt legend.png} (which shows colours associated with some time in the past) file will be generated in the same directory that looks something like this.
 
 \includegraphics[width=0.75\textwidth]{figures/IEheatmap}
 \includegraphics[width=0.25\textwidth]{figures/IElegend}
