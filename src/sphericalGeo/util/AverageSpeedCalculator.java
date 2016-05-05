@@ -24,10 +24,14 @@ public class AverageSpeedCalculator extends Runnable  {
 	public Input<File> treesetInput = new Input<>("trees","file containing tree set annotated with locations", new File("data.trees"));
 	public Input<String> tagInput = new Input<>("tag","tag used in annotated of locations", "location");
 	public Input<Integer> burninInput = new Input<>("burnin","burn in percentage, default 10", 10);
+	public Input<Double> intervalInput = new Input<>("interval","interval size used to measure through time, default 5", 5.0);
 
 	double sumOfTime = 0;
 	double sumOfDistance = 0;
+	double [] sumOfTimes;
+	double [] sumOfDistances;
 	String tag;
+	double interval;
 	
 	Pattern pattern = Pattern.compile("([0-9\\.Ee-]+),.*=([0-9\\.Ee-]+)");
 	Pattern pattern2 = Pattern.compile(".*location=\\{([0-9\\.Ee-]+),([0-9\\.Ee-]+)\\}.*");
@@ -38,6 +42,8 @@ public class AverageSpeedCalculator extends Runnable  {
 	
 	@Override
 	public void run() throws Exception {
+		interval = intervalInput.get();
+
 		tag = tagInput.get();
 		pattern = Pattern.compile("([0-9\\.Ee-]+),.*=([0-9\\.Ee-]+)");
 		pattern2 = Pattern.compile(".*" + tag + "=\\{([0-9\\.Ee-]+),([0-9\\.Ee-]+)\\}.*");
@@ -57,6 +63,7 @@ public class AverageSpeedCalculator extends Runnable  {
 		List<Tree> trees = parser.trees;
 		
 		double sum = 0;
+		
 		int k = 0;
 		for (int i = trees.size() * burnIn / 100; i < trees.size(); i++) {
 			sumOfTime = 0;
@@ -68,7 +75,45 @@ public class AverageSpeedCalculator extends Runnable  {
 		}
 		sum /= (trees.size() - trees.size() * burnIn / 100);
 		Log.info.println("Average displacement is " + sum + " km per unit of time in the trees");
-		
+
+		double maxHeight = 0;
+		for (int i = trees.size() * burnIn / 100; i < trees.size(); i++) {
+			maxHeight = Math.max(maxHeight, trees.get(i).getRoot().getHeight());
+		}
+		int n = 1 + (int)(maxHeight/intervalInput.get());
+		sumOfTimes = new double[n];
+		sumOfDistances = new double[n];
+		for (int i = trees.size() * burnIn / 100; i < trees.size(); i++) {
+			for (Node node : trees.get(i).getNodesAsArray()) {
+				if (!node.isRoot()) {
+					String parentLocation = (String) node.getParent().metaDataString;
+					String location = (String) node.metaDataString;
+					double [] start = parseLoction(parentLocation);
+					double [] end = parseLoction(location);
+					double distance = GreatCircleDistance.pairwiseDistance(start, end);
+					distribute(distance, node.getHeight(), node.getParent().getHeight());
+				}
+			}
+		}
+		for (int i = 0; i < n; i++) {
+			System.out.println(i*interval + " -- " + (i+1) * interval + ": " + sumOfDistances[i]/sumOfTimes[i] + " km/unit of time");
+		}
+	}
+
+	private void distribute(double distance, double height, double height2) {
+		int i = (int)(height / interval);
+		int j = (int)(height2 / interval);
+		while (i < j) {
+			double t = (i+1) * interval;
+			sumOfTimes[i] += t - height;
+			double delta = distance * (t - height) / (height2 - height);
+			sumOfDistances[i] += delta;
+			distance -= delta;
+			height = t;
+			i++;
+		}
+		sumOfTimes[i] += height2 - height;
+		sumOfDistances[i] += distance;
 	}
 
 	private double calcSpeed(Node node) {
