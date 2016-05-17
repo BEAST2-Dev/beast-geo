@@ -9,6 +9,7 @@ import beast.core.BEASTInterface;
 import beast.core.Citation;
 import beast.core.Description;
 import beast.core.Input;
+import beast.core.Input.Validate;
 import beast.core.StateNode;
 import beast.core.StateNodeInitialiser;
 import beast.core.util.Log;
@@ -27,13 +28,17 @@ public class ApproxMultivariateTraitLikelihoodF extends GenericTreeLikelihood im
 
 	final public Input<Boolean> scaleByBranchLengthInput = new Input<>("scale", "scale by branch lengths for initial position", false);
 	final public Input<LocationParameter> locationInput = new Input<>("location",
-			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree");
+			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree", Validate.REQUIRED);
 
 	final public Input<Transformer> transformerInput = new Input<>("transformer","landscape transformer to capture some inheterogenuity in the diffusion process");
 	final public Input<Boolean> logAverageInput = new Input<>("logAverage", "when logging, use average position instead of sample from particle filter. "
 			+ "This is faster, but also artificially reduces uncertainty in locations. ", false);
 
+	final public Input<Double> longitudeThresholdInput = new Input<>("longitudeThreshold", "longitudes below this threshold will get 360 added. "
+			+ "This is useful for calculating the mean location when a point jumps the boundary of the world map.", -180.0);
 
+	
+	
 	SphericalDiffusionModel substModel;
 	TreeInterface tree;
 	BranchRateModel clockModel;
@@ -68,6 +73,8 @@ public class ApproxMultivariateTraitLikelihoodF extends GenericTreeLikelihood im
 	boolean isMonoPhyletic = false;
 	boolean storedIsMonoPhyletic = false;
 	
+	double longitudeThreshold;
+	
 	@Override
 	public void initAndValidate() {
 		super.initAndValidate();
@@ -81,6 +88,7 @@ public class ApproxMultivariateTraitLikelihoodF extends GenericTreeLikelihood im
 		scaleByBranchLength = scaleByBranchLengthInput.get();
 		transformer = transformerInput.get();
 		
+		longitudeThreshold = longitudeThresholdInput.get();
 		// initialise leaf positions
 		position = new double[tree.getNodeCount()][2];
 		AlignmentFromTraitMap data = (AlignmentFromTraitMap) dataInput.get();
@@ -190,6 +198,11 @@ public class ApproxMultivariateTraitLikelihoodF extends GenericTreeLikelihood im
 							d[taxonNr * 2] = location[0];
 							d[taxonNr * 2 + 1] = location[1];
 							setPosition(taxonNr, location[0], location[1]);
+						} else if (multiGeoprior.getCurrentLogP() == Double.NEGATIVE_INFINITY) {
+							Log.warning.println("WARNING: location of " + multiGeoprior.getPrior(k).getID() + " already set at an invalid point -- resetting it");
+								d[taxonNr * 2] = location[0];
+								d[taxonNr * 2 + 1] = location[1];
+								setPosition(taxonNr, location[0], location[1]);
 						} else {
 							if (!initialised) {
 								Log.warning.println("location of " + multiGeoprior.getPrior(k).getID() + " already set at " + d[taxonNr*2]+","+d[taxonNr*2+1]);
@@ -201,6 +214,7 @@ public class ApproxMultivariateTraitLikelihoodF extends GenericTreeLikelihood im
 //					}
 					taxonNrs[k] = taxonNr;
 				}
+				multiGeoprior.requiresRecalculation();
 			} else {
 				// only works when clades are monophyletic, so we give up here
 				isMonoPhyletic = false;
@@ -824,9 +838,16 @@ public class ApproxMultivariateTraitLikelihoodF extends GenericTreeLikelihood im
 			}
 			if (transformer != null) {
 				double [] p = transformer.projectInverse(position[iDim][0], position[iDim][1]);
+				if (p[1] < longitudeThreshold) {
+					p[1] += 360;
+				}
 				return p;
 			}
 			sanitycheck();
+			
+			if (position[iDim][1] < longitudeThreshold) {
+				position[iDim][1] += 360;
+			}
 			return position[iDim];
 		}
 	}

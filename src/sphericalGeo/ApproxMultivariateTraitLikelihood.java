@@ -32,6 +32,8 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	public Input<Boolean> logAverageInput = new Input<>("logAverage", "when logging, use average position instead of sample from particle filter. "
 			+ "This is faster, but also artificially reduces uncertainty in locations. ", false);
 
+	final public Input<Double> longitudeThresholdInput = new Input<>("longitudeThreshold", "longitudes below this threshold will get 360 added. "
+			+ "This is useful for calculating the mean location when a point jumps the boundary of the world map.", -180.0);
 
 	SphericalDiffusionModel substModel;
 	TreeInterface tree;
@@ -67,6 +69,8 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	boolean isMonoPhyletic = false;
 	boolean storedIsMonoPhyletic = false;
 	
+	double longitudeThreshold;
+
 	@Override
 	public void initAndValidate() {
 		super.initAndValidate();
@@ -105,6 +109,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 		//sumLengths = new double[tree.getNodeCount()];
 		parentweight = new double[tree.getNodeCount()];
 	
+		longitudeThreshold = longitudeThresholdInput.get();
 		
 		List<GeoPrior> geopriors = geopriorsInput.get();
 		{
@@ -832,9 +837,15 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 			}
 			if (transformer != null) {
 				double [] p = transformer.projectInverse(position[iDim][0], position[iDim][1]);
+				if (p[1] < longitudeThreshold) {
+					p[1] += 360;
+				}
 				return p;
 			}
 			sanitycheck();
+			if (position[iDim][1] < longitudeThreshold) {
+				position[iDim][1] += 360;
+			}
 			return position[iDim];
 		}
 	}
@@ -868,6 +879,9 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 			loggerLikelihood.needsUpdate = true;
 		}
 		
+		if (storedIsSampled == null) {
+			return;
+		}
 		System.arraycopy(isSampled, 0, storedIsSampled, 0, isSampled.length);
 		System.arraycopy(taxonNrs, 0, storedTaxonNrs, 0, taxonNrs.length);
 		
