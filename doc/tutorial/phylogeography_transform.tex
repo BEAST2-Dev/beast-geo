@@ -118,7 +118,7 @@ We do not wan the standard deviation for the relaxed clock to get out of hand, s
 
 In the MCMC panel, set the chain length to 1 million, and set logging frequency for trees to 10000. Save the file as a IE.xml using the ``File/Save" menu. Now you can run the file in BEAST, check convergence in Tracer (for 1 million, it does not convergence, so ESSs are poor, but for the purpose of this tutorial it gives a good indication of the geography. You can resume for another million states or more to get full convergence.) To visualise the result using {\tt spread} create a summary tree from a terminal using
 \begin{verbatim}
-/path/to/treeannotator -hpd2D 0.8 -b 10 IE.trees > IE.tree
+/path/to/treeannotator -hpd2D 0.8 -b 10 IE.trees IE.tree
 \end{verbatim}
 This creates 80\% HPD areas in the annotated tree. Do not forget the -hpd2D argument, otherwise no HPD regions will be shown. 
 In {\tt spread}, go to the continuous tab, select IE.tree as tree, and select `location1' and `location2' for `latitude attribute name' and `longitude attribute name' respectively. Then under the `output' tab, click `Plot' to visualise in {\tt spread}, or `Generate' to generate a KML file that can be shown in Google earth. See the spherical geography tutorial for details.
