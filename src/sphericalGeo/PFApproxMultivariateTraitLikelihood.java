@@ -19,9 +19,9 @@ import beast.util.Randomizer;
 
 @Description("Approximate likelihood by particle filter approximation")
 public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood implements LocationProvider {
-	public Input<Integer> nrOfParticlesInput = new Input<>("nrOfParticles", "number of particles to use", 25);//100
-	public Input<Integer> nrOfIterationsInput = new Input<>("nrOfIterations", "number of iterations to run the particle filter", 10);
-	public Input<Integer> rangeSizeInput = new Input<>("nrrange", "number of random samples for placing a node", 10);//10
+	public Input<Integer> nrOfParticlesInput = new Input<>("nrOfParticles", "number of particles to use", 1);//100
+	public Input<Integer> nrOfIterationsInput = new Input<>("nrOfIterations", "number of iterations to run the particle filter", 100);
+	public Input<Integer> rangeSizeInput = new Input<>("nrrange", "number of random samples for placing a node", 20);//10
 	
 	public Input<Boolean> scaleByBranchLengthInput = new Input<>("scale", "scale by branch lengths for initial position", true);
 
@@ -30,6 +30,7 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood i
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree");
 
 	public Input<Transformer> transformerInput = new Input<>("transformer","landscape transformer to capture some inheterogenuity in the diffusion process");
+	public Input<Double> epsilonInput = new Input<>("epsilon", "size of interval to use when randomly choosing new latitude/longitude", 10.0);
 
 
 	double epsilon = 2.0;
@@ -39,6 +40,8 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood i
 	boolean [] isSampled;
 	List<Integer> sampleNumber;
 
+	double [][] sphereposition;
+	double [] parentweight;
 
 	class LeafParticleSet {
 		int particleCount;
@@ -181,7 +184,8 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood i
 		}
 		branchLengths = new double[tree.getNodeCount()];
 		sumLengths = new double[tree.getNodeCount()];
-		
+		parentweight = new double[tree.getNodeCount()];
+
 		
 		particleCount = nrOfParticlesInput.get();
 		iterationCount = nrOfIterationsInput.get();
@@ -222,6 +226,13 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood i
 				}
 			}
 		}
+		
+		sphereposition = new double[position.length][3];
+		for (int i = 0; i < tree.getLeafNodeCount(); i++) {
+			sphereposition[i] = SphericalDiffusionModel.spherical2Cartesian(position[i][0], position[i][1]);
+		}
+
+		epsilon = epsilonInput.get();
 	}
 
 	@Override
@@ -282,11 +293,24 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood i
 		}
 	}
 
+	private void normalise(double[] position) {
+		double len = Math.sqrt(position[0] * position[0] + position[1] * position[1] + position[2] * position[2]);
+		position[0] /= len;
+		position[1] /= len;
+		position[2] /= len;
+	}
+
 	private void choosePosition(int nodeNr, double[][] pposition) {
 		// randomize
 		double [][] newPosition = new double[rangeSize][2];
 		for (int i = 0; i < rangeSize; i++) {
 			if (!isSampled[nodeNr]) {
+//				double [] spherePosition = SphericalDiffusionModel.spherical2Cartesian(pposition[i][0], pposition[i][1]);
+//				spherePosition[0] += Randomizer.nextDouble() * epsilon - epsilon / 2.0;
+//				spherePosition[1] += Randomizer.nextDouble() * epsilon - epsilon / 2.0;
+//				spherePosition[2] += Randomizer.nextDouble() * epsilon - epsilon / 2.0;
+//				normalise(spherePosition);
+//				newPosition[i] = SphericalDiffusionModel.cartesian2Sperical(spherePosition, true);
 				newPosition[i][0] = pposition[nodeNr][0] + Randomizer.nextDouble() * epsilon - epsilon / 2.0;			
 				newPosition[i][1] = pposition[nodeNr][1] + Randomizer.nextDouble() * epsilon - epsilon / 2.0;
 			} else {
@@ -410,18 +434,47 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood i
 	
 	void setUpInitialPositions() {
 		// process sampled locations
+//		for (int i : sampleNumber) {
+//			position[i][0] = sampledLocations.getMatrixValue(i, 0);
+//			position[i][1] = sampledLocations.getMatrixValue(i, 1);
+//			if (transformer != null) {
+//				double [] t = transformer.project(position[i][0], position[i][1]);
+//				position[i][0] = t[0];
+//				position[i][1] = t[1];
+//			}
+//		}
+		
+		for (int i = 0; i < tree.getLeafNodeCount(); i++) {
+			sphereposition[i] = SphericalDiffusionModel.spherical2Cartesian(position[i][0], position[i][1]);
+		}
+
+		// process sampled locations
 		for (int i : sampleNumber) {
-			position[i][0] = sampledLocations.getMatrixValue(i, 0);
-			position[i][1] = sampledLocations.getMatrixValue(i, 1);
+			double lat1 = sampledLocations.getMatrixValue(i, 0);
+			double long1 = sampledLocations.getMatrixValue(i, 1);
 			if (transformer != null) {
-				double [] t = transformer.project(position[i][0], position[i][1]);
-				position[i][0] = t[0];
-				position[i][1] = t[1];
+				double [] t = transformer.project(lat1, long1);
+				lat1 = t[0];
+				long1 = t[1];
+			}
+			if (position[i][0] != lat1 || position[i][1] != long1) {
+				position[i][0] = lat1;
+				position[i][1] = long1;
+				sphereposition[i] = SphericalDiffusionModel.spherical2Cartesian(position[i][0], position[i][1]);
 			}
 		}
+
 		
 		initByMean(tree.getRoot());
 		resetMean2(tree.getRoot());
+
+		for (int i = tree.getLeafNodeCount(); i < tree.getNodeCount(); i++) {
+			if (!isSampled[i]) {
+				position[i] = SphericalDiffusionModel.cartesian2Sperical(sphereposition[i], true);
+			} else {
+				//System.err.print("[skip " + i +"]");
+			}
+		}
 		
 		for (double [][] pposition : particlePosition) {
 			for (int i = tree.getLeafNodeCount(); i < tree.getNodeCount(); i++) {
@@ -434,6 +487,7 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood i
 				
 			}
 		}
+		
 	}
 	
 	void initByMean(Node node) {
@@ -494,40 +548,142 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood i
 		}
 	}
 
-	private void setHalfWayPosition(int nodeNr, int child1, int child2) {
+	void setHalfWayPosition(int nodeNr, int child1, int child2) {
 		// start in weighted middle of the children
+		double precision = 1.0;
 		if (scaleByBranchLength) {
-			double b1 = 1.0/Math.sqrt(branchLengths[child1]);
-			double b2 = 1.0/Math.sqrt(branchLengths[child2]);
+			double b1 = 1.0/Math.sqrt(branchLengths[child1]/precision);
+			double b2 = 1.0/Math.sqrt(branchLengths[child2]/precision);
 			double len = b1 + b2;
-			position[nodeNr][0] = (position[child1][0] * b1 + position[child2][0] * b2) / len;
-			position[nodeNr][1] = (position[child1][1] * b1 + position[child2][1] * b2) / len;
-			// position[nodeNr][0] = (position[child1][0] * branchLengths[child1] + position[child2][0] * branchLengths[child2]) / (branchLengths[child1] + branchLengths[child2]);
-			// position[nodeNr][1] = (position[child1][1] * branchLengths[child1] + position[child2][1] * branchLengths[child2]) / (branchLengths[child1] + branchLengths[child2]);
-		} else {
-			position[nodeNr][0] = (position[child1][0] + position[child2][0]) / 2.0;
-			position[nodeNr][1] = (position[child1][1] + position[child2][1]) / 2.0;
+			sphereposition[nodeNr][0] = (sphereposition[child1][0] * b1 + sphereposition[child2][0] * b2) / len;
+			sphereposition[nodeNr][1] = (sphereposition[child1][1] * b1 + sphereposition[child2][1] * b2) / len;
+			sphereposition[nodeNr][2] = (sphereposition[child1][2] * b1 + sphereposition[child2][2] * b2) / len;
+//			double len = 1.0/branchLengths[child1] + 1.0/branchLengths[child2];
+//			sphereposition[nodeNr][0] = (sphereposition[child1][0] / branchLengths[child1] + sphereposition[child2][0] / branchLengths[child2]) / len;
+//			sphereposition[nodeNr][1] = (sphereposition[child1][1] / branchLengths[child1] + sphereposition[child2][1] / branchLengths[child2]) / len;
+//			sphereposition[nodeNr][2] = (sphereposition[child1][2] / branchLengths[child1] + sphereposition[child2][2] / branchLengths[child2]) / len;
+		} else{
+			double b1 = 1.0/Math.sqrt(branchLengths[child1]/precision);
+			double b2 = 1.0/Math.sqrt(branchLengths[child2]/precision);
+			if (tree.getNode(nodeNr).isRoot()) {
+				double len = b1 + b2;
+				b1 = b1 / len;
+				b2 = b2 / len;
+				double w = (1.0 + b1 * parentweight[child1] + b2 * parentweight[child2]);
+				b1 /= w;
+				b2 /= w;
+			} else {
+				double p = 1.0/Math.sqrt(branchLengths[nodeNr]);
+				final double len = b1 + b2 + p;
+                if( true ) {
+                    //same as other branch
+                    final double s = 1.0 / (len - b1 * parentweight[child1] - b2 * parentweight[child2]);
+                    b1 *= s;
+                    b2 *= s;
+                    parentweight[nodeNr] = p * s;
+                } else {
+                    b1 /= len;
+                    b2 /= len;
+                    p /= len;
+                    double w = (1.0 - b1 * parentweight[child1] - b2 * parentweight[child2]);
+                    b1 /= w;
+                    b2 /= w;
+                    p /= w;
+                    parentweight[nodeNr] = p;
+                }
+			}
+			sphereposition[nodeNr][0] = (sphereposition[child1][0] * b1 + sphereposition[child2][0] * b2);
+			sphereposition[nodeNr][1] = (sphereposition[child1][1] * b1 + sphereposition[child2][1] * b2);
+			sphereposition[nodeNr][2] = (sphereposition[child1][2] * b1 + sphereposition[child2][2] * b2);
+//			sphereposition[nodeNr][0] = (sphereposition[child1][0] + sphereposition[child2][0]) / 2.0;
+//			sphereposition[nodeNr][1] = (sphereposition[child1][1] + sphereposition[child2][1]) / 2.0;
+//			sphereposition[nodeNr][2] = (sphereposition[child1][2] + sphereposition[child2][2]) / 2.0;
 		}
-		
+		normalise(sphereposition[nodeNr]);
+		//System.err.print("["+sphereposition[nodeNr][0]+","+sphereposition[nodeNr][1]+","+sphereposition[nodeNr][2]+"]");
+//		double [] pos = SphericalDiffusionModel.cartesian2Sperical(sphereposition[nodeNr], true);
+//		System.err.print("["+pos[0]+","+pos[1]+"]");
+//		pos = SphericalDiffusionModel.map(pos[0], pos[1], -80, 0);
+//		System.err.println("["+pos[0]+","+pos[1]+"]");
 	}
 
-	private void setHalfWayPosition(int nodeNr, int child1, int child2, int parent) {
+//	private void setHalfWayPosition(int nodeNr, int child1, int child2) {
+//		// start in weighted middle of the children
+//		if (scaleByBranchLength) {
+//			double b1 = 1.0/Math.sqrt(branchLengths[child1]);
+//			double b2 = 1.0/Math.sqrt(branchLengths[child2]);
+//			double len = b1 + b2;
+//			position[nodeNr][0] = (position[child1][0] * b1 + position[child2][0] * b2) / len;
+//			position[nodeNr][1] = (position[child1][1] * b1 + position[child2][1] * b2) / len;
+//			// position[nodeNr][0] = (position[child1][0] * branchLengths[child1] + position[child2][0] * branchLengths[child2]) / (branchLengths[child1] + branchLengths[child2]);
+//			// position[nodeNr][1] = (position[child1][1] * branchLengths[child1] + position[child2][1] * branchLengths[child2]) / (branchLengths[child1] + branchLengths[child2]);
+//		} else {
+//			position[nodeNr][0] = (position[child1][0] + position[child2][0]) / 2.0;
+//			position[nodeNr][1] = (position[child1][1] + position[child2][1]) / 2.0;
+//		}
+//		
+//	}
+
+	void setHalfWayPosition(int nodeNr, int child1, int child2, int parent) {
 		// start in weighted middle of the children and parent location
+		final double precision = 1.0;
 		if (scaleByBranchLength) {
-			double b1 = 1.0/Math.sqrt(branchLengths[child1]);
-			double b2 = 1.0/Math.sqrt(branchLengths[child2]);
-			double p = 1.0/Math.sqrt(branchLengths[nodeNr]);
+			double b1 = 1.0/Math.sqrt(branchLengths[child1]/precision);
+			double b2 = 1.0/Math.sqrt(branchLengths[child2]/precision);
+			double p = 1.0/Math.sqrt(branchLengths[nodeNr]/precision);
 			double len = b1 + b2 + p;
-			position[nodeNr][0] = (position[child1][0] * b1 + position[child2][0] * b2 + position[parent][0] * p) / len;
-			position[nodeNr][1] = (position[child1][1] * b1 + position[child2][1] * b2 + position[parent][1] * p) / len;
-			// position[nodeNr][0] = (position[child1][0] * branchLengths[child1] + position[child2][0] * branchLengths[child2] + position[parent][0] * branchLengths[nodeNr]) / sumLengths[nodeNr];
-			// position[nodeNr][1] = (position[child1][1] * branchLengths[child1] + position[child2][1] * branchLengths[child2] + position[parent][1] * branchLengths[nodeNr]) / sumLengths[nodeNr];
-		} else {
-			position[nodeNr][0] = (position[child1][0] + position[child2][0] + position[parent][0]) / 3.0;
-			position[nodeNr][1] = (position[child1][1] + position[child2][1] + position[parent][1]) / 3.0;
-		}
+			sphereposition[nodeNr][0] = (sphereposition[child1][0] * b1 + sphereposition[child2][0] * b2 + sphereposition[parent][0] * p) / len;
+			sphereposition[nodeNr][1] = (sphereposition[child1][1] * b1 + sphereposition[child2][1] * b2 + sphereposition[parent][1] * p) / len;
+			sphereposition[nodeNr][2] = (sphereposition[child1][2] * b1 + sphereposition[child2][2] * b2 + sphereposition[parent][2] * p) / len;
 
+//			double len = 1.0/branchLengths[child1] + 1.0/branchLengths[child2] + 1.0/branchLengths[nodeNr];
+//			sphereposition[nodeNr][0] = (sphereposition[child1][0] / branchLengths[child1] + sphereposition[child2][0] / branchLengths[child2] + sphereposition[parent][0] / branchLengths[nodeNr]) / len;
+//			sphereposition[nodeNr][1] = (sphereposition[child1][1] / branchLengths[child1] + sphereposition[child2][1] / branchLengths[child2] + sphereposition[parent][1] / branchLengths[nodeNr]) / len;
+//			sphereposition[nodeNr][2] = (sphereposition[child1][2] / branchLengths[child1] + sphereposition[child2][2] / branchLengths[child2] + sphereposition[parent][2] / branchLengths[nodeNr]) / len;
+		} else {
+            final double sp = 1.0/precision;
+			double b1 = 1.0/Math.sqrt(branchLengths[child1] * sp);
+			double b2 = 1.0/Math.sqrt(branchLengths[child2] * sp);
+			double p = 1.0/Math.sqrt(branchLengths[nodeNr] * sp);
+			final double len = b1 + b2 + p;
+            if( true ) {
+                final double s = (len - b1 * parentweight[child1] - b2 * parentweight[child2]);
+                p /= s;
+            } else {
+                b1 /= len;
+                b2 /= len;
+                p /= len;
+                double w = (1.0 - b1 * parentweight[child1] - b2 * parentweight[child2]);
+                p /= w;
+            }
+			sphereposition[nodeNr][0] += sphereposition[parent][0] * p;
+			sphereposition[nodeNr][1] += sphereposition[parent][1] * p;
+			sphereposition[nodeNr][2] += sphereposition[parent][2] * p;
+		}
+		normalise(sphereposition[nodeNr]);
+
+//		double [] pos = SphericalDiffusionModel.cartesian2Sperical(sphereposition[nodeNr], true);
+//		System.err.print("["+pos[0]+","+pos[1]+"]");
+//		pos = SphericalDiffusionModel.map(pos[0], pos[1], -80, 0);
+//		System.err.println("["+pos[0]+","+pos[1]+"]");
 	}
+//	private void setHalfWayPosition(int nodeNr, int child1, int child2, int parent) {
+//		// start in weighted middle of the children and parent location
+//		if (scaleByBranchLength) {
+//			double b1 = 1.0/Math.sqrt(branchLengths[child1]);
+//			double b2 = 1.0/Math.sqrt(branchLengths[child2]);
+//			double p = 1.0/Math.sqrt(branchLengths[nodeNr]);
+//			double len = b1 + b2 + p;
+//			position[nodeNr][0] = (position[child1][0] * b1 + position[child2][0] * b2 + position[parent][0] * p) / len;
+//			position[nodeNr][1] = (position[child1][1] * b1 + position[child2][1] * b2 + position[parent][1] * p) / len;
+//			// position[nodeNr][0] = (position[child1][0] * branchLengths[child1] + position[child2][0] * branchLengths[child2] + position[parent][0] * branchLengths[nodeNr]) / sumLengths[nodeNr];
+//			// position[nodeNr][1] = (position[child1][1] * branchLengths[child1] + position[child2][1] * branchLengths[child2] + position[parent][1] * branchLengths[nodeNr]) / sumLengths[nodeNr];
+//		} else {
+//			position[nodeNr][0] = (position[child1][0] + position[child2][0] + position[parent][0]) / 3.0;
+//			position[nodeNr][1] = (position[child1][1] + position[child2][1] + position[parent][1]) / 3.0;
+//		}
+//
+//	}
 
 	@Override
 	public boolean isStochastic() {
