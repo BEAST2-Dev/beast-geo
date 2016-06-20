@@ -26,9 +26,6 @@
 package sphericalGeo;
 
 
-
-import java.util.Arrays;
-
 import org.apache.commons.math3.util.FastMath;
 
 import org.apache.commons.math.ConvergenceException;
@@ -39,6 +36,7 @@ import org.apache.commons.math.analysis.integration.UnivariateRealIntegrator;
 
 import beast.core.Description;
 import beast.core.Input;
+import beast.core.Loggable;
 import beast.core.Input.Validate;
 import beast.core.parameter.RealParameter;
 import beast.evolution.datatype.DataType;
@@ -51,8 +49,10 @@ import beast.util.Randomizer;
 //import static org.apache.commons.math3.util.FastMath;
 import static java.lang.Math.*;
 
+import java.io.PrintStream;
+
 @Description("Diffusion model that assumes a normal diffusion process on a sphere")
-public class SphericalDiffusionModel extends SubstitutionModel.Base {
+public class SphericalDiffusionModel extends SubstitutionModel.Base implements Loggable {
 
     private static final double RAD2DEG = 180 / Math.PI;
     private static final double DEG2RAD = Math.PI / 180;
@@ -86,7 +86,18 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
     // assumes start = {latitude, longitude}
     //         stop  = {latitude, longitude}
     // and -90 < latitude < 90, -180 < longitude < 180
+    
+    double maxTau = 0;
+    int tauCount = 0;
+    double sumTau = 0;
+    double meanTau = 0;
     public double getLogLikelihood(Node node, double [] start, double [] stop, double time) {
+    	if (node == null || node.getNr() == 0) {
+    		maxTau = 0;
+    		meanTau = (tauCount == 0 ? 0 : sumTau / tauCount); 
+    	    tauCount = 0;
+    	    sumTau = 0;
+    	}
 //        if (time <= 1e-4) {
 //        	time = 1e-4;
 //        }
@@ -310,8 +321,18 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
           angle = acos(x);
         }
 
+        
+        // no contribution when angle is less than 1 degree ~ 110km
+        if (angle < 1 * DEG2RAD) {
+        	return 0;
+        }
+        
 //        final double inverseVariance = precision.getValue(0) / time;
         final double tau = time/precision.getValue(0);
+        maxTau = Math.max(tau, maxTau);
+        sumTau += tau;
+        tauCount++;
+        
         final double logN = calcLogN(tau, node);
         //final double logP = -angle * angle * inverseVariance / 2.0 + 0.5 * Math.log(angle * sin(angle)) + Math.log(inverseVariance);
 
@@ -606,7 +627,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
 		f3DRotated2[1] = f3DRotated[1];
 		f3DRotated2[2] = -f3DRotated[0] * fS2 + f3DRotated[2] * fC2;
 		
-		System.err.println(Arrays.toString(f3DPoint) + " " + Arrays.toString(f3DRotated) + " " + Arrays.toString(f3DRotated2));
+		//System.err.println(Arrays.toString(f3DPoint) + " " + Arrays.toString(f3DRotated) + " " + Arrays.toString(f3DRotated2));
 		// translate back to (longitude, latitude)
 		double [] point = cartesian2Sperical(f3DRotated2, true);
 		return point;
@@ -793,5 +814,22 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base {
         System.err.println("Diff : " + Math.abs(a0-x0)/Math.max(a0,x0) + " " + Math.abs(a1-x1)/Math.max(a1,x1));
 
 		System.err.println("Runtime: " + ((end - start)/1000.0) + " seconds");
+	}
+
+	@Override
+	public void init(PrintStream out) {
+		out.print("maxtau\t");
+		out.print("meantau\t");
+	}
+
+	@Override
+	public void log(int sample, PrintStream out) {
+		out.print(maxTau + "\t");
+		out.print(meanTau + "\t");
+	}
+
+	@Override
+	public void close(PrintStream out) {
+		
 	}
 }

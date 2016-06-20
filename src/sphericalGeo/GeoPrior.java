@@ -192,6 +192,9 @@ public class GeoPrior extends Distribution {
 
     // would be nice to use nodeRef's, but they are not preserved :(
     public Node getCommonAncestor() {
+    	if (isTip) {
+    		return tree.getNode(taxonNr);
+    	}
         Node cur = tree.getNode(taxonIndex[0]);
 
         for (int k = 1; k < taxonIndex.length; ++k) {

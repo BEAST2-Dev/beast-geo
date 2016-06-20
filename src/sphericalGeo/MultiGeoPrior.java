@@ -42,13 +42,9 @@ public class MultiGeoPrior extends MultiMonophyleticConstraint {
 				throw new IllegalArgumentException("GeoPrior " + prior.getID()
 						+ " has allInternalNodes=\"true\", which should be false for use with MultiGeoPrior");
 			}
-			if (prior.taxonSetInput.get() == null) {
+			if (prior.taxonSetInput.get() == null && prior.taxonInput.get() == null) {
 				throw new IllegalArgumentException(
-						"GeoPrior " + prior.getID() + " should have a \"taxonset\" specified");
-			}
-			if (prior.taxonInput.get() != null) {
-				throw new IllegalArgumentException(
-						"GeoPrior " + prior.getID() + " should not have a \"taxon\" specified");
+						"GeoPrior " + prior.getID() + " should have a \"taxonset\" or \"taxon\" specified");
 			}
 		}
 
@@ -62,7 +58,12 @@ public class MultiGeoPrior extends MultiMonophyleticConstraint {
 				throw new IllegalArgumentException("All constraints must be on the same tree");
 			}
 			List<Integer> list = new ArrayList<Integer>();
-			for (String taxon : m.taxonSetInput.get().getTaxaNames()) {
+			if (m.taxonSetInput.get() !=null) {
+				for (String taxon : m.taxonSetInput.get().getTaxaNames()) {
+					list.add(indexOf(taxon));
+				}
+			} else {
+				String taxon = m.taxonInput.get().getID();
 				list.add(indexOf(taxon));
 			}
 			boolean add = true;
