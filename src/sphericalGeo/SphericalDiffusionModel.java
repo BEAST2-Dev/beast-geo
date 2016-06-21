@@ -60,6 +60,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base implements L
     public Input<Boolean> m_fast = new Input<>("fast", "Use an approximation for arccos for angles close to 0 "
     + "(|cos(x) > 0.9). In this range the approximation has an error of at most 1e-10, " +
             "and is faster than the Java version.", false);
+    public Input<Double> thresholdInput = new Input<>("threshold", "angle (in degrees 0...180) below which there is no contribution to the probability density", 0.0);
 
     public SphericalDiffusionModel() {
 		frequenciesInput.setRule(Validate.OPTIONAL);
@@ -67,11 +68,13 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base implements L
 
     RealParameter precision;
     boolean fast = false;
+    double threshold;
 
     @Override
     public void initAndValidate() {
         precision = precisionInput.get();
         fast = m_fast.get();
+        threshold = thresholdInput.get() * DEG2RAD;
 
         super.initAndValidate();
     }
@@ -323,7 +326,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base implements L
 
         
         // no contribution when angle is less than 1 degree ~ 110km
-        if (angle < 1 * DEG2RAD) {
+        if (angle < threshold) {
         	return 0;
         }
         
