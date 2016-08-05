@@ -23,6 +23,7 @@ import org.xml.sax.SAXException;
 
 import beast.app.treeannotator.TreeSetParser;
 import beast.app.util.Application;
+import beast.app.util.OutFile;
 import beast.app.util.TreeFile;
 import beast.app.util.XMLFile;
 import beast.core.BEASTInterface;
@@ -42,7 +43,8 @@ import beast.util.XMLParserException;
 public class TreeToTraceLogger extends Runnable {
 	XMLFile xmlFile;
 	TreeFile treeFile;
-	File outFile;
+	OutFile outFile;
+	Integer burnin = 10;
 	
 	List<MRCAPrior> mrcas;
 	   // array of flags to indicate which taxa are in the set
@@ -53,10 +55,13 @@ public class TreeToTraceLogger extends Runnable {
 	public TreeToTraceLogger() {}	
 	public TreeToTraceLogger(@Param(name="xmlFile", description="XML file containing MRCAPriors (and possibly many more items. but these will be ignored)") XMLFile xmlFile,
 			@Param(name="treeFile", description="file containing tree log") TreeFile treeFile,
-			@Param(name="out", description="file to store trace log, if not specified, results are printed on stdout") File out) {
+			@Param(name="out", description="file to store trace log, if not specified, results are printed on stdout") OutFile out,
+			@Param(name="burnin", description="burn-in percentage, defaults to 10", defaultValue="10") Integer burnin
+			) {
 		this.xmlFile = xmlFile;
 		this.treeFile = treeFile;		
 		this.outFile = out;
+		this.burnin = burnin;
 	}
 	
 
@@ -87,7 +92,7 @@ public class TreeToTraceLogger extends Runnable {
 	
 	private void processTrees(PrintStream out) throws IOException {
 		Log.warning.println("loading trees");
-		MemoryFriendlyTreeSet parser = new MemoryFriendlyTreeSet(treeFile.getPath(), 10);
+		MemoryFriendlyTreeSet parser = new MemoryFriendlyTreeSet(treeFile.getPath(), burnin);
 		parser.reset();
 		Log.warning.println("processing trees");
 		int sample = 0;
@@ -262,12 +267,19 @@ public class TreeToTraceLogger extends Runnable {
 	public void setTreeFile(TreeFile treeFile) {
 		this.treeFile = treeFile;
 	}
-	public File getOut() {
+	public OutFile getOut() {
 		return outFile;
 	}
-	public void setOut(File out) {
+	public void setOut(OutFile out) {
 		this.outFile = out;
 	}
+	public Integer getBurnin() {
+		return burnin;
+	}
+	public void setBurnin(Integer burnin) {
+		this.burnin = burnin;
+	}
+
 	public static void main(String[] args) throws Exception {
 		new Application(new TreeToTraceLogger(), "TreeToTraceLogger", args);
 	}

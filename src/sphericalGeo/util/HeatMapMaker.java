@@ -27,6 +27,7 @@ import beast.core.Runnable;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.NexusParser;
+import beast.util.Randomizer;
 
 @Description("Creates heat map of locations with colour representing time")
 public class HeatMapMaker extends Runnable {
@@ -42,11 +43,12 @@ public class HeatMapMaker extends Runnable {
 	public Input<Double> translucencyInput = new Input<>("translucency","translucency of the dots used to draw heat map (a number between 0=invisible and 1=solid)", 0.2);
 	public Input<Double> saturationInput = new Input<>("saturation","saturation of colour for the dots", 0.9);
 	public Input<Double> brightnessInput = new Input<>("brightness","brightnessof colour for the dots ", 0.9);
+	public Input<Integer> jitterInput = new Input<>("jitter", "jitter applied to dot locations (in pixels)", 0);
+	public Input<File> maskInput = new Input<>("mask", "image file with a mask: dots will not be shown outside mask");//, new File("/Users/remco/data/map/World98b.png"));
 	
 	BufferedImage image;
 
 	double minLat = -90, maxLat = 90, minLong = -180, maxLong = 180;
-	BufferedImage bgImage;
 	
 	int width;
 	int height;
@@ -64,6 +66,7 @@ public class HeatMapMaker extends Runnable {
 	@Override
 	public void run() throws Exception {
 		Graphics g = image.getGraphics();
+		int jitter = jitterInput.get();
 
 		File bg = bgInput.get();
 		if (bg != null) {
@@ -81,6 +84,32 @@ public class HeatMapMaker extends Runnable {
 			}
 		} else {
 			System.out.println("No background image");
+		}
+		File maskFile = maskInput.get();
+		BufferedImage mask = null;
+		if (maskFile != null) {
+			if (bg.exists()) {
+				System.out.println("Loading mask image " + maskFile.getPath());
+				BufferedImage maskImage = ImageIO.read(maskFile);
+				parseBBox();
+		        mask = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		        Graphics g2 = mask.getGraphics();
+				g2.drawImage(maskImage, 0, 0, width, height, 
+						(int) (maskImage.getWidth() * (180 + minLong) / 360.0),
+						(int) (maskImage.getHeight() * (90 - maxLat) / 180.0), 
+						(int) (maskImage.getWidth() * (180 + maxLong) / 360.0), 
+						(int) (maskImage.getHeight() * (90 - minLat) / 180.0), null);
+				try {
+					ImageIO.write(mask, "png", new File("/tmp/mask.png"));					
+				} catch (Exception e) {
+					// ignore -- this is for debugging only
+				}
+
+			} else {
+				System.out.println("Could not find mask image " + bg.getPath());
+			}
+		} else {
+			System.out.println("No mask image");
 		}
 
 		// get trees
@@ -123,10 +152,28 @@ public class HeatMapMaker extends Runnable {
 		
 		for (Dot dot : dots) {
 			double f = Math.min(dot.age, oldest)/oldest;
+			
+//			 int red   = (int) (Math.sin(2*3.14*f + 0) * 127 + 128);
+//			 int green = (int) (Math.sin(2*3.14*f + 2) * 127 + 128);
+//			 int blue  = (int) (Math.sin(2*3.14*f + 4) * 127 + 128);
+//			 g.setColor(new Color(red,green,blue));
+			
 			g.setColor(Color.getHSBColor((float) (f/1.2), saturation, brightness));
+			
+			
 			int y = height - (int)( (dot.latitude - minLat) * height/(maxLat-minLat));  
-			int x = (int)( (dot.longitude - minLong) * width/(maxLong-minLong));  
-			g.fillOval(x-halfRadius, y-halfRadius, radius, radius);
+			int x = (int)( (dot.longitude - minLong) * width/(maxLong-minLong)); 
+			if (jitter > 0) {
+				x += Randomizer.nextGaussian() * jitter;
+				y += Randomizer.nextGaussian() * jitter;
+			}
+			if (mask == null) {
+				g.fillOval(x-halfRadius, y-halfRadius, radius, radius);
+			} else {
+				if (x > 0 && x < width && y > 0 && y < height && ((mask.getRGB(x,  y) & 0xff0000) == 0)) {
+					g.fillOval(x-halfRadius, y-halfRadius, radius, radius);
+				}
+			}
 		}
 		System.out.println(" done");
 		
@@ -152,7 +199,7 @@ public class HeatMapMaker extends Runnable {
         for (int i = 0; i < 10; i++) {
         	g.drawString(""+ (oldest * (10 - i)/ 10), 100, 200*i/10);
         }
-		ImageIO.write(image, "png", new File(outputInput.get().getParent() + DIR_SEPARATOR + "legend.png"));
+		ImageIO.write(image, "png", new File((outputInput.get().getParent() != null ? outputInput.get().getParent() + DIR_SEPARATOR : "") + "legend.png"));
 		System.out.println(" done");
 		
 	}
