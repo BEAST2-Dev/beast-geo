@@ -1,7 +1,10 @@
 package sphericalGeo.util;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.util.List;
+import java.io.FileReader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,8 +19,9 @@ import beast.core.Runnable;
 import beast.core.util.Log;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
-import beast.util.NexusParser;
 import sphericalGeo.GreatCircleDistance;
+import sphericalGeo.util.treeset.MemoryFriendlyTreeSet;
+import sphericalGeo.util.treeset.TreeSet;
 
 @Description("calculates average speed on a posterior set of trees from a phylogeographical analysis")
 public class AverageSpeedCalculator extends Runnable  {
@@ -25,6 +29,8 @@ public class AverageSpeedCalculator extends Runnable  {
 	public Input<String> tagInput = new Input<>("tag","tag used in annotated of locations", "location");
 	public Input<Integer> burninInput = new Input<>("burnin","burn in percentage, default 10", 10);
 	public Input<Double> intervalInput = new Input<>("interval","interval size used to measure through time, default 5", 5.0);
+	public Input<File> leafLocationsInput = new Input<>("leafLocations","file with tip locations (optional). "
+			+ "Tab delimited file: first column is taxon name, second the latitude, and third the longitude");
 
 	double sumOfTime = 0;
 	double sumOfDistance = 0;
@@ -32,6 +38,7 @@ public class AverageSpeedCalculator extends Runnable  {
 	double [] sumOfDistances;
 	String tag;
 	double interval;
+	Map<String, Double[]> tipLocationMap;
 	
 	Pattern pattern = Pattern.compile("([0-9\\.Ee-]+),.*=([0-9\\.Ee-]+)");
 	Pattern pattern2 = Pattern.compile(".*location=\\{([0-9\\.Ee-]+),([0-9\\.Ee-]+)\\}.*");
@@ -57,44 +64,78 @@ public class AverageSpeedCalculator extends Runnable  {
 			return;
 		}
 
+		if (leafLocationsInput.get() != null) {
+			tipLocationMap = new HashMap<>();
+			BufferedReader fin = new BufferedReader(new FileReader(leafLocationsInput.get()));
+			while (fin.ready()) {
+				String str = fin.readLine();
+				String [] strs = str.split("\t");
+				if (strs.length >= 3) {
+					try {
+						double lat = Double.parseDouble(strs[1]);
+						double lon = Double.parseDouble(strs[2]);
+						tipLocationMap.put(strs[0], new Double[]{lat, lon});
+					} catch (NumberFormatException e) {
+						// ignore
+					}
+				}
+			}
+			fin.close();
+		}
+		
 		// get trees
-		NexusParser parser = new NexusParser();
-		parser.parseFile(treesetInput.get());
-		List<Tree> trees = parser.trees;
+		TreeSet treeset = new MemoryFriendlyTreeSet(treesetInput.get().getPath(), burnIn);
+		treeset.reset();
 		
 		double sum = 0;
 		
 		int k = 0;
-		for (int i = trees.size() * burnIn / 100; i < trees.size(); i++) {
+		while (treeset.hasNext()) {
+			Tree tree = treeset.next();
 			sumOfTime = 0;
 			sumOfDistance = 0;
-			calcSpeed(trees.get(i).getRoot());
+			calcSpeed(tree.getRoot());
 			sum += sumOfDistance / sumOfTime;
 			k++;
-			System.err.println(sumOfDistance / sumOfTime);
+			if (k % 100 == 0) {Log.warning.print('.');}
+			//System.err.println(sumOfDistance / sumOfTime);
 		}
-		sum /= (trees.size() - trees.size() * burnIn / 100);
+		Log.warning.println();
+		sum /= k;
 		Log.info.println("Average displacement is " + sum + " km per unit of time in the trees");
 
 		double maxHeight = 0;
-		for (int i = trees.size() * burnIn / 100; i < trees.size(); i++) {
-			maxHeight = Math.max(maxHeight, trees.get(i).getRoot().getHeight());
+		treeset.reset();
+		while (treeset.hasNext()) {
+			Tree tree = treeset.next();
+			maxHeight = Math.max(maxHeight, tree.getRoot().getHeight());
 		}
 		int n = 1 + (int)(maxHeight/intervalInput.get());
 		sumOfTimes = new double[n];
 		sumOfDistances = new double[n];
-		for (int i = trees.size() * burnIn / 100; i < trees.size(); i++) {
-			for (Node node : trees.get(i).getNodesAsArray()) {
+		treeset.reset();
+		k = 0;
+		while (treeset.hasNext()) {
+			Tree tree = treeset.next();
+			for (Node node : tree.getNodesAsArray()) {
 				if (!node.isRoot()) {
 					String parentLocation = (String) node.getParent().metaDataString;
 					String location = (String) node.metaDataString;
 					double [] start = parseLoction(parentLocation);
-					double [] end = parseLoction(location);
+					double [] end;
+					if (node.isLeaf() && node.metaDataString == null) {
+						end = getLocation(node);
+					} else {
+						end = parseLoction(location);
+					}
 					double distance = GreatCircleDistance.pairwiseDistance(start, end);
 					distribute(distance, node.getHeight(), node.getParent().getHeight());
 				}
 			}
+			k++;
+			if (k % 100 == 0) {Log.warning.print('.');}
 		}
+		Log.warning.println();
 		for (int i = 0; i < n; i++) {
 			System.out.println(i*interval + " -- " + (i+1) * interval + ": " + sumOfDistances[i]/sumOfTimes[i] + " km/unit of time");
 		}
@@ -122,7 +163,12 @@ public class AverageSpeedCalculator extends Runnable  {
 			String parentLocation = (String) node.getParent().metaDataString;
 			String location = (String) node.metaDataString;
 			double [] start = parseLoction(parentLocation);
-			double [] end = parseLoction(location);
+			double [] end;
+			if (node.isLeaf() && node.metaDataString == null) {
+				end = getLocation(node);
+			} else {
+				end = parseLoction(location);
+			}
 			double distance = GreatCircleDistance.pairwiseDistance(start, end);
 			sumOfDistance += distance;
 		}
@@ -130,6 +176,19 @@ public class AverageSpeedCalculator extends Runnable  {
 			calcSpeed(child);
 		}
 		return 0;
+	}
+
+	private double[] getLocation(Node node) {
+		if (tipLocationMap != null && tipLocationMap.containsKey(node.getID())) {
+			Double [] location = tipLocationMap.get(node.getID());
+			double [] l2 = new double[2];
+			l2[0] = location[0];
+			l2[1] = location[1];
+			return l2;
+		}
+		throw new IllegalArgumentException("could not find location for node " + node.getID() + ". "
+				+ "Perhaps leafLocations is not specified, or the node name is misspelled (note "
+				+ "names are case sensitive)");
 	}
 
 	private double[] parseLoction(String location) {

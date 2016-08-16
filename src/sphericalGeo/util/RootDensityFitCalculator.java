@@ -1,7 +1,6 @@
 package sphericalGeo.util;
 
 import java.io.File;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,9 +10,9 @@ import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.util.Log;
 import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.util.NexusParser;
 import sphericalGeo.region.KMLRegion;
+import sphericalGeo.util.treeset.MemoryFriendlyTreeSet;
+import sphericalGeo.util.treeset.TreeSet;
 import beast.core.Runnable;
 
 @Description("calculates proportion of root locations from posterior tree set fitting in a region")
@@ -48,14 +47,17 @@ public class RootDensityFitCalculator extends Runnable  {
 		}
 
 		// get trees
-		Log.warning.print("Reading trees...");
-		NexusParser parser = new NexusParser();
-		parser.parseFile(treesetInput.get());
-		Log.warning.println("Done");
-		List<Tree> trees = parser.trees;
+//		Log.warning.print("Reading trees...");
+//		NexusParser parser = new NexusParser();
+//		parser.parseFile(treesetInput.get());
+//		Log.warning.println("Done");
+//		List<Tree> trees = parser.trees;
+		
+		TreeSet treeSet = new MemoryFriendlyTreeSet(treesetInput.get().getPath(), burnIn);		
+    	treeSet.reset();
 		double propFit = 0, unFit = 0;
-		for (int i = trees.size() * burnIn / 100; i < trees.size(); i++) {
-			Node root = trees.get(i).getRoot();
+		while (treeSet.hasNext()) {
+			Node root = treeSet.next().getRoot();
 			String location = (String) root.metaDataString;
 			double [] start = parseLoction(location);
 			if (region.isInside(start[0], start[1])) {
@@ -64,8 +66,8 @@ public class RootDensityFitCalculator extends Runnable  {
 				unFit++;
 			}
 		}
-		propFit /= (trees.size() - trees.size() * burnIn / 100);
-		unFit /= (trees.size() - trees.size() * burnIn / 100);
+		propFit /= treeSet.size();
+		unFit /= treeSet.size();
 		Log.info.println("Root location fits " + propFit + "% of the time " + unFit + "% misfit");
 	}
 	
@@ -94,6 +96,8 @@ public class RootDensityFitCalculator extends Runnable  {
 		coords[1] = Double.parseDouble(sMatch1);
 		return coords;
 	}
+
+    
 
 	public static void main(String[] args) throws Exception {
 		new Application(new RootDensityFitCalculator(), "RootAreaDensityCalculator", args);
