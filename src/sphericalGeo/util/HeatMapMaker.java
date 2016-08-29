@@ -69,7 +69,7 @@ public class HeatMapMaker extends Runnable {
 		int jitter = jitterInput.get();
 
 		File bg = bgInput.get();
-		if (bg != null) {
+		if (bg != null && ! bg.getName().equals("[[none]]")) {
 			if (bg.exists()) {
 				System.out.println("Loading background image " + bg.getPath());
 				BufferedImage bgImage = ImageIO.read(bg);
@@ -87,7 +87,7 @@ public class HeatMapMaker extends Runnable {
 		}
 		File maskFile = maskInput.get();
 		BufferedImage mask = null;
-		if (maskFile != null) {
+		if (maskFile != null && !maskFile.getName().equals("[[none]]")) {
 			if (bg.exists()) {
 				System.out.println("Loading mask image " + maskFile.getPath());
 				BufferedImage maskImage = ImageIO.read(maskFile);
