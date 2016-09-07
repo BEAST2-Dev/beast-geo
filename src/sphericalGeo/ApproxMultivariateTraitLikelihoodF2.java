@@ -14,7 +14,7 @@ import beast.evolution.tree.Tree;
 @Description(value="Approximate likelihood by MAP approximation of internal states optimised to take sampled nodes in account. "
 		+ "Efficiently calculates geo priors as well.", 
 			isInheritable=false)
-@Citation("Remco R. Bouckaert. Phylogeography by diffusion on a sphere: whole world phylogeography. PeerJ, 2016.")
+@Citation(value="Remco R. Bouckaert. Phylogeography by diffusion on a sphere: whole world phylogeography. 2016, PeerJ 4:e2406 https://doi.org/10.7717/peerj.2406", DOI="10.7717/peerj.2406", year=2016)
 public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTraitLikelihoodF { 
 	
 	/** maps each node to the partition containing the node **/
