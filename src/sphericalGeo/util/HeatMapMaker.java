@@ -45,6 +45,7 @@ public class HeatMapMaker extends Runnable {
 	public Input<Double> brightnessInput = new Input<>("brightness","brightnessof colour for the dots ", 0.9);
 	public Input<Integer> jitterInput = new Input<>("jitter", "jitter applied to dot locations (in pixels)", 0);
 	public Input<File> maskInput = new Input<>("mask", "image file with a mask: dots will not be shown outside mask");//, new File("/Users/remco/data/map/World98b.png"));
+	public Input<Integer> repeatsInput = new Input<>("repeats", "number of times a dot should be drasn", 1);
 	
 	BufferedImage image;
 
@@ -53,6 +54,7 @@ public class HeatMapMaker extends Runnable {
 	int width;
 	int height;
 	String tag;
+	int repeats = 1;
 	
 	final static String DIR_SEPARATOR = (Utils.isWindows() ? "\\\\" : "/");
 	@Override
@@ -67,6 +69,7 @@ public class HeatMapMaker extends Runnable {
 	public void run() throws Exception {
 		Graphics g = image.getGraphics();
 		int jitter = jitterInput.get();
+		repeats = repeatsInput.get();
 
 		File bg = bgInput.get();
 		if (bg != null && ! bg.getName().equals("[[none]]")) {
@@ -88,7 +91,7 @@ public class HeatMapMaker extends Runnable {
 		File maskFile = maskInput.get();
 		BufferedImage mask = null;
 		if (maskFile != null && !maskFile.getName().equals("[[none]]")) {
-			if (bg.exists()) {
+			if (maskFile.exists()) {
 				System.out.println("Loading mask image " + maskFile.getPath());
 				BufferedImage maskImage = ImageIO.read(maskFile);
 				parseBBox();
@@ -106,7 +109,7 @@ public class HeatMapMaker extends Runnable {
 				}
 
 			} else {
-				System.out.println("Could not find mask image " + bg.getPath());
+				System.out.println("Could not find mask image " + maskFile.getPath());
 			}
 		} else {
 			System.out.println("No mask image");
@@ -124,7 +127,8 @@ public class HeatMapMaker extends Runnable {
 		System.out.println(" done");
 		
 		// get dots
-		System.out.print("Drawing dots...");
+		System.out.println("Drawing dots...");
+		System.out.println("|=========|=========|=========|=========|=========|=========|=========|=========|=========|=========|");
 		List<Dot> dots = new ArrayList<>();
 		for (Tree tree: trees) {
 			collectDots(tree.getRoot(),dots);
@@ -150,6 +154,7 @@ public class HeatMapMaker extends Runnable {
 		float brightness = (float) (double) brightnessInput.get();
 		float saturation = (float) (double) saturationInput.get();
 		
+		int k = 0;
 		for (Dot dot : dots) {
 			double f = Math.min(dot.age, oldest)/oldest;
 			
@@ -158,24 +163,29 @@ public class HeatMapMaker extends Runnable {
 //			 int blue  = (int) (Math.sin(2*3.14*f + 4) * 127 + 128);
 //			 g.setColor(new Color(red,green,blue));
 			
-			g.setColor(Color.getHSBColor((float) (f/1.2), saturation, brightness));
+			g.setColor(Color.getHSBColor(0.2f + (float) (f/0.8f), saturation, brightness));
 			
-			
-			int y = height - (int)( (dot.latitude - minLat) * height/(maxLat-minLat));  
-			int x = (int)( (dot.longitude - minLong) * width/(maxLong-minLong)); 
-			if (jitter > 0) {
-				x += Randomizer.nextGaussian() * jitter;
-				y += Randomizer.nextGaussian() * jitter;
-			}
-			if (mask == null) {
-				g.fillOval(x-halfRadius, y-halfRadius, radius, radius);
-			} else {
-				if (x > 0 && x < width && y > 0 && y < height && ((mask.getRGB(x,  y) & 0xff0000) == 0)) {
+			for (int i = 0; i < repeats; i++) {
+				int y = height - (int)( (dot.latitude - minLat) * height/(maxLat-minLat));  
+				int x = (int)( (dot.longitude - minLong) * width/(maxLong-minLong)); 
+				if (jitter > 0) {
+					x += Randomizer.nextGaussian() * jitter;
+					y += Randomizer.nextGaussian() * jitter;
+				}
+				if (mask == null) {
 					g.fillOval(x-halfRadius, y-halfRadius, radius, radius);
+				} else {
+					if (x > 0 && x < width && y > 0 && y < height && ((mask.getRGB(x,  y) & 0xff0000) == 0)) {
+						g.fillOval(x-halfRadius, y-halfRadius, radius, radius);
+					}
 				}
 			}
+			k++;
+			if (k % (dots.size()/100) == 0) {
+				System.err.print('.');
+			}
 		}
-		System.out.println(" done");
+		System.out.println("\ndone");
 		
 		// write file
 		System.out.print("Writing file " + outputInput.get().getPath());
@@ -192,7 +202,7 @@ public class HeatMapMaker extends Runnable {
         
         for (int i = 0; i < 200; i++) {
         	double f = (200 - i) / 200.0;
-			g.setColor(Color.getHSBColor((float) (f/1.2), 1.0f, 1.0f));
+			g.setColor(Color.getHSBColor(0.2f + (float) (f/0.8f), 1.0f, 1.0f));
         	g.drawLine(25, i, 75, i);
         }
 		g.setColor(Color.black);
