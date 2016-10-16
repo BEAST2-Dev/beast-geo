@@ -61,7 +61,7 @@ public class HeatMapMaker extends Runnable {
 	public void initAndValidate() {
 		width = widthInput.get();
 		height = heightInput.get();
-        image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		tag = tagInput.get();
 	}
 
