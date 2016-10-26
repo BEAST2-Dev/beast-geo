@@ -406,6 +406,11 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 		//	storedLogPContributions = new double[logPContributions.length];
 		//}
 
+		if (logPContributions == null) {
+			// only happens when initial state has zero probability
+			// due to a prior being violated or another likelihood being zero
+			return;
+		}
 		System.arraycopy(logPContributions, 0, storedLogPContributions, 0, logPContributions.length);
 		
 		System.arraycopy(isTopOfPartition, 0, storedIsTopOfPartition, 0, isTopOfPartition.length);
