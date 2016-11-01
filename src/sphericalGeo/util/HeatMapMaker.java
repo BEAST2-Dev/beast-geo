@@ -67,6 +67,7 @@ public class HeatMapMaker extends Runnable {
 
 	@Override
 	public void run() throws Exception {
+		long start = System.currentTimeMillis();
 		Graphics g = image.getGraphics();
 		int jitter = jitterInput.get();
 		repeats = repeatsInput.get();
@@ -210,7 +211,8 @@ public class HeatMapMaker extends Runnable {
         	g.drawString(""+ (oldest * (10 - i)/ 10), 100, 200*i/10);
         }
 		ImageIO.write(image, "png", new File((outputInput.get().getParent() != null ? outputInput.get().getParent() + DIR_SEPARATOR : "") + "legend.png"));
-		System.out.println(" done");
+		long end = System.currentTimeMillis();
+		System.out.println(" done in " + (end - start) / 1000 + " seconds");
 		
 	}
 

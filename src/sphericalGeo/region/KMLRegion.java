@@ -34,6 +34,8 @@ public class KMLRegion extends Region {
 		Log.info.println("Processing " + kmlFileInput.get());
 		List<List<Double>> coordinates;
 		try {
+			width = 1024;
+			height = 1024;
 			coordinates = parseKML();
 			calcAdmissableNodes(coordinates);
 		} catch (Exception e) {
@@ -41,7 +43,7 @@ public class KMLRegion extends Region {
 		}
 	}
 
-	private void calcAdmissableNodes(List<List<Double>> coordinates) {
+	protected void calcAdmissableNodes(List<List<Double>> coordinates) {
 		boolean debug = Boolean.valueOf(System.getProperty("beast.debug"));
 		boolean traversesMapCenter = false;
 		for (List<Double> coords : coordinates) {
@@ -86,8 +88,6 @@ public class KMLRegion extends Region {
 		}
 
 		// create bitmap to draw in
-		width = 1024;
-		height = 1024;
 		double w = width / (maxLong - minLong);
 		double h = height / (maxLat - minLat);
 
@@ -128,6 +128,14 @@ public class KMLRegion extends Region {
 
 		if (debug) {
 			try {
+//				g.setColor(Color.red);
+//				double [] centre = centroid();
+//				int x = (int)(width * (centre[1] - minLong)/(maxLong-minLong));
+//				int y = (int)(height * (centre[0] - minLat)/(maxLat-minLat));
+//				if ((image.getRGB(x, y) & 0xFFFFFF) != regionColor) {
+//					System.err.println("centroid mismatch: " + getID());
+//				}
+//				g.fillOval(x - 2, y - 2, 5, 5);
 				ImageIO.write(image, "png", new File("/tmp/kmlregion" + getID() + ".png"));
 				
 //				String s = BeautiDoc.load("/tmp/" + getID() + ".dat");
@@ -175,5 +183,5 @@ public class KMLRegion extends Region {
 		}
 		return coordinates;
 	}
-
+	
 }
