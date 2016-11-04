@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -24,6 +26,7 @@ import beast.core.util.Log;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.math.distributions.MRCAPrior;
+import beast.util.Randomizer;
 import beast.util.XMLParser;
 import sphericalGeo.util.treeset.MemoryFriendlyTreeSet;
 import sphericalGeo.util.treeset.TreeSet;
@@ -31,9 +34,10 @@ import sphericalGeo.util.treeset.TreeSet;
 @Description("Create SVG file for a summary tree -- requires geographical info in the input tree set")
 public class TreeToSVG extends SpeedAnnotator  {
 	public Input<File> xmlFileInput = new Input<>("xml", "xml file with MRCAPrior constraints. Any branch inside such constraint will be omitted");
-	
+	public Input<Boolean> suppressCladesInput = new Input<>("suppressClades", "do not export branches in clades that have MRCAPrior", false);
 	
 	Node mrca;
+	String [] cssclass;
 	
 	public TreeToSVG() {
 		outputInput.setValue(new OutFile("/tmp/x.svg"), this);
@@ -45,20 +49,23 @@ public class TreeToSVG extends SpeedAnnotator  {
 	
 	@Override
 	public void run() throws Exception {
-		List<Set<String>> mrcaPriors = new ArrayList<>();
-		Tree baseTree = null;
+		boolean suppressClades = suppressCladesInput.get();
 		
+		List<Set<String>> mrcaPriors = new ArrayList<>();
+		List<String> classIDs = new ArrayList<>();
+		Set<String> classes = new HashSet<>();
 		if (xmlFileInput.get() != null && xmlFileInput.get().exists()) {
 			XMLParser parser = new XMLParser();
 			MCMC mcmc = (MCMC) parser.parseFile(xmlFileInput.get());
 			State state = mcmc.startStateInput.get();
 			for (StateNode n : state.stateNodeInput.get()) {
 				if (n instanceof Tree) {
-					baseTree = (Tree) n;
 					for (BEASTInterface o : n.getOutputs()) {
 						if (o instanceof MRCAPrior) {
 							Set<String> taxa = ((MRCAPrior) o).taxonsetInput.get().getTaxaNames();
 							mrcaPriors.add(taxa);
+							classIDs.add(o.getID());
+							classes.add(o.getID());
 						}
 					}
 				}
@@ -115,9 +122,19 @@ public class TreeToSVG extends SpeedAnnotator  {
 "stroke-width:0.25;stroke-miterlimit:4;stroke-dasharray:none;stroke:#0000e0;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:round\n"+
 "}\n" +
 ".pnline2 {\n"+
-"stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none;stroke:#ffff00;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:round\n"+
-"}\n"+
-"</style>\n" +
+"stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke:#ffff00;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:round\n"+
+"}\n");
+		for (String c : classes) {
+			// Will produce only bright / light colours:
+			int r = Randomizer.nextInt(128) + 128;
+			int g = Randomizer.nextInt(128) + 128;
+			int b = Randomizer.nextInt(128) + 128;
+			String color= Integer.toHexString(r) + Integer.toHexString(g) + Integer.toHexString(b);
+			
+			out.println("." + c.replaceAll("\\..*", "") + "{\nstroke:#" + color + ";\n}");
+		}
+	
+		out.println("</style>\n" +
 "<g>\n");
 		
 		Tree tree = treeset.next();
@@ -125,11 +142,15 @@ public class TreeToSVG extends SpeedAnnotator  {
 		out.println();
 		while (treeset.hasNext()) {
 			tree = treeset.next();
+		
 			
 			boolean [] suppress = new boolean[tree.getNodeCount()];
 			if (mrcaPriors != null) {
-				for(Set<String> isInTaxaSet : mrcaPriors) {
-					calcMRCAtime(tree.getRoot(), new int[1], isInTaxaSet, isInTaxaSet.size());
+				cssclass = new String[tree.getNodeCount()];
+				Arrays.fill(cssclass, "");
+				for (int i = 0; i < mrcaPriors.size(); i++) {
+					Set<String> isInTaxaSet = mrcaPriors.get(i);
+					calcMRCAtime(tree.getRoot(), new int[1], isInTaxaSet, isInTaxaSet.size(), classIDs.get(i).replaceAll("\\..*", ""));
 					suppress[mrca.getNr()] = true;
 				}
 				mark(tree.getRoot(), suppress, false);
@@ -149,15 +170,17 @@ public class TreeToSVG extends SpeedAnnotator  {
 					} else {
 						end = parseLoction(location);
 					}
-					if (!suppress[node.getNr()] || !suppress[node.getParent().getNr()]) {
+					if (!suppress[node.getNr()] || !suppress[node.getParent().getNr()] || !suppressClades) {
+						out.print("<g" + (node.isLeaf() ? " id=\"" + node.getID() + "\"": "") + ">");
 						out.println("<line x1=\""+ (start[1] + 180) +"\" "+
 								"y1=\""+(90-start[0]) +"\" " +
 								"x2=\""+(end[1]+180) +"\" " +
-								"y2=\""+(90-end[0])+"\" class=\"pnline\"/>\n");
-						out.println("<line x1=\""+ (start[1] + 180) +"\" "+
+								"y2=\""+(90-end[0])+"\" class=\"pnline " + (cssclass == null ? "" : cssclass[node.getParent().getNr()] + "2 mrca") + "\"/>\n");
+						out.print("<line x1=\""+ (start[1] + 180) +"\" "+
 								"y1=\""+(90-start[0]) +"\" " +
 								"x2=\""+(end[1]+180) +"\" " +
-								"y2=\""+(90-end[0])+"\" class=\"pnline2\"/>\n");
+								"y2=\""+(90-end[0])+"\" class=\"pnline2 " + (cssclass == null ? "" : cssclass[node.getParent().getNr()] + " mrca") + "\"/>\n");
+						out.println("</g>");
 					}
 				} else {
 					String location = (String) node.metaDataString;
@@ -185,22 +208,26 @@ public class TreeToSVG extends SpeedAnnotator  {
 	}
 	
 	
-    int calcMRCAtime(final Node node, final int[] taxonCount2, Set<String> isInTaxaSet, int nrOfTaxa) {
+    int calcMRCAtime(final Node node, final int[] taxonCount2, Set<String> isInTaxaSet, int nrOfTaxa, String css) {
         if (node.isLeaf()) {
             taxonCount2[0]++;
             if (isInTaxaSet.contains(node.getID())) {
+            	cssclass[node.getNr()] = css;
                 return 1;
             } else {
                 return 0;
             }
         } else {
-            int taxonCount = calcMRCAtime(node.getLeft(), taxonCount2, isInTaxaSet, nrOfTaxa);
+            int taxonCount = calcMRCAtime(node.getLeft(), taxonCount2, isInTaxaSet, nrOfTaxa, css);
             final int leftTaxa = taxonCount2[0];
             taxonCount2[0] = 0;
             if (node.getRight() != null) {
-                taxonCount += calcMRCAtime(node.getRight(), taxonCount2, isInTaxaSet, nrOfTaxa);
+                taxonCount += calcMRCAtime(node.getRight(), taxonCount2, isInTaxaSet, nrOfTaxa, css);
                 final int rightTaxa = taxonCount2[0];
                 taxonCount2[0] = leftTaxa + rightTaxa;
+                if (taxonCount > 0 && taxonCount <= nrOfTaxa) {
+                	cssclass[node.getNr()] = css;
+                }
                 if (taxonCount == nrOfTaxa) {
                 	mrca = node;
                     return taxonCount + 1;
