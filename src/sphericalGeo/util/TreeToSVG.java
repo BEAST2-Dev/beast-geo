@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -35,6 +33,8 @@ import sphericalGeo.util.treeset.TreeSet;
 public class TreeToSVG extends SpeedAnnotator  {
 	public Input<File> xmlFileInput = new Input<>("xml", "xml file with MRCAPrior constraints. Any branch inside such constraint will be omitted");
 	public Input<Boolean> suppressCladesInput = new Input<>("suppressClades", "do not export branches in clades that have MRCAPrior", false);
+	public Input<Double> legendOffsetXInput = new Input<>("legendOffsetX", "offset of legend (specified by MRCAs, if any)", 0.0);
+	public Input<Double> legendOffsetYInput = new Input<>("legendOffsetY", "offset of legend (specified by MRCAs, if any)", 0.0);
 	
 	Node mrca;
 	String [] cssclass;
@@ -122,8 +122,25 @@ public class TreeToSVG extends SpeedAnnotator  {
 "stroke-width:0.25;stroke-miterlimit:4;stroke-dasharray:none;stroke:#0000e0;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:round\n"+
 "}\n" +
 ".pnline2 {\n"+
-"stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke:#ffff00;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:round\n"+
-"}\n");
+"stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none;stroke:#ffff00;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:round\n"+
+"}\n" +
+".mrca {\n" +
+"stroke-width:0.2\n" +
+"}\n" +
+".legend {\n" +
+"font-size:3pt;\n" +
+"font-family:helvetica;\n" +
+"}\n" +
+".curly {\n" +
+"stroke-width:0.2;\n" +
+"stroke:red;\n" +
+"fill:none;\n" +
+"}\n" +
+".label{\n"+
+"font-size:0.1;\n" +
+"font-family:helvetica;\n" +
+"}\n"
+);
 		for (String c : classes) {
 			// Will produce only bright / light colours:
 			int r = Randomizer.nextInt(128) + 128;
@@ -158,8 +175,9 @@ public class TreeToSVG extends SpeedAnnotator  {
 			
 			
 			
-			
-			for (Node node : tree.getNodesAsArray()) {
+			Node [] nodes = tree.getNodesAsArray();
+			Arrays.sort(nodes, (n1, n2) -> {return Double.compare(n1.getHeight(), n2.getHeight());});
+			for (Node node : nodes) {
 				if (!node.isRoot()) {
 					String parentLocation = (String) node.getParent().metaDataString;
 					String location = (String) node.metaDataString;
@@ -172,25 +190,54 @@ public class TreeToSVG extends SpeedAnnotator  {
 					}
 					if (!suppress[node.getNr()] || !suppress[node.getParent().getNr()] || !suppressClades) {
 						out.print("<g" + (node.isLeaf() ? " id=\"" + node.getID() + "\"": "") + ">");
+						String mrca = "";
+						if (cssclass != null && !cssclass[node.getParent().getNr()].equals("")) {
+							mrca = " mrca";
+						}
 						out.println("<line x1=\""+ (start[1] + 180) +"\" "+
 								"y1=\""+(90-start[0]) +"\" " +
 								"x2=\""+(end[1]+180) +"\" " +
-								"y2=\""+(90-end[0])+"\" class=\"pnline " + (cssclass == null ? "" : cssclass[node.getParent().getNr()] + "2 mrca") + "\"/>\n");
+								"y2=\""+(90-end[0])+"\" class=\"pnline " + (cssclass == null ? "" : cssclass[node.getParent().getNr()] + "2" + mrca) + "\"/>\n");
 						out.print("<line x1=\""+ (start[1] + 180) +"\" "+
 								"y1=\""+(90-start[0]) +"\" " +
 								"x2=\""+(end[1]+180) +"\" " +
-								"y2=\""+(90-end[0])+"\" class=\"pnline2 " + (cssclass == null ? "" : cssclass[node.getParent().getNr()] + " mrca") + "\"/>\n");
+								"y2=\""+(90-end[0])+"\" class=\"pnline2 " + (cssclass == null ? "" : cssclass[node.getParent().getNr()] + mrca) + "\"/>\n");
+						
+						if (!suppress[node.getNr()] || !suppress[node.getParent().getNr()]) {
+							out.print("<path d=\"M" + (start[1] + 180)+ " " + (90-start[0]) + 
+									" c " +(end[1]-start[1])/2.0 + " " + (start[0]-end[0])/2.0 +
+									" , "+ (end[1]-start[1])/2.0 + " " + (start[0]-end[0])/2.0 +
+									" ," + (end[1]-start[1]) + " " + (start[0]-end[0])+" \" class=\"curly \"/>\n"); 
+						}
+						if (node.isLeaf()) {
+							out.print("\n<text x=\"" + (end[1] + 180) + "\" y=\"" + (90 - end[0]) + "\" class=\"label\">" + node.getID() + "</text>");
+						}
 						out.println("</g>");
 					}
 				} else {
 					String location = (String) node.metaDataString;
 					double [] start = parseLoction(location);
-					out.println("<circle cx=\"" + (start[1]+180) +"\" cy=\"" + (90-start[0]) + "\" r=\"0.5\" stroke=\"#000000\" stroke-width=\"0.05\" fill=\"#ffff00d\" />\n");
+					out.println("<circle cx=\"" + (start[1]+180) +"\" cy=\"" + (90-start[0]) + "\" r=\"0.5\" stroke=\"#000000\" stroke-width=\"0.05\" fill=\"#ffff00\" />\n");
 				}
 			}
 		}
-		out.println("</g>\n" + 
-				"</svg>\n");
+		out.println("</g>\n");
+		int k = 1;
+		String [] classes2 = classes.toArray(new String[]{});
+		Arrays.sort(classes2);
+		double offsetX = legendOffsetXInput.get();
+		double offsetY = legendOffsetYInput.get();
+		double dy = 1;
+		double len = 5;
+		for (String s : classes2) {
+			s = s.replaceAll("\\..*", "");
+			out.print("<g class=\"legend\">");
+			out.print("<line x1=\"" + offsetX + "\" y1=\"" + (k * dy + offsetY) + "\" x2=\""+( + offsetX + len)+"\" y2=\"" + (k * dy + offsetY) + "\" class=\"" + s +"\"/>");
+			out.print("<text x=\""+( + offsetX + len + 1)+"\" y=\"" + (k * dy + offsetY + dy/2) + "\">"+ s + "</text>");
+			out.println("</g>");
+			k++;
+		}
+		out.println("</svg>\n");
 		out.println("");
 		if (outputInput.get() != null) {
 			out.close();
