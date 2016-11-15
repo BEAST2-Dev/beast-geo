@@ -182,7 +182,7 @@ public class HeatMapMaker extends Runnable {
 				}
 			}
 			k++;
-			if (k % (dots.size()/100) == 0) {
+			if (k % (Math.max(1, dots.size()/100)) == 0) {
 				System.err.print('.');
 			}
 		}
