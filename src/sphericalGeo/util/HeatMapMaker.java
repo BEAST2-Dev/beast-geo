@@ -46,6 +46,7 @@ public class HeatMapMaker extends Runnable {
 	public Input<Integer> jitterInput = new Input<>("jitter", "jitter applied to dot locations (in pixels)", 0);
 	public Input<File> maskInput = new Input<>("mask", "image file with a mask: dots will not be shown outside mask");//, new File("/Users/remco/data/map/World98b.png"));
 	public Input<Integer> repeatsInput = new Input<>("repeats", "number of times a dot should be drasn", 1);
+	public Input<Boolean> rootOnlyInput = new Input<>("rootOnly", "only draw root locations and ignore the rest", false);
 	
 	BufferedImage image;
 
@@ -55,6 +56,7 @@ public class HeatMapMaker extends Runnable {
 	int height;
 	String tag;
 	int repeats = 1;
+	boolean rootOnly;
 	
 	final static String DIR_SEPARATOR = (Utils.isWindows() ? "\\\\" : "/");
 	@Override
@@ -63,6 +65,7 @@ public class HeatMapMaker extends Runnable {
 		height = heightInput.get();
         image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		tag = tagInput.get();
+		rootOnly = rootOnlyInput.get();
 	}
 
 	@Override
@@ -71,6 +74,7 @@ public class HeatMapMaker extends Runnable {
 		Graphics g = image.getGraphics();
 		int jitter = jitterInput.get();
 		repeats = repeatsInput.get();
+		rootOnly = rootOnlyInput.get();
 
 		File bg = bgInput.get();
 		if (bg != null && ! bg.getName().equals("[[none]]")) {
@@ -219,8 +223,10 @@ public class HeatMapMaker extends Runnable {
 	private void collectDots(Node node, List<Dot> dots) {
 		String meta =  node.metaDataString;
 		dots.add(new Dot(node.getHeight(), meta));
-		for (Node child:  node.getChildren()) {
-			collectDots(child, dots);
+		if (!rootOnly) {
+			for (Node child:  node.getChildren()) {
+				collectDots(child, dots);
+			}
 		}
 	}
 
