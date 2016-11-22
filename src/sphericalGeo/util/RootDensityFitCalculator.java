@@ -21,10 +21,14 @@ public class RootDensityFitCalculator extends Runnable  {
 	public Input<String> tagInput = new Input<>("tag","tag used in annotated of locations", "location");
 	public Input<Integer> burninInput = new Input<>("burnin","burn in percentage, default 10", 10);
 	public Input<File> kmlInput = new Input<>("kml","region as stored in KML file to be fitted", Validate.REQUIRED);
+	public Input<Double> lowerAgeInput = new Input<>("lower","lower bound of root age to be taken in account", Double.NEGATIVE_INFINITY);
+	public Input<Double> upperAgeInput = new Input<>("upper","upper bound of root age to be taken in account", Double.POSITIVE_INFINITY);
 
 	Pattern pattern = Pattern.compile("([0-9\\.Ee-]+),.*=([0-9\\.Ee-]+)");
 	Pattern pattern2 = Pattern.compile(".*location=\\{([0-9\\.Ee-]+),([0-9\\.Ee-]+)\\}.*");
 
+	
+	
 	@Override
 	public void initAndValidate() {
 	}
@@ -32,6 +36,8 @@ public class RootDensityFitCalculator extends Runnable  {
 	@Override
 	public void run() throws Exception {
 		KMLRegion region = new KMLRegion(kmlInput.get().getPath());
+		double lowerAge = lowerAgeInput.get();
+		double upperAge = upperAgeInput.get();
 		
 		String tag = tagInput.get();
 		pattern = Pattern.compile("([0-9\\.Ee-]+),.*=([0-9\\.Ee-]+)");
@@ -58,17 +64,21 @@ public class RootDensityFitCalculator extends Runnable  {
 		double propFit = 0, unFit = 0;
 		while (treeSet.hasNext()) {
 			Node root = treeSet.next().getRoot();
-			String location = (String) root.metaDataString;
-			double [] start = parseLoction(location);
-			if (region.isInside(start[0], start[1])) {
-				propFit++;
+			if (root.getHeight() > lowerAge && root.getHeight() <= upperAge) {
+				String location = (String) root.metaDataString;
+				double [] start = parseLoction(location);
+				if (region.isInside(start[0], start[1])) {
+					propFit++;
+				} else {
+					unFit++;
+				}
 			} else {
 				unFit++;
 			}
 		}
 		propFit /= treeSet.size();
 		unFit /= treeSet.size();
-		Log.info.println("Root location fits " + propFit + "% of the time " + unFit + "% misfit");
+		Log.info.println("Root location fits " + 100*propFit + "% of the time " + 100*unFit + "% misfit");
 	}
 	
 	private double[] parseLoction(String location) {
