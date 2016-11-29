@@ -34,6 +34,7 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 
 	final public Input<Double> longitudeThresholdInput = new Input<>("longitudeThreshold", "longitudes below this threshold will get 360 added. "
 			+ "This is useful for calculating the mean location when a point jumps the boundary of the world map.", -180.0);
+	final public Input<Boolean> alwaysUpdateInput = new Input<>("alwaysUpdate","set this to true when sampling from prior, otherwise set to false for efficient computation", false);
 
 	SphericalDiffusionModel substModel;
 	TreeInterface tree;
@@ -822,7 +823,17 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 
 	/** return randomized position **/
 	public double[] getPosition(int iDim) {
+		if (alwaysUpdateInput.get()) {
+			calculateLogP();
+			if (position[iDim][1] < longitudeThreshold) {
+				position[iDim][1] += 360;
+			}
+			return position[iDim];			
+		}
 		if (!logAverage) {
+			if (loggerLikelihood == null) {
+				calculateLogP();
+			}
 			return loggerLikelihood.getPosition(iDim);
 		} else {
 			if (needsUpdate) {
