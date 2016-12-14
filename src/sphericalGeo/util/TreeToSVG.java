@@ -125,15 +125,20 @@ public class TreeToSVG extends SpeedAnnotator  {
 "stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none;stroke:#ffff00;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:round\n"+
 "}\n" +
 ".mrca {\n" +
-"stroke-width:0.2\n" +
+"stroke-width:0.1;\n" +
 "}\n" +
 ".legend {\n" +
-"font-size:3pt;\n" +
+"font-size:1pt;\n" +
 "font-family:helvetica;\n" +
 "}\n" +
 ".curly {\n" +
 "stroke-width:0.2;\n" +
 "stroke:red;\n" +
+"fill:none;\n" +
+"}\n" +
+".curly2 {\n" +
+"stroke-width:0.25;\n" +
+"stroke:black;\n" +
 "fill:none;\n" +
 "}\n" +
 ".label{\n"+
@@ -166,6 +171,7 @@ public class TreeToSVG extends SpeedAnnotator  {
 				cssclass = new String[tree.getNodeCount()];
 				Arrays.fill(cssclass, "");
 				for (int i = 0; i < mrcaPriors.size(); i++) {
+					System.err.println(i);
 					Set<String> isInTaxaSet = mrcaPriors.get(i);
 					calcMRCAtime(tree.getRoot(), new int[1], isInTaxaSet, isInTaxaSet.size(), classIDs.get(i).replaceAll("\\..*", ""));
 					suppress[mrca.getNr()] = true;
@@ -207,10 +213,14 @@ public class TreeToSVG extends SpeedAnnotator  {
 							out.print("<path d=\"M" + (start[1] + 180)+ " " + (90-start[0]) + 
 									" c " +(end[1]-start[1])/2.0 + " " + (start[0]-end[0])/2.0 +
 									" , "+ (end[1]-start[1])/2.0 + " " + (start[0]-end[0])/2.0 +
+									" ," + (end[1]-start[1]) + " " + (start[0]-end[0])+" \" class=\"curly2 \"/>\n"); 
+							out.print("<path d=\"M" + (start[1] + 180)+ " " + (90-start[0]) + 
+									" c " +(end[1]-start[1])/2.0 + " " + (start[0]-end[0])/2.0 +
+									" , "+ (end[1]-start[1])/2.0 + " " + (start[0]-end[0])/2.0 +
 									" ," + (end[1]-start[1]) + " " + (start[0]-end[0])+" \" class=\"curly \"/>\n"); 
 						}
 						if (node.isLeaf()) {
-							out.print("\n<text x=\"" + (end[1] + 180) + "\" y=\"" + (90 - end[0]) + "\" class=\"label\">" + node.getID() + "</text>");
+//							out.print("\n<text x=\"" + (end[1] + 180) + "\" y=\"" + (90 - end[0]) + "\" class=\"label\">" + node.getID() + "</text>");
 						}
 						out.println("</g>");
 					}
@@ -220,6 +230,30 @@ public class TreeToSVG extends SpeedAnnotator  {
 					out.println("<circle cx=\"" + (start[1]+180) +"\" cy=\"" + (90-start[0]) + "\" r=\"0.5\" stroke=\"#000000\" stroke-width=\"0.05\" fill=\"#ffff00\" />\n");
 				}
 			}
+			out.print("<g>\n");
+			for (Node node : nodes) {
+				if (!node.isRoot()) {
+					boolean isMRCA = false;
+					if (cssclass != null && !cssclass[node.getNr()].equals("")) {
+						isMRCA = true;;
+					}
+					boolean isParentMRCA = false;
+					if (cssclass != null && !cssclass[node.getParent().getNr()].equals("")) {
+						isParentMRCA = true;;
+					}
+	
+					if (isMRCA && !isParentMRCA) {
+						String location = (String) node.metaDataString;
+						double [] start = parseLoction(location);
+						double x = start[1] + 180;
+						double y = 90 - start[0]; 
+						out.print("<circle cx=\"" + x +"\" cy=\"" + y + "\" r=\"0.5\" class=\"clabel\"/>");
+						out.print("<text id=\""+cssclass[node.getNr()]+"\" x=\"" + x +"\" y=\"" + (y + 0.3) +"\" class=\"label\">1</text>\n");
+					}
+				}
+
+			}
+			out.print("</g>\n");
 		}
 		out.println("</g>\n");
 		int k = 1;
