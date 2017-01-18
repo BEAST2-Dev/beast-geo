@@ -27,6 +27,7 @@ import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.LogAnalyser;
 import beast.util.Randomizer;
+import beast.util.TreeParser;
 import beast.util.XMLParser;
 import sphericalGeo.util.treeset.MemoryFriendlyTreeSet;
 import sphericalGeo.util.treeset.TreeSet;
@@ -47,6 +48,7 @@ public class CPOAnalyser extends Runnable {
 	public void initAndValidate() {
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void run() throws Exception {
 		System.setProperty("java.only", "true");
@@ -132,7 +134,7 @@ public class CPOAnalyser extends Runnable {
     				index = labels.indexOf(shortid);
     			}
     			if (index >= 0) {
-    				Double [] v = tracelog.getTrace(index);
+    				Double [] v = tracelog.getTrace(index + 1);
     				values.add(v);
     			} else {
     				Log.warning.println("Did not find " + id + " in log.");
@@ -145,7 +147,8 @@ public class CPOAnalyser extends Runnable {
     	    	
 		Log.warning.println("Calculating total CPO");
     	Log.warning.println("|---------|---------|---------|---------|---------|---------|---------|---------|");
-		k = 0;
+		double lastLikelihood = 0;
+    	k = 0;
 		int reported = 0;
 		treeSet.reset();
     	while (treeSet.hasNext()) {
@@ -166,17 +169,17 @@ public class CPOAnalyser extends Runnable {
     			}
     		}
 			Tree currentTree = treeSet.next();
+			//TreeParser p = new TreeParser(tree.getTaxonset().asStringList(), newick, 0, false);
 			tree.assignFrom(currentTree);
-			
+
 			// calc likelihood
-			mcmc.startStateInput.get().setEverythingDirty(true);
 			mcmc.robustlyCalcPosterior(mcmc.posteriorInput.get());
 			// grab site probabilities from treelikelihoods
 			int i = 0;
 	    	for (Distribution d : likelihood.pDistributions.get()) {
 	    		if (d instanceof GenericTreeLikelihood) {
 	    			TreeLikelihood tl = (TreeLikelihood) d;
-	    			Log.warning.print(tl.getCurrentLogP()+ " ");
+	    			lastLikelihood  = tl.getCurrentLogP();
 	    			double [] pll = tl.getPatternLogLikelihoods();
 	    			for (int j = 0; j < pll.length; j++) {
 	    				patterLogProbs[i++][k] = pll[j];
@@ -186,10 +189,11 @@ public class CPOAnalyser extends Runnable {
 					
 			while (reported - k < 0) {
 				Log.warning.print("*");
-				reported += 1 + treeSet.size() / 80;
+				reported += 1 + treeSet.size() / 86;
 			}
 			k++;		
 		}
+
     	// precalc total log pseudomarginal likelihood (LPML) from siteProbs array
   		// Part of Equation (14) in Lewis et al 2014
     	double [] minLogP = new double[patternCount];
@@ -201,8 +205,13 @@ public class CPOAnalyser extends Runnable {
     		minLogP[i] = min;
     	}
     	
-		double LPML = calcLPML(minLogP, patterLogProbs, weights);
-		
+		int [] order = new int[treeSet.size()];
+		for (int i = 0; i < order.length; i++) {
+			order[i] = i;
+		}
+		double LPML = calcLPML(order, minLogP, patterLogProbs, weights);
+		Log.info.println("\nSanity check: make sure the last likelihood in the log file is: " + lastLikelihood);
+
   		Log.info("\nlog pseudomarginal likelihood (LPML) = " + LPML);
     	
     	Log.warning.println("Calculating variance of CPO");
@@ -225,12 +234,8 @@ public class CPOAnalyser extends Runnable {
     	double [] LPMLs = new double[replicates];
     	while (k < replicates) {
         	// calc CPO from subsample of siteProbs array
-    		int [] newWeights = new int[patternCount];
-			int [] sites = Randomizer.sampleIndicesWithReplacement(siteCount);
-    		for (int i : sites) {
-    			newWeights[siteMap[i]]++;
-    		}
-    		LPMLs[k] = calcLPML(minLogP, patterLogProbs, newWeights);
+			order = Randomizer.sampleIndicesWithReplacement(treeSet.size());
+    		LPMLs[k] = calcLPML(order, minLogP, patterLogProbs, weights);
     		
 			while (reported - k < 0) {
 				Log.warning.print("*");
@@ -253,7 +258,7 @@ public class CPOAnalyser extends Runnable {
         }
         var /= (replicates - 1.0);
         double standardDeviation = Math.sqrt(var);
-        Log.info("\nstandardDeviation = " + standardDeviation);
+        Log.info("\nmean = " + mean + ", standardDeviation = " + standardDeviation);
 
 	}
 
@@ -272,6 +277,7 @@ public class CPOAnalyser extends Runnable {
 							RateByMetaData newClock = new RateByMetaData(tree);
 							newClock.meanRateInput.setValue(clock.getInput("clock.rate").get(), newClock);
 							tl.branchRateModelInput.setValue(newClock, tl);
+							tl.initAndValidate();
 						}
 					}
 				}
@@ -318,7 +324,7 @@ public class CPOAnalyser extends Runnable {
 		public void setTree(Tree tree) {this.tree = tree;}
 	}
 	
-	private double calcLPML(double[] minLogP, double[][] patterLogProbs, int[] patternWeights) {
+	private double calcLPML(int [] order, double[] minLogP, double[][] patterLogProbs, int[] patternWeights) {
 		int patternCount = patterLogProbs.length;
 		int treeSetSize = patterLogProbs[0].length;
   		// Equation (14) in Lewis et al 2014
@@ -326,8 +332,9 @@ public class CPOAnalyser extends Runnable {
   		for (int i = 0; i < patternCount; i++) {
     		double CPOi_ = Math.log(treeSetSize) + minLogP[i];
     		double sum = 0;
-        	for (int k = 0; k < treeSetSize; k++) {
-        		sum += Math.exp(minLogP[i] - patterLogProbs[i][k]);
+    		double [] p = patterLogProbs[i];
+        	for (int k : order) {
+        		sum += Math.exp(minLogP[i] - p[k]);
     		}
         	CPOi_ -= Math.log(sum);
     		CPOi[i] = CPOi_;
