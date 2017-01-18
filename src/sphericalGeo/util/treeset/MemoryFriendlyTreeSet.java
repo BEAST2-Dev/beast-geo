@@ -109,7 +109,7 @@ public class MemoryFriendlyTreeSet extends TreeSet {
             if (str == null) {
                 return null;
             }
-            if (str.contains("[")) {
+            if (str.matches("^\\s*\\[.*")) {
                 final int start = str.indexOf('[');
                 int end = str.indexOf(']', start);
                 while (end < 0) {

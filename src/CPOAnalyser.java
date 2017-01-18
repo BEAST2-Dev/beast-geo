@@ -21,13 +21,11 @@ import beast.core.parameter.Parameter;
 import beast.core.util.CompoundDistribution;
 import beast.core.util.Log;
 import beast.evolution.branchratemodel.*;
-import beast.evolution.likelihood.GenericTreeLikelihood;
-import beast.evolution.likelihood.TreeLikelihood;
+import beast.evolution.likelihood.*;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.LogAnalyser;
 import beast.util.Randomizer;
-import beast.util.TreeParser;
 import beast.util.XMLParser;
 import sphericalGeo.util.treeset.MemoryFriendlyTreeSet;
 import sphericalGeo.util.treeset.TreeSet;
@@ -177,14 +175,22 @@ public class CPOAnalyser extends Runnable {
 			// grab site probabilities from treelikelihoods
 			int i = 0;
 	    	for (Distribution d : likelihood.pDistributions.get()) {
-	    		if (d instanceof GenericTreeLikelihood) {
+	    		if (d instanceof TreeLikelihood) {
 	    			TreeLikelihood tl = (TreeLikelihood) d;
 	    			lastLikelihood  = tl.getCurrentLogP();
 	    			double [] pll = tl.getPatternLogLikelihoods();
 	    			for (int j = 0; j < pll.length; j++) {
 	    				patterLogProbs[i++][k] = pll[j];
 	    			}
+	    		} else if (d instanceof ThreadedTreeLikelihood) {
+	    			ThreadedTreeLikelihood tl = (ThreadedTreeLikelihood) d;
+	    			lastLikelihood  = tl.getCurrentLogP();
+	    			double [] pll = tl.getPatternLogLikelihoods();
+	    			for (int j = 0; j < pll.length; j++) {
+	    				patterLogProbs[i++][k] = pll[j];
+	    			}
 	    		}
+
 	    	}
 					
 			while (reported - k < 0) {
