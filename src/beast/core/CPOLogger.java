@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import beast.core.Input.Validate;
+import beast.core.parameter.RealParameter;
 import beast.core.util.CompoundDistribution;
 import beast.evolution.likelihood.GenericTreeLikelihood;
 import beast.evolution.likelihood.ThreadedTreeLikelihood;
@@ -26,7 +27,11 @@ public class CPOLogger extends Logger {
 	
 	@Override
 	public void initAndValidate() {
+		RealParameter p = new RealParameter("1.0");
+		p.setID("dummy");
+		loggersInput.setValue(p, this);
 		super.initAndValidate();
+		loggersInput.get().clear();
 		
 		likelihoods = new ArrayList<>();
 		CompoundDistribution likelihood = likelihoodInput.get();
@@ -97,9 +102,11 @@ public class CPOLogger extends Logger {
         		double [] logPs = null;
             	if (d instanceof TreeLikelihood) {
             		TreeLikelihood tl = (TreeLikelihood) d;
+            		tl.calculateLogP();
             		logPs = tl.getPatternLogLikelihoods();
             	} else {
             		ThreadedTreeLikelihood tl = (ThreadedTreeLikelihood) d;
+            		tl.calculateLogP();
                 	logPs = tl.getPatternLogLikelihoods();
             	}
         		for (double f : logPs) {
@@ -117,4 +124,17 @@ public class CPOLogger extends Logger {
 
 	        m_out.println(logContent);
 	    } // log
+	
+	@Override
+	public void close() {
+		super.close();
+
+//		CPOAnalyser analyser = new CPOAnalyser();
+//		analyser.cpoLogFileInput.setValue(fileNameInput.get(), analyser);
+//		try {
+//			analyser.run();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+	}
 } // CPOLogger

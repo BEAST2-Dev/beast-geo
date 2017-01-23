@@ -1,3 +1,4 @@
+package beast.core;
 
 
 
@@ -17,7 +18,6 @@ import beast.app.util.LogFile;
 import beast.app.util.TreeFile;
 import beast.app.util.XMLFile;
 import beast.core.BEASTInterface;
-import beast.core.CPOLogger;
 import beast.core.Description;
 import beast.core.Distribution;
 import beast.core.Input;
@@ -58,6 +58,9 @@ public class CPOAnalyser extends Runnable {
 
 	double EPSILON = 1e-6; // may need an input for this
 	
+	
+	public CPOAnalyser() {}
+	
 	@Override
 	public void initAndValidate() {
 	}
@@ -79,7 +82,7 @@ public class CPOAnalyser extends Runnable {
 			cpoTable = getCPOTableFromCPOLog(cpoLogFileInput.get());
 		}
 		
-		double [][] patterLogProbs = cpoTable.patterLogProbs;
+		double [][] patterLogProbs = cpoTable.patternLogProbs;
 		int [] weights = cpoTable.patternWeights;
 		int patternCount = patterLogProbs.length;
 		int treeCount = patterLogProbs[0].length;
@@ -117,23 +120,25 @@ public class CPOAnalyser extends Runnable {
     			siteMap[k++] = i;
     		}
     	}
-    	int reported = 0;
+    	double reported = 0;
     	int replicates = bootstrapLengthInput.get();
+    	Log.warning.println(replicates + " replicates");
     	k = 0;
+    	//Randomizer.setSeed(1237);
     	double [] LPMLs = new double[replicates];
     	while (k < replicates) {
         	// calc CPO from subsample of siteProbs array
 			order = Randomizer.sampleIndicesWithReplacement(treeCount);
     		LPMLs[k] = calcLPML(order, minLogP, cpoTable);
     		
-			while (reported - k < 0) {
+			while (reported < k) {
 				Log.warning.print("*");
-				reported += 1 + replicates / 80;
+				reported += replicates / 80;
 			}
 			k++;		
 		}
-    	
-        // Summarise 
+
+    	// Summarise 
     	double mean = 0;
         for (int i = 0; i < replicates; i++) {
             mean += LPMLs[i];
@@ -221,9 +226,9 @@ public class CPOAnalyser extends Runnable {
     	}
     	
     	CPOTable cpoTable = new CPOTable();
-    	cpoTable.patterLogProbs = new double[patternCount][treeSet.size()];
+    	cpoTable.patternLogProbs = new double[patternCount][treeSet.size()];
     	cpoTable.patternWeights = new int[patternCount];
-    	double [][] patterLogProbs = cpoTable.patterLogProbs;
+    	double [][] patterLogProbs = cpoTable.patternLogProbs;
     	int k = 0;
     	for (Distribution d : likelihood.pDistributions.get()) {
     		if (d instanceof GenericTreeLikelihood) {
@@ -464,7 +469,7 @@ public class CPOAnalyser extends Runnable {
 	}
 	
 	class CPOTable {
-		double [][] patterLogProbs;
+		double [][] patternLogProbs;
 		int [] patternWeights;
 		
 		
@@ -473,15 +478,15 @@ public class CPOAnalyser extends Runnable {
 		// and the remainder a standard BEAST log file
 		void readFromCPOLog(File file) throws IOException {
 			LogAnalyser cpoLog = new LogAnalyser(file.getAbsolutePath(), burninInput.get(), false, false);
-			patterLogProbs = new double [cpoLog.getLabels().size()][cpoLog.getTrace(0).length];
-			for (int i = 0; i < patterLogProbs.length; i++) {
-				Double [] d = cpoLog.getTrace(i);
+			patternLogProbs = new double [cpoLog.getLabels().size()][cpoLog.getTrace(0).length];
+			for (int i = 0; i < patternLogProbs.length; i++) {
+				Double [] d = cpoLog.getTrace(i + 1);
 				for (int j = 0; j < d.length; j++) {
-					patterLogProbs[i][j] = d[j];
+					patternLogProbs[i][j] = d[j];
 				}
 			}
 			
-			patternWeights = new int[patterLogProbs.length];
+			patternWeights = new int[patternLogProbs.length];
 	        BufferedReader fin = new BufferedReader(new FileReader(file));
 	        String str = fin.readLine();
         	fin.close();
@@ -493,12 +498,40 @@ public class CPOAnalyser extends Runnable {
 	        	patternWeights[i] = Integer.parseInt(strs[i+1]);
 	        }
 	    }
+		
+		@Override
+		public boolean equals(Object o) {
+			if (!(o instanceof CPOTable)) {
+				return false;
+			}
+			CPOTable table2 = (CPOTable) o;
+			if (patternWeights.length != table2.patternWeights.length) {
+				return false;
+			}
+			for (int i = 0; i < patternWeights.length; i++) {
+				if (patternWeights[i] != table2.patternWeights[i]) {
+					return false;
+				}
+			}
+			if (patternLogProbs.length != table2.patternLogProbs.length ||
+				patternLogProbs[0].length != table2.patternLogProbs[0].length) {
+				return false;
+			}
+			for (int i = 0; i < patternLogProbs.length; i++) {
+				for (int j = 0; j < patternLogProbs[0].length; j++) {
+					if (Math.abs(patternLogProbs[i][j] - table2.patternLogProbs[i][j]) > 1e-10) {
+						return false;
+					}
+ 				}
+			}
+			return true;
+		}
 	}
 	
 	
 	
 	private double calcLPML(int [] order, double[] minLogP, CPOTable cpoTable) {
-		double [][] patterLogProbs = cpoTable.patterLogProbs;
+		double [][] patterLogProbs = cpoTable.patternLogProbs;
 		int patternCount = patterLogProbs.length;
 		int treeSetSize = patterLogProbs[0].length;
 		int [] patternWeights = cpoTable.patternWeights;
