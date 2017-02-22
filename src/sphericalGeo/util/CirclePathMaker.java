@@ -1,8 +1,11 @@
 package sphericalGeo.util;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import sphericalGeo.GreatCircleDistance;
@@ -13,6 +16,7 @@ import beast.core.util.Log;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.NexusParser;
+import beast.util.TreeParser;
 
 @Description("Takes a summary tree and insert single child nodes with locations following "
 		+ "the shortes path on a sphere.")
@@ -34,7 +38,18 @@ public class CirclePathMaker extends BEASTObject {
 			parseArgs(args);
 			NexusParser parser = new NexusParser();
 			if (treeFile != null) {
-				parser.parseFile(new File(treeFile));
+		        BufferedReader fin = new BufferedReader(new FileReader(new File(treeFile)));
+		        String str = null;
+		        str = fin.readLine();
+		        fin.close();
+		        if (str.toLowerCase().startsWith("#nexus")) {
+		        	parser.parseFile(new File(treeFile));
+		        } else {
+		        	TreeParser tp = new TreeParser(str);
+		        	trees = new ArrayList<>();
+		        	trees.add(tp);
+		        	return;
+		        }
 			} else {
 				parser.parseFile("x", new InputStreamReader(System.in));
 			}
@@ -43,6 +58,7 @@ public class CirclePathMaker extends BEASTObject {
 				throw new Exception("no trees found in file");
 			}
 		} catch (Exception e) {
+			
 			e.printStackTrace();
 			printUsageAndExit();
 		}
@@ -90,7 +106,7 @@ public class CirclePathMaker extends BEASTObject {
 	private void printUsageAndExit() {
 		System.out.println("CirclePathMaker [args]");
 		System.out.println(getDescription()); 
-		System.out.println("-tree <nexus file> nexus file containing summary tree to be annotated (default stdin)");
+		System.out.println("-tree <nexus/newick file> nexus file containing summary tree to be annotated (default nexus from stdin)");
 		System.out.println("-out <tree file> where to save results (default to stdout)");
 		System.out.println("-minarc <number> minimum arc in degrees to be split (default " + MIN_ARC + ")");
 		System.out.println("-name <name> name of the attribute storing the location info (default " + LOCATION_NAME + ")");
