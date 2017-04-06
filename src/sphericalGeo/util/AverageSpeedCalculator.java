@@ -3,7 +3,10 @@ package sphericalGeo.util;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,6 +15,7 @@ import beast.app.beauti.BeautiConfig;
 import beast.app.beauti.BeautiDoc;
 import beast.app.draw.BEASTObjectDialog;
 import beast.app.draw.BEASTObjectPanel;
+import beast.app.treeannotator.TreeAnnotator;
 import beast.app.util.Application;
 import beast.core.Description;
 import beast.core.Input;
@@ -84,17 +88,19 @@ public class AverageSpeedCalculator extends Runnable  {
 		}
 		
 		// get trees
-		TreeSet treeset = new MemoryFriendlyTreeSet(treesetInput.get().getPath(), burnIn);
+		TreeAnnotator.TreeSet treeset = new TreeAnnotator().new MemoryFriendlyTreeSet(treesetInput.get().getPath(), burnIn);
 		treeset.reset();
 		
 		double sum = 0;
 		
 		int k = 0;
+		List<Double> speeds = new ArrayList<>();
 		while (treeset.hasNext()) {
 			Tree tree = treeset.next();
 			sumOfTime = 0;
 			sumOfDistance = 0;
 			calcSpeed(tree.getRoot());
+			speeds.add(sumOfDistance / sumOfTime);
 			sum += sumOfDistance / sumOfTime;
 			k++;
 			if (k % 100 == 0) {Log.warning.print('.');}
@@ -102,7 +108,11 @@ public class AverageSpeedCalculator extends Runnable  {
 		}
 		Log.warning.println();
 		sum /= k;
-		Log.info.println("Average displacement is " + sum + " km per unit of time in the trees");
+		
+		Collections.sort(speeds);
+		double lo = speeds.get((int)(speeds.size() * 2.5/100));
+		double hi = speeds.get((int)(speeds.size() * 97.5/100));
+		Log.info.println("Average displacement is " + sum + " km per unit of time in the trees (" + lo + "," + hi+")");
 
 		double maxHeight = 0;
 		treeset.reset();
