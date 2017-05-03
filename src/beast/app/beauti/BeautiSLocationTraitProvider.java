@@ -1,7 +1,10 @@
 package beast.app.beauti;
 
 import java.awt.Frame;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,8 +12,10 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.border.EmptyBorder;
 
+import sphericalGeo.AlignmentFromTraitMap;
 import sphericalGeo.ApproxMultivariateTraitLikelihood;
 import sphericalGeo.TraitFunction;
+import sphericalGeo.TreeTraitMap;
 import beast.app.beauti.BeautiAlignmentProvider;
 import beast.app.beauti.BeautiDoc;
 import beast.app.beauti.PartitionContext;
@@ -69,6 +74,42 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
         return null;
 	}
 	
+	@Override
+	public List<BEASTInterface> getAlignments(BeautiDoc doc, File[] files, String[] args) {
+		String name = args[0];
+		String tree = args[1];
+    	PartitionContext context = new PartitionContext(name, name, name, tree);
+
+    	Alignment alignment = (Alignment) doc.addAlignmentWithSubnet(context, template.get());
+    	List<BEASTInterface> list = new ArrayList<>();
+    	list.add(alignment);
+
+		AlignmentFromTraitMap traitData = (AlignmentFromTraitMap) alignment;
+		try {
+	        BufferedReader fin = new BufferedReader(new FileReader(files[0]));
+	        StringBuffer buf = new StringBuffer();
+	        // do not eat up header -- it might contain a useful entry, 
+	        // but if not, it will not hurt
+	        // fin.readLine();
+	        // process data
+	        while (fin.ready()) {
+	            String str = fin.readLine();
+	            str = str.replaceFirst("\t", "=") + ",";
+	            // only add entries that are non-empty
+	            if (str.indexOf("=") > 0 && !str.matches("^\\s+=.*$")) {
+	                buf.append(str);
+	            }
+	        }
+	        fin.close();
+	        TreeTraitMap trait = traitData.traitInput.get();
+	        trait.value.setValue(buf.toString().trim(), trait);
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage());
+		}
+
+    	return list;
+	}
 	
 	protected List<BEASTInterface> getTree(BeautiDoc doc) {
 		try {
