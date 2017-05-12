@@ -259,6 +259,7 @@ public class Cartogram extends SwingWorker implements Serializable
 	 * The construct method is an overriden method from
 	 * SwingWorker which does initiate the computation process.
 	 */
+	@Override
 	public Object construct()
 	{
 	
@@ -301,7 +302,7 @@ public class Cartogram extends SwingWorker implements Serializable
 				double gastnerGridSizeDbl = Math.pow(2, gastnerGridPower);
 				gastnerGridSize = (int)gastnerGridSizeDbl;
 			
-				double gastnerLoopsDbl = (double)mAmountOfDeformation / 25.0;
+				double gastnerLoopsDbl = mAmountOfDeformation / 25.0;
 				gastnerLoopsDbl = Math.floor(gastnerLoopsDbl);
 				gastnerLoops = (int)gastnerLoopsDbl + 1;
 				if (gastnerLoops < 1) gastnerLoops = 1;
@@ -574,6 +575,7 @@ public class Cartogram extends SwingWorker implements Serializable
 	 * It terminates the computation, adds all layers and produces the
 	 * computation report.
 	 */
+	@Override
 	public void finished ()
 	{
 	
@@ -1084,8 +1086,8 @@ public class Cartogram extends SwingWorker implements Serializable
 		// Compute the deformation grid size in x and y direction.
 		
 		double resolution = 
-			Math.max((env.getWidth() / (double)(mGridLayerSize + 1)), 
-					 (env.getHeight() / (double)(mGridLayerSize + 1)));
+			Math.max((env.getWidth() / (mGridLayerSize + 1)), 
+					 (env.getHeight() / (mGridLayerSize + 1)));
 					 
 		int sizeX = 
 			(int)Math.round(Math.floor(env.getWidth() / resolution)) - 1;
@@ -1138,7 +1140,7 @@ public class Cartogram extends SwingWorker implements Serializable
 				feat.setGeometry(ls);
 			
 				// Add the other attributes.
-				Integer idobj = new Integer((int)i);
+				Integer idobj = new Integer(i);
 				feat.setAttribute("ID", idobj);
 				i++;
 			
@@ -1173,7 +1175,7 @@ public class Cartogram extends SwingWorker implements Serializable
 				feat.setGeometry(ls);
 			
 				// Add the other attributes.
-				Integer idobj = new Integer((int)i);
+				Integer idobj = new Integer(i);
 				feat.setAttribute("ID", idobj);
 				i++;
 			
@@ -1471,7 +1473,7 @@ public class Cartogram extends SwingWorker implements Serializable
 	
 		
 		double percFeaturesInStdDev = 
-			(double)nFeaturesInStdDev / (double)nFeatures * (double)100;
+			(double)nFeaturesInStdDev / (double)nFeatures * 100;
 		
 		int pfint = (int)Math.round(percFeaturesInStdDev);
 			
@@ -1540,7 +1542,7 @@ public class Cartogram extends SwingWorker implements Serializable
 		if (layer == null) return defaultValue;
 		
 		int nfeat = layer.getFeatureCollectionWrapper().getFeatures().size();
-		double featuresPerEdge = Math.sqrt((double)nfeat);
+		double featuresPerEdge = Math.sqrt(nfeat);
 		
 		
 		

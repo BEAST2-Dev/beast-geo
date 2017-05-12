@@ -23,8 +23,6 @@
 
 package sphericalGeo.scapetoad.gui;
 
-import java.awt.Color;
-import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.FileDialog;
 import java.awt.Font;
@@ -43,7 +41,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -66,6 +63,7 @@ import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -84,16 +82,12 @@ import javax.swing.event.HyperlinkListener;
 
 import sphericalGeo.scapetoad.StatusTracker;
 import sphericalGeo.scapetoad.core.Cartogram;
-import sphericalGeo.scapetoad.core.SizeErrorStyle;
-
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jump.feature.AttributeType;
 import com.vividsolutions.jump.feature.Feature;
 import com.vividsolutions.jump.feature.FeatureCollectionWrapper;
 import com.vividsolutions.jump.feature.FeatureSchema;
 import com.vividsolutions.jump.workbench.model.Layer;
-import com.vividsolutions.jump.workbench.model.LayerManager;
-import com.vividsolutions.jump.workbench.ui.renderer.style.BasicStyle;
 
 
 
@@ -459,6 +453,7 @@ public class CartogramWizard extends JFrame implements StatusTracker
 	/**
 	 * Shows the finished panel.
 	 */
+	@Override
 	public void goToFinishedPanel ()
 	{
 		AppContext.sizeErrorLegend.setVisible(true);
@@ -597,12 +592,14 @@ public class CartogramWizard extends JFrame implements StatusTracker
 	 * @param label1 the progress main message.
 	 * @param label2 the progress secondary message.
 	 */
+	@Override
 	public void updateRunningStatus 
 		(final int progress, final String label1, final String label2)
 	{
 		
 		Runnable doSetRunningStatus = new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				mRunningPanel.updateProgressBar(progress);
@@ -621,6 +618,7 @@ public class CartogramWizard extends JFrame implements StatusTracker
 	/**
 	 * Returns the list of simultaneous layers.
 	 */
+	@Override
 	public Vector getSimultaneousLayers ()
 	{
 		return mSimultaneousLayers;
@@ -660,6 +658,7 @@ public class CartogramWizard extends JFrame implements StatusTracker
 	/**
 	 * Returns the list of constrained deformation layers.
 	 */
+	@Override
 	public Vector getConstrainedDeformationLayers ()
 	{
 		return mConstrainedDeformationLayers;
@@ -827,6 +826,7 @@ public class CartogramWizard extends JFrame implements StatusTracker
 	/**
 	 * Sets a cartogram computation error message for the user.
 	 */
+	@Override
 	public void setComputationError (
 		String title, String message, String stackTrace)
 	{
@@ -1155,8 +1155,8 @@ class CartogramWizardPanelZero extends JPanel implements HyperlinkListener
 		JButton helpButton = 
 			new JButton(helpIcon);
 		
-		helpButton.setVerticalTextPosition(AbstractButton.BOTTOM);
-		helpButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		helpButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+		helpButton.setHorizontalTextPosition(SwingConstants.CENTER);
 		helpButton.setSize(30, 30);
 		helpButton.setLocation(0, 312);
 		helpButton.setFocusable(false);
@@ -1175,6 +1175,7 @@ class CartogramWizardPanelZero extends JPanel implements HyperlinkListener
 
 
 
+	@Override
 	public void hyperlinkUpdate (HyperlinkEvent e)
 	{
 		try
@@ -1388,8 +1389,8 @@ class CartogramWizardPanelOne extends JPanel
 		JButton helpButton = 
 			new JButton(helpIcon);
 		
-		helpButton.setVerticalTextPosition(AbstractButton.BOTTOM);
-		helpButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		helpButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+		helpButton.setHorizontalTextPosition(SwingConstants.CENTER);
 		helpButton.setSize(30, 30);
 		helpButton.setLocation(0, 312);
 		helpButton.setFocusable(false);
@@ -1415,6 +1416,7 @@ class CartogramWizardPanelOne extends JPanel
 	 * This is an overriden method from its super class. Once the
 	 * job done, we call the super class' setVisible method.
 	 */
+	@Override
 	public void setVisible (boolean visible)
 	{
 	
@@ -1767,8 +1769,8 @@ class CartogramWizardPanelTwo extends JPanel implements HyperlinkListener
 		JButton helpButton = 
 			new JButton(helpIcon);
 		
-		helpButton.setVerticalTextPosition(AbstractButton.BOTTOM);
-		helpButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		helpButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+		helpButton.setHorizontalTextPosition(SwingConstants.CENTER);
 		helpButton.setSize(30, 30);
 		helpButton.setLocation(0, 312);
 		helpButton.setFocusable(false);
@@ -1788,6 +1790,7 @@ class CartogramWizardPanelTwo extends JPanel implements HyperlinkListener
 
 
 	
+	@Override
 	public void setVisible(boolean visible)
 	{
 		if (visible)
@@ -1882,6 +1885,7 @@ class CartogramWizardPanelTwo extends JPanel implements HyperlinkListener
 
 
 
+	@Override
 	public void hyperlinkUpdate (HyperlinkEvent e)
 	{
 		try
@@ -2091,8 +2095,8 @@ class CartogramWizardPanelThree extends JPanel
 		JButton helpButton = 
 			new JButton(helpIcon);
 		
-		helpButton.setVerticalTextPosition(AbstractButton.BOTTOM);
-		helpButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		helpButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+		helpButton.setHorizontalTextPosition(SwingConstants.CENTER);
 		helpButton.setSize(30, 30);
 		helpButton.setLocation(0, 312);
 		helpButton.setFocusable(false);
@@ -2156,7 +2160,7 @@ class CartogramWizardPanelFour extends JPanel
 
 		// Add the slider for the amount of deformation.
 		Font smallFont = new Font(null, Font.PLAIN, 11);
-		mDeformationSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
+		mDeformationSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 50);
 		mDeformationSlider.setMajorTickSpacing(25);
 		mDeformationSlider.setMinorTickSpacing(5);
 		mDeformationSlider.setPaintTicks(true);
@@ -2301,8 +2305,8 @@ class CartogramWizardPanelFour extends JPanel
 		JButton helpButton = 
 			new JButton(helpIcon);
 		
-		helpButton.setVerticalTextPosition(AbstractButton.BOTTOM);
-		helpButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		helpButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+		helpButton.setHorizontalTextPosition(SwingConstants.CENTER);
 		helpButton.setSize(30, 30);
 		helpButton.setLocation(0, 312);
 		helpButton.setFocusable(false);
@@ -2327,6 +2331,7 @@ class CartogramWizardPanelFour extends JPanel
 	 * If the panel is shown, update the layer list before displaying
 	 * the panel.
 	 */
+	@Override
 	public void setVisible (boolean visible)
 	{
 		if (visible)
@@ -2338,7 +2343,7 @@ class CartogramWizardPanelFour extends JPanel
 		{
 			// Update the amount of deformation.
 			mCartogramWizard.setAmountOfDeformation(
-				(int)mDeformationSlider.getValue());
+				mDeformationSlider.getValue());
 				
 		}
 		
@@ -2569,8 +2574,8 @@ class CartogramWizardFinishedPanel extends JPanel
 		ImageIcon helpIcon = new ImageIcon(imageURL);
 
 		mHelpButton = new JButton(helpIcon);
-		mHelpButton.setVerticalTextPosition(AbstractButton.BOTTOM);
-		mHelpButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		mHelpButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+		mHelpButton.setHorizontalTextPosition(SwingConstants.CENTER);
 		mHelpButton.setSize(30, 30);
 		mHelpButton.setLocation(0, 312);
 		mHelpButton.setFocusable(false);
@@ -2600,6 +2605,7 @@ class CartogramWizardFinishedPanel extends JPanel
 	 * Adapts the finished panels according to the current
 	 * cartogram wizard settings (parameters and error message).
 	 */
+	@Override
 	public void setVisible (boolean visible)
 	{
 		
@@ -2756,6 +2762,7 @@ class CartogramWizardGoToStepAction extends AbstractAction
 	
 	
 	
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		mWizard.goToStep(mStep);
@@ -2777,6 +2784,7 @@ class CartogramWizardGoToStepAction extends AbstractAction
 class CartogramWizardCloseAction extends AbstractAction
 {
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		
@@ -2835,6 +2843,7 @@ class CartogramWizardComputeAction extends AbstractAction
 	/**
 	 * This method launches the cartogram computation process.
 	 */
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		
@@ -3048,7 +3057,7 @@ class CartogramWizardOptionsWindow extends JDialog
 		mGridSizeTextField.setLocation(240, 85);
 		mGridSizeTextField.setSize(50, 26);
 		mGridSizeTextField.setFont(new Font(null, Font.PLAIN, 11));
-		mGridSizeTextField.setHorizontalAlignment(JTextField.RIGHT);
+		mGridSizeTextField.setHorizontalAlignment(SwingConstants.RIGHT);
 		this.add(mGridSizeTextField);
 		
 		
@@ -3057,7 +3066,7 @@ class CartogramWizardOptionsWindow extends JDialog
 		
 		
 		// Separator
-		JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
+		JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
 		separator.setLocation(20, 120);
 		separator.setSize(460, 10);
 		this.add(separator);
@@ -3167,7 +3176,7 @@ class CartogramWizardOptionsWindow extends JDialog
 		mCartogramGridSizeTextField.setLocation(240, 270);
 		mCartogramGridSizeTextField.setSize(50, 26);
 		mCartogramGridSizeTextField.setFont(new Font(null, Font.PLAIN, 11));
-		mCartogramGridSizeTextField.setHorizontalAlignment(JTextField.RIGHT);
+		mCartogramGridSizeTextField.setHorizontalAlignment(SwingConstants.RIGHT);
 		mCartogramGridSizeTextField.setEnabled(
 			mAdvancedOptionsCheckBox.isSelected());
 		this.add(mCartogramGridSizeTextField);
@@ -3287,7 +3296,7 @@ class CartogramWizardOptionsWindow extends JDialog
 		mDiffusionIterationsTextField.setLocation(240, 450);
 		mDiffusionIterationsTextField.setSize(50, 26);
 		mDiffusionIterationsTextField.setFont(new Font(null, Font.PLAIN, 11));
-		mDiffusionIterationsTextField.setHorizontalAlignment(JTextField.RIGHT);
+		mDiffusionIterationsTextField.setHorizontalAlignment(SwingConstants.RIGHT);
 		mDiffusionIterationsTextField.setEnabled(
 			mAdvancedOptionsCheckBox.isSelected());
 		this.add(mDiffusionIterationsTextField);
@@ -3331,8 +3340,8 @@ class CartogramWizardOptionsWindow extends JDialog
 		JButton helpButton = 
 			new JButton(helpIcon);
 		
-		helpButton.setVerticalTextPosition(AbstractButton.BOTTOM);
-		helpButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		helpButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+		helpButton.setHorizontalTextPosition(SwingConstants.CENTER);
 		helpButton.setSize(30, 30);
 		helpButton.setLocation(20, 510);
 		helpButton.setFocusable(false);
@@ -3431,6 +3440,7 @@ class CartogramWizardOptionsWindow extends JDialog
 
 
 
+	@Override
 	public void hyperlinkUpdate (HyperlinkEvent e)
 	{
 		try
@@ -3459,6 +3469,7 @@ class CartogramWizardOptionsWindow extends JDialog
 	 * This method gets called on a state change of the advanced options
 	 * check box. It enables or disables the advanced options.
 	 */
+	@Override
 	public void stateChanged (ChangeEvent e)
 	{
 		boolean enabled = mAdvancedOptionsCheckBox.isSelected();
@@ -3516,6 +3527,7 @@ class CartogramWizardAdvancedOptionsAction extends AbstractAction
 	 * Method which performs this action; it creates and opens
 	 * the Advanced Options dialog.
 	 */
+	@Override
 	public void actionPerformed (ActionEvent e)
 	{
 	
@@ -3576,6 +3588,7 @@ class CartogramWizardShowURL extends AbstractAction
 	/**
 	 * Method which performs this action.
 	 */
+	@Override
 	public void actionPerformed (ActionEvent e)
 	{
 	
@@ -3614,6 +3627,7 @@ class CartogramWizardWindowListener implements WindowListener
 {
 
 
+	@Override
 	public void windowActivated (WindowEvent e)
 	{
 	}
@@ -3623,6 +3637,7 @@ class CartogramWizardWindowListener implements WindowListener
 	/**
 	 * Method invoked in response to a window close event.
 	 */
+	@Override
 	public void windowClosed (WindowEvent e)
 	{
 	}	// CartogramWizardWindowListener.windowClosed
@@ -3634,6 +3649,7 @@ class CartogramWizardWindowListener implements WindowListener
 	 * It creates a CartogramWizardCloseAction which is automatically
 	 * performed.
 	 */
+	@Override
 	public void windowClosing (WindowEvent e)
 	{
 		
@@ -3651,6 +3667,7 @@ class CartogramWizardWindowListener implements WindowListener
 	
 	
 	
+	@Override
 	public void windowDeactivated (WindowEvent e)
 	{
 	}
@@ -3658,6 +3675,7 @@ class CartogramWizardWindowListener implements WindowListener
 	
 	
 	
+	@Override
 	public void windowDeiconified (WindowEvent e)
 	{
 	}
@@ -3665,6 +3683,7 @@ class CartogramWizardWindowListener implements WindowListener
 	
 	
 	
+	@Override
 	public void windowIconified (WindowEvent e)
 	{
 	}
@@ -3672,6 +3691,7 @@ class CartogramWizardWindowListener implements WindowListener
 	
 	
 	
+	@Override
 	public void windowOpened (WindowEvent e)
 	{
 	}
@@ -3931,6 +3951,7 @@ class CartogramWizardSimulaneousLayerAction extends AbstractAction
 	/**
 	 * Method which performs the previously specified action.
 	 */
+	@Override
 	public void actionPerformed (ActionEvent e)
 	{
 	
@@ -4218,6 +4239,7 @@ class CartogramWizardConstrainedLayerAction extends AbstractAction
 	/**
 	 * Method which performs the previously specified action.
 	 */
+	@Override
 	public void actionPerformed (ActionEvent e)
 	{
 	
@@ -4266,12 +4288,13 @@ class CartogramWizardSaveReportAction extends AbstractAction
 	 * Shows a save dialog and writes the computation report to the
 	 * specified file.
 	 */
+	@Override
 	public void actionPerformed (ActionEvent e)
 	{
 	
 		// Create the File Save dialog.
 		FileDialog fd = new FileDialog(
-			(Frame)AppContext.cartogramWizard, 
+			AppContext.cartogramWizard, 
 			"Save Computation Report As...", 
 			FileDialog.SAVE);
 

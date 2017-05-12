@@ -44,6 +44,7 @@ public class ActionShowHelp extends AbstractAction
 	/**
 	 * Opens the browser and points it to the ScapeToad help web site.
 	 */
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		try

@@ -180,8 +180,10 @@ public class ApproxMultivariateTraitLikelihoodF2 extends ApproxMultivariateTrait
 	  private List<Integer> asList(final int[] is)
 	    {
 	            return new AbstractList<Integer>() {
-	                    public Integer get(int i) { return is[i]; }
-	                    public int size() { return is.length; }
+	                    @Override
+						public Integer get(int i) { return is[i]; }
+	                    @Override
+						public int size() { return is.length; }
 	            };
 	    }
 	

@@ -3,7 +3,6 @@ package sphericalGeo;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.NormalDistribution;
 import org.apache.commons.math.distribution.NormalDistributionImpl;
 

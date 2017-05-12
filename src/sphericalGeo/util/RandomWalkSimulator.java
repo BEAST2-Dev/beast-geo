@@ -13,6 +13,7 @@ import java.awt.event.MouseListener;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 
 //import com.itextpdf.awt.PdfGraphics2D;
 //import com.itextpdf.text.pdf.PdfContentByte;
@@ -241,7 +242,7 @@ public class RandomWalkSimulator extends JPanel implements MouseListener, KeyLis
 		frame.add(panel);
 		frame.addMouseListener(panel);
 		frame.addKeyListener(panel);
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		frame.setSize(1024,768);
 		frame.setVisible(true);
 

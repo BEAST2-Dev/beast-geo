@@ -36,13 +36,10 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jump.feature.AttributeType;
 import com.vividsolutions.jump.feature.BasicFeature;
 import com.vividsolutions.jump.feature.Feature;
-import com.vividsolutions.jump.feature.FeatureCollection;
-import com.vividsolutions.jump.feature.FeatureCollectionWrapper;
 import com.vividsolutions.jump.feature.FeatureDataset;
 import com.vividsolutions.jump.feature.FeatureSchema;
 import com.vividsolutions.jump.workbench.model.Layer;
@@ -701,9 +698,9 @@ public class CartogramGrid implements Serializable
 		
 		// If the distance to move is too big, we compute a new, closer
 		// location.
-		if (moveDistance > (mCellSizeX / (double)10))
+		if (moveDistance > (mCellSizeX / 10))
 		{
-			double newMoveDistance = mCellSizeX / (double)10;
+			double newMoveDistance = mCellSizeX / 10;
 			
 			double moveVectorX = x - mNodeX[i][j];
 			double moveVectorY = y - mNodeY[i][j];

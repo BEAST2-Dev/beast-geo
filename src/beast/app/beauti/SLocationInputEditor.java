@@ -534,7 +534,7 @@ public class SLocationInputEditor extends ListInputEditor {
 		if (transformer.weightIdentifiedInput.get() != null && transformer.weightIdentifiedInput.get().matches("^\\s*$")) {
 			transformer.weightIdentifiedInput.setValue(null, transformer);
 		}
-		File shapeFile = ((ScapeToadTransfomer) transformer).shapeFileInput.get();
+		File shapeFile = transformer.shapeFileInput.get();
 		if (shapeFile == null || shapeFile.getName().equals("[[none]]")) {
 			likelihood.transformerInput.setValue(null, likelihood);
 		}

@@ -32,7 +32,6 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jump.feature.AttributeType;
 import com.vividsolutions.jump.feature.Feature;
-import com.vividsolutions.jump.feature.FeatureCollection;
 import com.vividsolutions.jump.feature.FeatureCollectionWrapper;
 import com.vividsolutions.jump.feature.FeatureDataset;
 import com.vividsolutions.jump.feature.FeatureSchema;
@@ -171,7 +170,7 @@ public class CartogramLayer implements Serializable
 			nobj++;
 		}
 		
-		meanValue = meanValue / (double)nobj;
+		meanValue = meanValue / nobj;
 		
 		return meanValue;
 		
@@ -325,7 +324,7 @@ public class CartogramLayer implements Serializable
 		
 		if (n < 0) n = 0;
 		if (n > 100) n = 100;
-		double dblN = (double)n;
+		double dblN = n;
 		
 		// Create a new TreeSet and store the attribute values inside.
 		TreeSet set = new TreeSet();
@@ -344,7 +343,7 @@ public class CartogramLayer implements Serializable
 		Vector attrVector = new Vector(set);
 		
 		// Get the indexes of the bounding features.
-		double dblIndex = (double)n / (double)100 * (double)nfeat;
+		double dblIndex = (double)n / (double)100 * nfeat;
 		int lowerIndex = Math.round((float)Math.floor(dblIndex));
 		int upperIndex = Math.round((float)Math.ceil(dblIndex));
 		
@@ -354,10 +353,10 @@ public class CartogramLayer implements Serializable
 			return pval.doubleValue();
 		}
 		
-		double lowerPctl = (double)lowerIndex / (double)nfeat * (double)100;
+		double lowerPctl = (double)lowerIndex / (double)nfeat * 100;
 		Double lowerValueDbl = (Double)attrVector.get(lowerIndex);
 		double lowerValue = lowerValueDbl.doubleValue();
-		double upperPctl = (double)upperIndex / (double)nfeat * (double)100;
+		double upperPctl = (double)upperIndex / (double)nfeat * 100;
 		Double upperValueDbl = (Double)attrVector.get(upperIndex);
 		double upperValue = upperValueDbl.doubleValue();
 		

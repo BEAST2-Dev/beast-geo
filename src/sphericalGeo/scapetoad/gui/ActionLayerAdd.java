@@ -45,6 +45,7 @@ public class ActionLayerAdd extends AbstractAction
 	 * Shows an open dialog and adds the selected Shape file to
 	 * the layer manager.
 	 */
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		Layer lyr = IOManager.openShapefile();

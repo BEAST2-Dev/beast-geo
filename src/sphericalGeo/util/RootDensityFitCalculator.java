@@ -1,6 +1,8 @@
 package sphericalGeo.util;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,7 +22,7 @@ public class RootDensityFitCalculator extends Runnable  {
 	public Input<File> treesetInput = new Input<>("trees","file containing tree set annotated with locations", new File("data.trees"));
 	public Input<String> tagInput = new Input<>("tag","tag used in annotated of locations", "location");
 	public Input<Integer> burninInput = new Input<>("burnin","burn in percentage, default 10", 10);
-	public Input<File> kmlInput = new Input<>("kml","region as stored in KML file to be fitted", Validate.REQUIRED);
+	public Input<List<String>> kmlInput = new Input<>("kml","region as stored in KML file to be fitted", new ArrayList<>(), Validate.REQUIRED);
 	public Input<Double> lowerAgeInput = new Input<>("lower","lower bound of root age to be taken in account", Double.NEGATIVE_INFINITY);
 	public Input<Double> upperAgeInput = new Input<>("upper","upper bound of root age to be taken in account", Double.POSITIVE_INFINITY);
 
@@ -35,7 +37,9 @@ public class RootDensityFitCalculator extends Runnable  {
 	
 	@Override
 	public void run() throws Exception {
-		KMLRegion region = new KMLRegion(kmlInput.get().getPath());
+		for (String kmlFile : kmlInput.get()) {
+		
+		KMLRegion region = new KMLRegion(kmlFile);//.getPath());
 		double lowerAge = lowerAgeInput.get();
 		double upperAge = upperAgeInput.get();
 		
@@ -65,7 +69,7 @@ public class RootDensityFitCalculator extends Runnable  {
 		while (treeSet.hasNext()) {
 			Node root = treeSet.next().getRoot();
 			if (root.getHeight() > lowerAge && root.getHeight() <= upperAge) {
-				String location = (String) root.metaDataString;
+				String location = root.metaDataString;
 				double [] start = parseLoction(location);
 				if (region.isInside(start[0], start[1])) {
 					propFit++;
@@ -79,6 +83,7 @@ public class RootDensityFitCalculator extends Runnable  {
 		propFit /= treeSet.size();
 		unFit /= treeSet.size();
 		Log.info.println("Root location fits " + 100*propFit + "% of the time " + 100*unFit + "% misfit");
+		}
 	}
 	
 	private double[] parseLoction(String location) {

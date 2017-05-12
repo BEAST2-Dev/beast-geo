@@ -69,6 +69,7 @@ public class SizeErrorStyle implements Style
 
 
 
+	@Override
 	public Object clone()
 	{
 		return null;
@@ -76,12 +77,14 @@ public class SizeErrorStyle implements Style
 
 
 
+	@Override
 	public void initialize (Layer layer)
 	{
 	}
 
 
 
+	@Override
 	public boolean isEnabled ()
 	{
 		return _enabled;
@@ -89,6 +92,7 @@ public class SizeErrorStyle implements Style
 
 
 
+	@Override
 	public void paint (Feature f, Graphics2D g, Viewport viewport)
 		throws NoninvertibleTransformException
 	{
@@ -110,6 +114,7 @@ public class SizeErrorStyle implements Style
 
 
 
+	@Override
 	public void setEnabled (boolean enabled)
 	{
 		_enabled = enabled;

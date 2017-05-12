@@ -185,8 +185,8 @@ public class TreeToSVG extends SpeedAnnotator  {
 			Arrays.sort(nodes, (n1, n2) -> {return Double.compare(n1.getHeight(), n2.getHeight());});
 			for (Node node : nodes) {
 				if (!node.isRoot()) {
-					String parentLocation = (String) node.getParent().metaDataString;
-					String location = (String) node.metaDataString;
+					String parentLocation = node.getParent().metaDataString;
+					String location = node.metaDataString;
 					double [] start = parseLoction(parentLocation);
 					double [] end;
 					if (node.isLeaf() && node.metaDataString == null) {
@@ -225,7 +225,7 @@ public class TreeToSVG extends SpeedAnnotator  {
 						out.println("</g>");
 					}
 				} else {
-					String location = (String) node.metaDataString;
+					String location = node.metaDataString;
 					double [] start = parseLoction(location);
 					out.println("<circle cx=\"" + (start[1]+180) +"\" cy=\"" + (90-start[0]) + "\" r=\"0.5\" stroke=\"#000000\" stroke-width=\"0.05\" fill=\"#ffff00\" />\n");
 				}
@@ -243,7 +243,7 @@ public class TreeToSVG extends SpeedAnnotator  {
 					}
 	
 					if (isMRCA && !isParentMRCA) {
-						String location = (String) node.metaDataString;
+						String location = node.metaDataString;
 						double [] start = parseLoction(location);
 						double x = start[1] + 180;
 						double y = 90 - start[0]; 

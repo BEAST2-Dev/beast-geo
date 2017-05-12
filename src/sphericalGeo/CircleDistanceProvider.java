@@ -26,6 +26,7 @@ public class CircleDistanceProvider extends BEASTObject implements DistanceProvi
 			this.ename = name;
 		}
 
+		@Override
 		public String toString() {
 			return ename;
 		}

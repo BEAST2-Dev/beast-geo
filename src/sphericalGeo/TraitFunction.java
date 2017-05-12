@@ -3,9 +3,6 @@ package sphericalGeo;
 
 
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;

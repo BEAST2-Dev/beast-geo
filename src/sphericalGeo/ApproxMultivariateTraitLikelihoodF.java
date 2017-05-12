@@ -822,6 +822,7 @@ public class ApproxMultivariateTraitLikelihoodF extends GenericTreeLikelihood im
 	}
 
 	/** return randomized position **/
+	@Override
 	public double[] getPosition(int iDim) {
 		if (!logAverage) {
 			return loggerLikelihood.getPosition(iDim);

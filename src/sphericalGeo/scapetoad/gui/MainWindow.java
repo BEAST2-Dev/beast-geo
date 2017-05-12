@@ -48,6 +48,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.SwingConstants;
 
 import sphericalGeo.scapetoad.core.IOManager;
 
@@ -112,6 +113,7 @@ public class MainWindow extends JFrame
 	 * in the status bar.
 	 * @param message the message to display in the status bar.
 	 */
+	@Override
 	public void setStatusMessage (String message)
 	{
 	}
@@ -123,6 +125,7 @@ public class MainWindow extends JFrame
 	 * Notifies the user in an alert box about a minor issue.
 	 * @param warning the warning message to display.
 	 */
+	@Override
 	public void warnUser (String warning)
 	{
 	}
@@ -133,6 +136,7 @@ public class MainWindow extends JFrame
 	/**
 	 * Handles an exception.
 	 */
+	@Override
 	public void handleThrowable (Throwable t)
 	{
 		if (AppContext.DEBUG) t.printStackTrace();
@@ -401,8 +405,8 @@ class MainToolbar extends JPanel
 		JButton fullExtentButton = 
 			new JButton("Full extent", fullExtentIcon);
 		
-		fullExtentButton.setVerticalTextPosition(AbstractButton.BOTTOM);
-		fullExtentButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		fullExtentButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+		fullExtentButton.setHorizontalTextPosition(SwingConstants.CENTER);
 		fullExtentButton.setSize(53, 53);
 		fullExtentButton.setFocusable(false);
 		fullExtentButton.setContentAreaFilled(false);
@@ -420,8 +424,8 @@ class MainToolbar extends JPanel
 		JButton addLayerButton = 
 			new JButton("Add layer", addLayerIcon);
 		
-		addLayerButton.setVerticalTextPosition(AbstractButton.BOTTOM);
-		addLayerButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		addLayerButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+		addLayerButton.setHorizontalTextPosition(SwingConstants.CENTER);
 		addLayerButton.setSize(53, 53);
 		addLayerButton.setFocusable(false);
 		addLayerButton.setContentAreaFilled(false);
@@ -440,8 +444,8 @@ class MainToolbar extends JPanel
 		JButton createCartogramButton = 
 			new JButton("Create cartogram", createCartogramIcon);
 		
-		createCartogramButton.setVerticalTextPosition(AbstractButton.BOTTOM);
-		createCartogramButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		createCartogramButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+		createCartogramButton.setHorizontalTextPosition(SwingConstants.CENTER);
 		createCartogramButton.setSize(53, 53);
 		createCartogramButton.setFocusable(false);
 		createCartogramButton.setContentAreaFilled(false);
@@ -460,8 +464,8 @@ class MainToolbar extends JPanel
 		JButton svgButton = 
 			new JButton("Export to SVG", svgIcon);
 		
-		svgButton.setVerticalTextPosition(AbstractButton.BOTTOM);
-		svgButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		svgButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+		svgButton.setHorizontalTextPosition(SwingConstants.CENTER);
 		svgButton.setSize(53, 53);
 		svgButton.setFocusable(false);
 		svgButton.setContentAreaFilled(false);
@@ -480,8 +484,8 @@ class MainToolbar extends JPanel
 		JButton shpButton = 
 			new JButton("Export to Shape", shpIcon);
 		
-		shpButton.setVerticalTextPosition(AbstractButton.BOTTOM);
-		shpButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		shpButton.setVerticalTextPosition(SwingConstants.BOTTOM);
+		shpButton.setHorizontalTextPosition(SwingConstants.CENTER);
 		shpButton.setSize(53, 53);
 		shpButton.setFocusable(false);
 		shpButton.setContentAreaFilled(false);
@@ -514,6 +518,7 @@ class ActionZoomToFullExtent extends AbstractAction
 	
 	private static final long serialVersionUID = 1L;
 	
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		
@@ -543,6 +548,7 @@ class ActionCreateCartogram extends AbstractAction
 
 	private static final long serialVersionUID = 1L;
 
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		
@@ -721,6 +727,7 @@ class ExportShapeFileDialogAction extends AbstractAction
 	/**
 	 * Method which performs the previously specified action.
 	 */
+	@Override
 	public void actionPerformed (ActionEvent e)
 	{
 		
@@ -970,6 +977,7 @@ class ExportSvgFileDialogAction extends AbstractAction
 	/**
 	 * Method which performs the previously specified action.
 	 */
+	@Override
 	public void actionPerformed (ActionEvent e)
 	{
 		

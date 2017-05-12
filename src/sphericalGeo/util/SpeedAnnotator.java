@@ -9,10 +9,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import beast.app.beauti.BeautiConfig;
-import beast.app.beauti.BeautiDoc;
-import beast.app.draw.BEASTObjectDialog;
-import beast.app.draw.BEASTObjectPanel;
 import beast.app.util.Application;
 import beast.app.util.OutFile;
 import beast.core.Description;
@@ -87,8 +83,8 @@ public class SpeedAnnotator extends Runnable  {
 			tree = treeset.next();
 			for (Node node : tree.getNodesAsArray()) {
 				if (!node.isRoot()) {
-					String parentLocation = (String) node.getParent().metaDataString;
-					String location = (String) node.metaDataString;
+					String parentLocation = node.getParent().metaDataString;
+					String location = node.metaDataString;
 					double [] start = parseLoction(parentLocation);
 					double [] end;
 					if (node.isLeaf() && node.metaDataString == null) {

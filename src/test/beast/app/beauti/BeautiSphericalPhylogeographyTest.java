@@ -148,6 +148,7 @@ public class BeautiSphericalPhylogeographyTest extends BeautiBase {
 			dialog.button("Guess latitude").click();
 
 			GenericTypeMatcher<JOptionPane> matcher = new GenericTypeMatcher<JOptionPane>(JOptionPane.class) {
+			@Override
 			protected boolean isMatching(JOptionPane optionPane) {
 				Component o = (Component) optionPane.getMessage();
 				while (o != null) {

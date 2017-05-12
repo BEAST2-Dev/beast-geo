@@ -24,8 +24,6 @@ package sphericalGeo.scapetoad.gui;
 
 
 import java.awt.geom.NoninvertibleTransformException;
-import java.util.Vector;
-
 import sphericalGeo.scapetoad.StatusTracker;
 
 import com.vividsolutions.jump.workbench.JUMPWorkbench;

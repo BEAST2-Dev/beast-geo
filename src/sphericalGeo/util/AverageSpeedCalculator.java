@@ -24,8 +24,6 @@ import beast.core.util.Log;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import sphericalGeo.GreatCircleDistance;
-import sphericalGeo.util.treeset.MemoryFriendlyTreeSet;
-import sphericalGeo.util.treeset.TreeSet;
 
 @Description("calculates average speed on a posterior set of trees from a phylogeographical analysis")
 public class AverageSpeedCalculator extends Runnable  {
@@ -129,8 +127,8 @@ public class AverageSpeedCalculator extends Runnable  {
 			Tree tree = treeset.next();
 			for (Node node : tree.getNodesAsArray()) {
 				if (!node.isRoot()) {
-					String parentLocation = (String) node.getParent().metaDataString;
-					String location = (String) node.metaDataString;
+					String parentLocation = node.getParent().metaDataString;
+					String location = node.metaDataString;
 					double [] start = parseLoction(parentLocation);
 					double [] end;
 					if (node.isLeaf() && node.metaDataString == null) {
@@ -170,8 +168,8 @@ public class AverageSpeedCalculator extends Runnable  {
 	private double calcSpeed(Node node) {
 		if (!node.isRoot()) {
 			sumOfTime += node.getLength();
-			String parentLocation = (String) node.getParent().metaDataString;
-			String location = (String) node.metaDataString;
+			String parentLocation = node.getParent().metaDataString;
+			String location = node.metaDataString;
 			double [] start = parseLoction(parentLocation);
 			double [] end;
 			if (node.isLeaf() && node.metaDataString == null) {

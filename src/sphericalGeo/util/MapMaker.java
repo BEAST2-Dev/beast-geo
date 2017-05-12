@@ -45,6 +45,7 @@ public class MapMaker extends Runnable {
 	public void initAndValidate() {
 	}
 	
+	@Override
 	public void run() throws Exception {
 		if (!kmlFileInput.get().exists()) {
 			throw new RuntimeException("kml file " + kmlFileInput.get().getPath() + "does not exist");

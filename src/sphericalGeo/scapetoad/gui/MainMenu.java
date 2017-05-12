@@ -25,16 +25,12 @@ package sphericalGeo.scapetoad.gui;
 
 
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
-
-import com.vividsolutions.jump.workbench.model.Layer;
 
 
 

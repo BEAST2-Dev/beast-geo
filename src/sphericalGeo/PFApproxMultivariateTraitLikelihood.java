@@ -690,6 +690,7 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood i
 		return true;
 	}
 
+	@Override
 	public double[] getPosition(int iDim) {
 		if (needsUpdate) {
 			try {

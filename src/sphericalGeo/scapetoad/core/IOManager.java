@@ -51,7 +51,6 @@ import com.vividsolutions.jump.feature.Feature;
 import com.vividsolutions.jump.feature.FeatureCollection;
 import com.vividsolutions.jump.feature.FeatureCollectionWrapper;
 import com.vividsolutions.jump.workbench.model.Layer;
-import com.vividsolutions.jump.workbench.ui.LayerViewPanel;
 import com.vividsolutions.jump.workbench.ui.renderer.style.LabelStyle;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -79,7 +78,7 @@ public class IOManager
 		
 			// Open dialog.
 			FileDialog fd = new FileDialog(
-				(Frame)AppContext.mainWindow, 
+				AppContext.mainWindow, 
 				"Add Layer...", 
 				FileDialog.LOAD);
 				
@@ -199,7 +198,7 @@ public class IOManager
 	{
 		// Create the File Save dialog.
 		FileDialog fd = new FileDialog(
-			(Frame)AppContext.mainWindow, 
+			AppContext.mainWindow, 
 			"Save Layer As...", 
 			FileDialog.SAVE);
 
@@ -266,7 +265,7 @@ public class IOManager
 	
 		// Create the File Save dialog.
 		FileDialog fd = new FileDialog(
-			(Frame)AppContext.mainWindow, 
+			AppContext.mainWindow, 
 			"Save Layer As...", 
 			FileDialog.SAVE);
 
@@ -389,7 +388,7 @@ public class IOManager
 				Color fillColor = layer.getBasicStyle().getFillColor();
 				Color strokeColor = layer.getBasicStyle().getLineColor();
 				int alpha = layer.getBasicStyle().getAlpha();
-				double opacity = (double)alpha / 255.0;
+				double opacity = alpha / 255.0;
 				
 			
 				// Output every Feature.
@@ -622,6 +621,7 @@ class ShapeFilenameFilter implements FilenameFilter
 	/**
 	 * This is the method used for filtering.
 	 */
+	@Override
 	public boolean accept (File dir, String name)
 	{
 	
@@ -649,6 +649,7 @@ class SVGFilenameFilter implements FilenameFilter
 	/**
 	 * This is the method used for filtering.
 	 */
+	@Override
 	public boolean accept (File dir, String name)
 	{
 	
@@ -759,6 +760,7 @@ class OpenLayerErrorDialogAction extends AbstractAction
 	/**
 	 * Method which performs the action.
 	 */
+	@Override
 	public void actionPerformed (ActionEvent e)
 	{
 		mDialog.setVisible(false);

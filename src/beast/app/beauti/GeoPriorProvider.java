@@ -386,7 +386,7 @@ public class GeoPriorProvider extends BEASTObjectInputEditor implements PriorPro
 		return "Geographical prior";
 	}
 	
-	//@Override
+	@Override
 	public boolean canProvidePrior(BeautiDoc doc) {
         for (BEASTInterface siteModel : doc.getPartitions("SiteModel")) {
         	String partition = BeautiDoc.parsePartition(siteModel.getID());

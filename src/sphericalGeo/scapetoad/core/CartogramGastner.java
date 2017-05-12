@@ -41,7 +41,6 @@ import org.apache.commons.math.MathException;
 
 import sphericalGeo.scapetoad.StatusTracker;
 import sphericalGeo.scapetoad.gui.AppContext;
-import sphericalGeo.scapetoad.gui.CartogramWizard;
 
 
 
@@ -624,10 +623,10 @@ public class CartogramGastner implements Serializable
 				double erfDenominator = Math.sqrt(2.0) * 
 					(this.SIGMA * Math.pow(this.SIGMAFAC, this.nblurs));
 					
-				double erfParam1 = this.erf((p + 0.5) / erfDenominator);
-				double erfParam2 = this.erf((p - 0.5) / erfDenominator);
-				double erfParam3 = this.erf((q + 0.5) / erfDenominator);
-				double erfParam4 = this.erf((q - 0.5) / erfDenominator);
+				double erfParam1 = CartogramGastner.erf((p + 0.5) / erfDenominator);
+				double erfParam2 = CartogramGastner.erf((p - 0.5) / erfDenominator);
+				double erfParam3 = CartogramGastner.erf((q + 0.5) / erfDenominator);
+				double erfParam4 = CartogramGastner.erf((q - 0.5) / erfDenominator);
 				
 				conv[0][i-1][j-1] = 0.5 * (erfParam1 - erfParam2) * 
 					(erfParam3 - erfParam4) / (this.lx * this.ly);

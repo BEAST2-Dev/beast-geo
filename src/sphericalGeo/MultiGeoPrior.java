@@ -12,7 +12,6 @@ import beast.core.Input;
 import beast.core.State;
 import beast.core.parameter.RealParameter;
 import beast.evolution.operators.MonoCladesMapping;
-import beast.evolution.tree.Node;
 import beast.math.distributions.MultiMonophyleticConstraint;
 
 /** adapted from MultiMRCAPrors by Joseph Heled **/

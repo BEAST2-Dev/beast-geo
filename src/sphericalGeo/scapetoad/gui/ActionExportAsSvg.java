@@ -40,6 +40,7 @@ public class ActionExportAsSvg extends AbstractAction
 	/**
 	 * This method is automatically called after a export as SVG event.
 	 */
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		this.doAction();
