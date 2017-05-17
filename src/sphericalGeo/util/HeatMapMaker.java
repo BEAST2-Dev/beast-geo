@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,6 +33,7 @@ import beast.math.distributions.MRCAPrior;
 import beast.util.NexusParser;
 import beast.util.Randomizer;
 import beast.util.XMLParser;
+import beast.util.XMLParserException;
 
 @Description("Creates heat map of locations with colour representing time")
 public class HeatMapMaker extends Runnable {
@@ -52,8 +54,8 @@ public class HeatMapMaker extends Runnable {
 	public Input<Integer> repeatsInput = new Input<>("repeats", "number of times a dot should be drasn", 1);
 	public Input<Boolean> rootOnlyInput = new Input<>("rootOnly", "only draw root locations and ignore the rest", false);
 	
-	public Input<XMLFile> xmlInput = new Input<>("xml", "If specified, the location of the MRCA of a clade is used (and the rootonly flag is ignored). "
-			+ "The xml file should contain a single TaxonSet in XML format.");
+	public Input<XMLFile> xmlInput = new Input<>("clade", "Name of XML file containing a single TaxonSet in BEAST XML format. "
+			+ "If specified, the location of the MRCA of a clade is used (and the rootonly flag is ignored).");
 	
 	BufferedImage image;
 
@@ -80,12 +82,7 @@ public class HeatMapMaker extends Runnable {
 	public void run() throws Exception {
 		long start = System.currentTimeMillis();
 		if (xmlInput.get() != null && !xmlInput.get().getName().equals("[[none]]")) {
-			XMLParser parser = new XMLParser();
-			String xml = BeautiDoc.load(xmlInput.get());
-			Object o = parser.parseBareFragment(xml, true);
-			if (o instanceof TaxonSet) {
-				taxonset = (TaxonSet) o;
-			}
+			taxonset = getTaxonSet(xmlInput.get());
 		}
 		
 		Graphics g = image.getGraphics();
@@ -243,6 +240,16 @@ public class HeatMapMaker extends Runnable {
 		long end = System.currentTimeMillis();
 		System.out.println(" done in " + (end - start) / 1000 + " seconds");
 		
+	}
+
+	static TaxonSet getTaxonSet(File xmlFile) throws IOException, XMLParserException {
+		XMLParser parser = new XMLParser();
+		String xml = BeautiDoc.load(xmlFile);
+		Object o = parser.parseBareFragment(xml, true);
+		if (o instanceof TaxonSet) {
+			return (TaxonSet) o;
+		}
+		return null;
 	}
 
 	private void collectDots(Node node, List<Dot> dots) {

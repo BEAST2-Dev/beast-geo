@@ -7,12 +7,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import beast.app.util.Application;
+import beast.app.util.XMLFile;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.util.Log;
+import beast.evolution.alignment.TaxonSet;
 import beast.evolution.tree.Node;
+import beast.evolution.tree.Tree;
+import beast.math.distributions.MRCAPrior;
 import sphericalGeo.region.KMLRegion;
+import sphericalGeo.util.HeatMapMaker.Dot;
 import sphericalGeo.util.treeset.MemoryFriendlyTreeSet;
 import sphericalGeo.util.treeset.TreeSet;
 import beast.core.Runnable;
@@ -26,9 +31,13 @@ public class RootDensityFitCalculator extends Runnable  {
 	public Input<Double> lowerAgeInput = new Input<>("lower","lower bound of root age to be taken in account", Double.NEGATIVE_INFINITY);
 	public Input<Double> upperAgeInput = new Input<>("upper","upper bound of root age to be taken in account", Double.POSITIVE_INFINITY);
 
+	public Input<XMLFile> xmlInput = new Input<>("clade", "Name of XML file containing a single TaxonSet in BEAST XML format. "
+			+ "If specified, the location of the MRCA of a clade is used (and the rootonly flag is ignored).");
+
 	Pattern pattern = Pattern.compile("([0-9\\.Ee-]+),.*=([0-9\\.Ee-]+)");
 	Pattern pattern2 = Pattern.compile(".*location=\\{([0-9\\.Ee-]+),([0-9\\.Ee-]+)\\}.*");
 
+	TaxonSet taxonset = null;
 	
 	
 	@Override
@@ -37,6 +46,10 @@ public class RootDensityFitCalculator extends Runnable  {
 	
 	@Override
 	public void run() throws Exception {
+		if (xmlInput.get() != null && !xmlInput.get().getName().equals("[[none]]")) {
+			taxonset = HeatMapMaker.getTaxonSet(xmlInput.get());
+		}
+
 		for (String kmlFile : kmlInput.get()) {
 		
 		KMLRegion region = new KMLRegion(kmlFile);//.getPath());
@@ -67,7 +80,15 @@ public class RootDensityFitCalculator extends Runnable  {
     	treeSet.reset();
 		double propFit = 0, unFit = 0;
 		while (treeSet.hasNext()) {
-			Node root = treeSet.next().getRoot();
+			Tree tree = treeSet.next();
+			Node root = tree.getRoot();
+			if (taxonset != null) {
+				MRCAPrior p = new MRCAPrior();
+				p.initByName("taxonset", taxonset, "tree", tree);
+				root = p.getCommonAncestor();
+			}
+
+			
 			if (root.getHeight() > lowerAge && root.getHeight() <= upperAge) {
 				String location = root.metaDataString;
 				double [] start = parseLoction(location);
