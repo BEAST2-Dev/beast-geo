@@ -21,13 +21,17 @@ import beast.app.util.Application;
 import beast.app.util.ConsoleApp;
 import beast.app.util.OutFile;
 import beast.app.util.Utils;
+import beast.app.util.XMLFile;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Runnable;
+import beast.evolution.alignment.TaxonSet;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
+import beast.math.distributions.MRCAPrior;
 import beast.util.NexusParser;
 import beast.util.Randomizer;
+import beast.util.XMLParser;
 
 @Description("Creates heat map of locations with colour representing time")
 public class HeatMapMaker extends Runnable {
@@ -48,6 +52,9 @@ public class HeatMapMaker extends Runnable {
 	public Input<Integer> repeatsInput = new Input<>("repeats", "number of times a dot should be drasn", 1);
 	public Input<Boolean> rootOnlyInput = new Input<>("rootOnly", "only draw root locations and ignore the rest", false);
 	
+	public Input<XMLFile> xmlInput = new Input<>("xml", "If specified, the location of the MRCA of a clade is used (and the rootonly flag is ignored). "
+			+ "The xml file should contain a single TaxonSet in XML format.");
+	
 	BufferedImage image;
 
 	double minLat = -90, maxLat = 90, minLong = -180, maxLong = 180;
@@ -57,6 +64,7 @@ public class HeatMapMaker extends Runnable {
 	String tag;
 	int repeats = 1;
 	boolean rootOnly;
+	TaxonSet taxonset = null;
 	
 	final static String DIR_SEPARATOR = (Utils.isWindows() ? "\\\\" : "/");
 	@Override
@@ -71,6 +79,15 @@ public class HeatMapMaker extends Runnable {
 	@Override
 	public void run() throws Exception {
 		long start = System.currentTimeMillis();
+		if (xmlInput.get() != null && !xmlInput.get().getName().equals("[[none]]")) {
+			XMLParser parser = new XMLParser();
+			String xml = BeautiDoc.load(xmlInput.get());
+			Object o = parser.parseBareFragment(xml, true);
+			if (o instanceof TaxonSet) {
+				taxonset = (TaxonSet) o;
+			}
+		}
+		
 		Graphics g = image.getGraphics();
 		int jitter = jitterInput.get();
 		repeats = repeatsInput.get();
@@ -136,7 +153,15 @@ public class HeatMapMaker extends Runnable {
 		System.out.println("|=========|=========|=========|=========|=========|=========|=========|=========|=========|=========|");
 		List<Dot> dots = new ArrayList<>();
 		for (Tree tree: trees) {
-			collectDots(tree.getRoot(),dots);
+			if (taxonset == null) {
+				collectDots(tree.getRoot(),dots);
+			} else {
+				MRCAPrior p = new MRCAPrior();
+				p.initByName("taxonset", taxonset, "tree", tree);
+				Node mrca = p.getCommonAncestor();
+				String meta =  mrca.metaDataString;
+				dots.add(new Dot(mrca.getHeight(), meta));
+			}
 		}
 		Collections.sort(dots, new Comparator<Dot>() {
 			@Override
