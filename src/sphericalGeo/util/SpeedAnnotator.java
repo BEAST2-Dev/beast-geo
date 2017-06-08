@@ -21,7 +21,7 @@ import sphericalGeo.GreatCircleDistance;
 import sphericalGeo.util.treeset.MemoryFriendlyTreeSet;
 import sphericalGeo.util.treeset.TreeSet;
 
-@Description("Annotates a set of trees with their speed on a branch -- requires geographical info in the input tree set")
+@Description("Annotates a set of trees with their speed and distance on a branch -- requires geographical info in the input tree set")
 public class SpeedAnnotator extends Runnable  {
 	public Input<File> treesetInput = new Input<>("trees","file containing tree set annotated with locations", new File("data.trees"));
 	public Input<String> tagInput = new Input<>("tag","tag used in annotated of locations", "location");
@@ -98,9 +98,10 @@ public class SpeedAnnotator extends Runnable  {
 					if (distance == 0) {
 						speed = 0;
 					}
-					node.metaDataString = "speed="+speed;				
+					//speed = Math.min(speed, 0.5);
+					node.metaDataString += ",speed="+speed + ",distance="+distance;
 				} else {
-					node.metaDataString = "speed=0.0";				
+					node.metaDataString += ",speed=0.0,distance=0.0";
 				}
 			}
             out.print("tree TREE" + k++ + " = ");
