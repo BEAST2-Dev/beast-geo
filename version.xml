@@ -11,4 +11,9 @@
               args=""
               icon="sphericalGeo/util/heatmapicon.png"
             />
+    <addonapp description="RootDensityFitCalculator"
+              class="sphericalGeo.util.RootDensityFitCalculator"
+              args=""
+              icon="sphericalGeo/util/heatmapicon.png"
+            />
 </addon>
