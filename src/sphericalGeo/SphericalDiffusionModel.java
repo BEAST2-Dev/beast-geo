@@ -66,7 +66,12 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base implements L
 		frequenciesInput.setRule(Validate.OPTIONAL);
 	}
 
-    RealParameter precision;
+    public SphericalDiffusionModel(Double precision) {
+		frequenciesInput.setRule(Validate.OPTIONAL);
+		initByName("precision", precision.toString());
+	}
+
+	RealParameter precision;
     boolean fast = false;
     double threshold;
 
