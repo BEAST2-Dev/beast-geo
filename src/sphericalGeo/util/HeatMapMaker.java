@@ -51,7 +51,7 @@ public class HeatMapMaker extends Runnable {
 	public Input<Double> brightnessInput = new Input<>("brightness","brightnessof colour for the dots ", 0.9);
 	public Input<Integer> jitterInput = new Input<>("jitter", "jitter applied to dot locations (in pixels)", 0);
 	public Input<File> maskInput = new Input<>("mask", "image file with a mask: dots will not be shown outside mask");//, new File("/Users/remco/data/map/World98b.png"));
-	public Input<Integer> repeatsInput = new Input<>("repeats", "number of times a dot should be drasn", 1);
+	public Input<Integer> repeatsInput = new Input<>("repeats", "number of times a dot should be drawn", 1);
 	public Input<Boolean> rootOnlyInput = new Input<>("rootOnly", "only draw root locations and ignore the rest", false);
 	
 	public Input<XMLFile> xmlInput = new Input<>("clade", "Name of XML file containing a single TaxonSet in BEAST XML format. "

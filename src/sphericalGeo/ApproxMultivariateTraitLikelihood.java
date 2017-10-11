@@ -826,6 +826,12 @@ public class ApproxMultivariateTraitLikelihood extends GenericTreeLikelihood imp
 	public double[] getPosition(int iDim) {
 		if (alwaysUpdateInput.get()) {
 			calculateLogP();
+			if (!logAverage) {
+				if (iDim == 0) {
+					loggerLikelihood.needsUpdate = true;
+				}
+				return loggerLikelihood.getPosition(iDim);
+			}
 			if (position[iDim][1] < longitudeThreshold) {
 				position[iDim][1] += 360;
 			}
