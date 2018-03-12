@@ -226,7 +226,7 @@ public class MultiGeoPrior extends MultiMonophyleticConstraint {
 	}
 	
 	@Override
-	public void log(int sample, PrintStream out) {
+	public void log(long sample, PrintStream out) {
 		for (GeoPrior prior : geoPriors) {
 			int taxonNr = prior.getTaxonNr();
 			out.append(location.getValue(taxonNr * 2)+"\t");

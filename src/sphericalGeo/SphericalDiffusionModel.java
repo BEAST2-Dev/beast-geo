@@ -831,7 +831,7 @@ public class SphericalDiffusionModel extends SubstitutionModel.Base implements L
 	}
 
 	@Override
-	public void log(int sample, PrintStream out) {
+	public void log(long sample, PrintStream out) {
 		out.print(maxTau + "\t");
 		out.print(meanTau + "\t");
 	}

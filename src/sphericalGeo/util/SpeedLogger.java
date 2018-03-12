@@ -44,7 +44,7 @@ public class SpeedLogger extends BEASTObject implements Loggable {
 	}
 
 	@Override
-	public void log(int sample, PrintStream out) {
+	public void log(long sample, PrintStream out) {
 		double sumOfTime = 0;
 		double sumOfDistance = 0;
 		for (Node node : tree.getNodesAsArray()) {

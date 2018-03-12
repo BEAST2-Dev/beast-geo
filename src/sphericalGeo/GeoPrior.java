@@ -373,7 +373,7 @@ public class GeoPrior extends Distribution {
     }
     
     @Override
-    public void log(int nSample, PrintStream out) {
+    public void log(long nSample, PrintStream out) {
 		if (!initialised) {
 			initialise();
 		}
