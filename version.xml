@@ -1,19 +1,19 @@
-<addon name='GEO_SPHERE' version='1.1.2'>
-	<depends on='beast2' atleast='2.4.6'/>
-	<depends on='BEASTLabs' atleast='1.6.0'/>
-    <addonapp description="HeatMapMaker"
+<package name='GEO_SPHERE' version='1.2.0'>
+	<depends on='beast2' atleast='2.5.0'/>
+	<depends on='BEASTLabs' atleast='1.8.0'/>
+    <packageapp description="HeatMapMaker"
               class="sphericalGeo.util.HeatMapMaker"
               args=""
               icon="sphericalGeo/util/heatmapicon.png"
             />
-    <addonapp description="MapMaker"
+    <packageapp description="MapMaker"
               class="sphericalGeo.util.MapMaker"
               args=""
               icon="sphericalGeo/util/heatmapicon.png"
             />
-    <addonapp description="RootDensityFitCalculator"
+    <packageapp description="RootDensityFitCalculator"
               class="sphericalGeo.util.RootDensityFitCalculator"
               args=""
               icon="sphericalGeo/util/heatmapicon.png"
             />
-</addon>
+</package>
