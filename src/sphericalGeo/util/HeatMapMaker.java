@@ -26,6 +26,7 @@ import beast.app.util.XMLFile;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Runnable;
+import beast.core.util.Log;
 import beast.evolution.alignment.TaxonSet;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
@@ -39,7 +40,7 @@ import beast.util.XMLParserException;
 public class HeatMapMaker extends Runnable {
 	public Input<File> treesetInput = new Input<>("treeSet","file containing tree set annotated with locations");//, new File("IE.trees"));
 	public Input<File> bgInput = new Input<>("background","image file with a map for the background");//, new File("/Users/remco/data/map/World98b.png"));
-	public Input<String> bboxInput = new Input<>("boundingBox","bounding box of the background image", "-90 -180 90 180");
+	public Input<String> bboxInput = new Input<>("boundingBox","bounding box of the background image (space or comma separated list of min-lat,min-long,max-lat,max-long)", "-90 -180 90 180");
 	public Input<String> tagInput = new Input<>("tag","tag used in annotated of locations", "location");
 	public Input<Integer> widthInput = new Input<>("width","width of the heat map", 1024);
 	public Input<Integer> heightInput = new Input<>("height","heightof the heat map", 1024);
@@ -96,11 +97,24 @@ public class HeatMapMaker extends Runnable {
 				System.out.println("Loading background image " + bg.getPath());
 				BufferedImage bgImage = ImageIO.read(bg);
 				parseBBox();
-				g.drawImage(bgImage, 0, 0, width, height, 
-						(int) (bgImage.getWidth() * (180 + minLong) / 360.0),
-						(int) (bgImage.getHeight() * (90 - maxLat) / 180.0), 
-						(int) (bgImage.getWidth() * (180 + maxLong) / 360.0), 
-						(int) (bgImage.getHeight() * (90 - minLat) / 180.0), null);
+				if (bboxInput.get() != null) {
+					g.drawImage(bgImage, 0, 0, width, height, 
+							0,
+							0, 
+							bgImage.getWidth(), 
+							bgImage.getHeight(), null);
+				} else {
+					g.drawImage(bgImage, 0, 0, width, height, 
+							(int) (bgImage.getWidth() * (180 + minLong) / 360.0),
+							(int) (bgImage.getHeight() * (90 - maxLat) / 180.0), 
+							(int) (bgImage.getWidth() * (180 + maxLong) / 360.0), 
+							(int) (bgImage.getHeight() * (90 - minLat) / 180.0), null);
+				}
+				try {
+					ImageIO.write(image, "png", new File("/tmp/bg.png"));					
+				} catch (Exception e) {
+					// ignore -- this is for debugging only
+				}
 			} else {
 				System.out.println("Could not find backgroung image " + bg.getPath());
 			}
@@ -316,6 +330,9 @@ public class HeatMapMaker extends Runnable {
 			}
 			latitude = y;
 			longitude = x;
+			if (longitude < minLong) {
+				longitude += 360;
+			}
 		}
 		
 		double age;
@@ -340,7 +357,10 @@ public class HeatMapMaker extends Runnable {
         String str = bboxInput.get().trim();
         String [] strs = str.split("\\s+");
         if (strs.length != 4) {
+        	strs = str.split(",");
+            if (strs.length != 4) {
                 throw new RuntimeException("bbox input must contain 4 numbers");
+            }
         }
         minLat = Double.parseDouble(strs[0]);
         minLong = Double.parseDouble(strs[1]);
@@ -350,7 +370,9 @@ public class HeatMapMaker extends Runnable {
                 double tmp = maxLat; maxLat = minLat; minLat = tmp;
         }
         if (minLong >= maxLong) {
-            double tmp = maxLong; maxLong = minLong; minLong = tmp;
+        	maxLong += 360;
+        	Log.warning("max longitude of boundig box is less than min longitude. Assuming map goes over longitude 180");
+            //double tmp = maxLong; maxLong = minLong; minLong = tmp;
         }
     }
 
