@@ -1,7 +1,7 @@
 \documentclass{article}
 \usepackage{url,graphicx,color}
 
-\newcommand{\BEASTVersion}{2.4}
+\newcommand{\BEASTVersion}{2.5}
 \newcommand{\TracerVersion}{1.6}
 \newcommand{\FigTreeVersion}{1.4.2}
 
@@ -66,7 +66,7 @@ Select the \beast-geo{} entry in the list, and click the Install button. After a
 
 \subsubsection*{Loading the NEXUS file }
 
-To load a NEXUS format alignment, simply select the \texttt{Import Alignment} option from the File menu. A dialog allows you to choose the kind of data to import, select "Add alignment"
+To load a NEXUS format alignment, simply select the \texttt{Import Alignment} option from the File menu. A dialog allows you to choose the kind of data to import, select ``{\tt Add alignment}"
 
 \includegraphics[scale=0.4]{figures/BEAUti_DataPartitions}
 
@@ -457,19 +457,28 @@ Select HeatMapMaker, then click the launch button and the HeatMapMaker interface
 You can change the following options:
 
 \begin{itemize}
-\item tree Set: file containing tree set annotated with locations
-\item background: image file with a map for the background
-\item bounding Box: bounding box of the background image, default -90 -180 90 180
-\item tag: tag used in annotated of locations
-\item width: width of the heat map, default 1024
-\item height: heightof the heat map, default 1024
-\item max Time: maximum time (all older nodes will be coloured red 
-\item output: where to save the file, default /tmp/heatmap.png
-\item disc Size: size of the dots used to draw heat map
-\item translucency: translucency of the dots used to draw heat map (a number between 0=invisible and 1=solid)
-\item saturation: saturation of colour for the dots
-\item brightness: brightnessof colour for the dots 
+\item tree Set $<$filename$>$:	file containing tree set annotated with locations
+\item background $<$filename$>$:	image file with a map for the background
+\item bounding Box $<$string$>$:	bounding box of the background image (space or comma separated list of min-lat,min-long,max-lat,max-long) default -90 -180 90 180
+\item tag $<$string$>$:	tag used in annotated of locations
+\item width $<$integer$>$:	width of the heat map, default 1024
+\item height $<$integer$>$:	heightof the heat map, default 1024
+\item maxTime $<$double$>$:	maximum time (all older nodes will be coloured the same as the colour at this time)
+\item output 	where to save the file
+\item disc Size $<$integer$>$:	size of the dots used to draw heat map
+\item translucency $<$double$>$:	translucency of the dots used to draw heat map (a number between 0=invisible and 1=solid)
+\item saturation $<$double$>$:	saturation of colour for the dots
+\item brightness $<$double$>$:	brightnessof colour for the dots 
+\item jitter $<$integer$>$:	jitter applied to dot locations (in pixels)
+\item mask $<$filename$>$:	image file with a mask: dots will not be shown outside mask
+\item repeats $<$integer$>$:	number of times a dot should be drawn
+\item root Only [true|false]	only draw root locations and ignore the rest
+\item start Colour $<$double$>$:	start of colour (hue) range, should be a number between 0 and 1. 0 = 1 = red, 0.3 = green, 0.66 = blue.
+\item colour Range $<$double$>$:	size of colour range for oldest tree, if $>$ 1, colours will be re-used (usefull if oldest tree is much older than the average tree), if $<$ 1 colours will be unique
+\item clade 	Name of XML file containing a single TaxonSet in BEAST XML format. If specified, the location of the MRCA of a clade is used (and the rootonly flag is ignored).
 \end{itemize}
+
+
 
 \includegraphics[width=0.8\textwidth]{figures/heatmap}
 \includegraphics[width=0.19\textwidth]{figures/legend}
@@ -478,8 +487,8 @@ You can change the following options:
 \subsubsection*{Trouble shooting}
 \begin{itemize}
 \item the taxon may already be specified somewhere in the XML if for example you are running a *BEAST analysis. In that case, replace {\tt $<$taxon id='AF182802' spec='Taxon'/$>$ } with {\tt$<$taxon idref='AF182802'/$>$ }.
-\item "location.s:geo" cannot be found, if you named your spherical diffusion partition something else than "geo". Just replace location.s:geo with location.s:your\_partition\_name.
-\item "Tree.t:hbv" cannot be found, if you named your tree in the data partition something else than "hbv". Again, just replace "hbv" with whatever the tree partition is called.
+\item ``location.s:geo" cannot be found, if you named your spherical diffusion partition something else than ``geo". Just replace location.s:geo with location.s:your\_partition\_name.
+\item ``Tree.t:hbv" cannot be found, if you named your tree in the data partition something else than ``hbv". Again, just replace ``hbv" with whatever the tree partition is called.
 \end{itemize}
 
 \bibliographystyle{plain}

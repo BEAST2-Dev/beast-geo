@@ -44,7 +44,7 @@ public class HeatMapMaker extends Runnable {
 	public Input<String> tagInput = new Input<>("tag","tag used in annotated of locations", "location");
 	public Input<Integer> widthInput = new Input<>("width","width of the heat map", 1024);
 	public Input<Integer> heightInput = new Input<>("height","heightof the heat map", 1024);
-	public Input<Double> maxTimeInput = new Input<>("maxTime","maximum time (all older nodes will be coloured red)", Double.POSITIVE_INFINITY);
+	public Input<Double> maxTimeInput = new Input<>("maxTime","maximum time (all older nodes will be coloured the same as the colour at this time)", Double.POSITIVE_INFINITY);
 	public Input<OutFile> outputInput = new Input<>("output","where to save the file", new OutFile("heatmap.png"));
 	public Input<Integer> discSizeInput = new Input<>("discSize","size of the dots used to draw heat map", 10);
 	public Input<Double> translucencyInput = new Input<>("translucency","translucency of the dots used to draw heat map (a number between 0=invisible and 1=solid)", 0.2);
@@ -54,6 +54,11 @@ public class HeatMapMaker extends Runnable {
 	public Input<File> maskInput = new Input<>("mask", "image file with a mask: dots will not be shown outside mask");//, new File("/Users/remco/data/map/World98b.png"));
 	public Input<Integer> repeatsInput = new Input<>("repeats", "number of times a dot should be drawn", 1);
 	public Input<Boolean> rootOnlyInput = new Input<>("rootOnly", "only draw root locations and ignore the rest", false);
+	public Input<Double> startColourInput = new Input<>("startColour", "start of colour (hue) range, should be a number between 0 and 1. "
+			+ "0 = 1 = red, 0.3 = green, 0.66 = blue.", 0.2);
+	public Input<Double> colourRangeInput = new Input<>("colourRange", "size of colour range for oldest tree, "
+			+ "if > 1, colours will be re-used (usefull if oldest tree is much older than the average tree), "
+			+ "if < 1 colours will be unique", 1.0/0.8);
 	
 	public Input<XMLFile> xmlInput = new Input<>("clade", "Name of XML file containing a single TaxonSet in BEAST XML format. "
 			+ "If specified, the location of the MRCA of a clade is used (and the rootonly flag is ignored).");
@@ -69,6 +74,8 @@ public class HeatMapMaker extends Runnable {
 	boolean rootOnly;
 	TaxonSet taxonset = null;
 	
+	float startColour, colourRange;
+	
 	final static String DIR_SEPARATOR = (Utils.isWindows() ? "\\\\" : "/");
 	@Override
 	public void initAndValidate() {
@@ -77,6 +84,8 @@ public class HeatMapMaker extends Runnable {
         image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		tag = tagInput.get();
 		rootOnly = rootOnlyInput.get();
+		startColour = (float) (double) startColourInput.get();
+		colourRange = (float) (double) colourRangeInput.get();
 	}
 
 	@Override
@@ -204,7 +213,7 @@ public class HeatMapMaker extends Runnable {
 //			 int blue  = (int) (Math.sin(2*3.14*f + 4) * 127 + 128);
 //			 g.setColor(new Color(red,green,blue));
 			
-			g.setColor(Color.getHSBColor(0.2f + (float) (f/0.8f), saturation, brightness));
+			g.setColor(Color.getHSBColor(startColour + (float) (f*colourRange), saturation, brightness));
 			
 			for (int i = 0; i < repeats; i++) {
 				int y = height - (int)( (dot.latitude - minLat) * height/(maxLat-minLat));  
