@@ -106,7 +106,7 @@ public class HeatMapMaker extends Runnable {
 				System.out.println("Loading background image " + bg.getPath());
 				BufferedImage bgImage = ImageIO.read(bg);
 				parseBBox();
-				if (bboxInput.get() != null) {
+				if (bboxInput.get() == null) {
 					g.drawImage(bgImage, 0, 0, width, height, 
 							0,
 							0, 
@@ -252,7 +252,8 @@ public class HeatMapMaker extends Runnable {
         
         for (int i = 0; i < 200; i++) {
         	double f = (200 - i) / 200.0;
-			g.setColor(Color.getHSBColor(0.2f + (float) (f/0.8f), 1.0f, 1.0f));
+			g.setColor(Color.getHSBColor(startColour + (float) (f*colourRange), saturation, brightness));
+			// g.setColor(Color.getHSBColor(0.2f + (float) (f/0.8f), 1.0f, 1.0f));
         	g.drawLine(25, i, 75, i);
         }
 		g.setColor(Color.black);
