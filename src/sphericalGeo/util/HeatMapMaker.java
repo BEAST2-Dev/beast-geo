@@ -119,11 +119,11 @@ public class HeatMapMaker extends Runnable {
 							(int) (bgImage.getWidth() * (180 + maxLong) / 360.0), 
 							(int) (bgImage.getHeight() * (90 - minLat) / 180.0), null);
 				}
-				try {
-					ImageIO.write(image, "png", new File("/tmp/bg.png"));					
-				} catch (Exception e) {
+				// try {
+				// 	ImageIO.write(image, "png", new File("/tmp/bg.png"));					
+				// } catch (Exception e) {
 					// ignore -- this is for debugging only
-				}
+				//}
 			} else {
 				System.out.println("Could not find backgroung image " + bg.getPath());
 			}
