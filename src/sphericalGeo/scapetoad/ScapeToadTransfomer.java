@@ -210,6 +210,7 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 		for (int i = 0; i < 5; i++) {
 			points[i] = new Coordinate();
 		}
+		
 		for (int i = 0; i < mNodeX.length - 1; i++) {
 			for (int j = 0; j < mNodeX[0].length - 1; j++) {
 				points[0].x = mNodeX[i][j];
@@ -236,7 +237,7 @@ public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, T
 				}
 			}
 		}
-		return null; 
+		return new double[]{lat0, long0};
 	}
 	
     /**

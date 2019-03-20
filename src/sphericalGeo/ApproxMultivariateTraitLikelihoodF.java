@@ -305,7 +305,7 @@ public class ApproxMultivariateTraitLikelihoodF extends GenericTreeLikelihood im
 		int k = 0;
 		for (int i : taxonNrs /*sampleNumber*/) {
 			if (position[i][0] != sampledLocations.getValue(i*2) ||
-				position[i][1] != sampledLocations.getValue(i*2+1)) {
+				(position[i][1] != sampledLocations.getValue(i*2+1) && position[i][1] != sampledLocations.getValue(i*2+1) + 360)) {
 				System.err.println(position[i][0] +"!="+ sampledLocations.getValue(i*2));
 				System.err.println(position[i][1] +"!="+ sampledLocations.getValue(i*2+1));
 			}
