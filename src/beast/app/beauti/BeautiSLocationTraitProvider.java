@@ -42,7 +42,7 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
 	final static String FIXED_TREE = "[[Fixed tree]]";
 
 	@Override
-	protected List<BEASTInterface> getAlignments(BeautiDoc doc) {
+	public List<BEASTInterface> getAlignments(BeautiDoc doc) {
 		try {
             List<String> trees = new ArrayList<>();
             doc.scrubAll(true, false);

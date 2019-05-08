@@ -30,7 +30,7 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood i
 			"2 dimensional parameter representing locations (in latitude, longitude) of nodes in a tree");
 
 	public Input<Transformer> transformerInput = new Input<>("transformer","landscape transformer to capture some inheterogenuity in the diffusion process");
-	public Input<Double> epsilonInput = new Input<>("epsilon", "size of interval to use when randomly choosing new latitude/longitude", 10.0);
+	public Input<Double> epsilonInput = new Input<>("epsilon", "size of interval to use when randomly choosing new latitude/longitude", 3.0);
 
 
 	double epsilon = 2.0;
@@ -700,7 +700,18 @@ public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood i
 			}
 		}
 		if (transformer != null) {
-			double [] pos = transformer.projectInverse(particlePosition[0][iDim][0], particlePosition[0][iDim][1]);
+			double lat = particlePosition[0][iDim][0];
+			double lon = particlePosition[0][iDim][1];
+			while (lon < -180) {
+				lon += 360;
+			}
+			while (lon > 180) {
+				lon -= 360;
+			}
+			double [] pos = transformer.projectInverse(lat, lon);
+			if (pos == null) {
+				pos = transformer.projectInverse(lat, lon);
+			}
 			return pos;
 		}
 		return particlePosition[0][iDim];
