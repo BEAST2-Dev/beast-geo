@@ -7,6 +7,7 @@ import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.util.Log;
+import beast.util.Randomizer;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -182,6 +183,57 @@ public class KMLRegion extends Region {
 			coordinates.add(polygon);
 		}
 		return coordinates;
+	}
+
+	
+	public List<Double> dottify(double radius) {
+		List<Double> centerPoints = new ArrayList<>();
+		int r = (int) (image.getHeight() * radius / (maxLat - minLat) + 1);
+		
+		// find starting random point inside polygon
+		boolean isInside = false;
+		double long_ = 0;
+		double lat_ = 0;
+		while (!isInside) {
+			lat_ = minLat + Randomizer.nextDouble() * (maxLat - minLat); 
+			long_ = minLong + Randomizer.nextDouble() * (maxLong - minLong);
+			isInside = isInside(lat_, long_);
+		}
+		// go north till boundary is found
+		while (isInside = isInside(lat_ - radius, long_)) {
+			lat_ -= radius / 2.0;
+		}
+		centerPoints.add(lat_);
+		centerPoints.add(long_);
+		
+		double [] next = nextDot(lat_, long_, radius);
+		centerPoints.add(next[0]);
+		centerPoints.add(next[1]);
+		while (Math.abs(next[0] - lat_) + Math.abs(next[1] - long_) > radius) {
+			next = nextDot(lat_, long_, radius);
+			centerPoints.add(next[0]);
+			centerPoints.add(next[1]);			
+		}
+		
+		return centerPoints;
+	}
+	
+	private double[] nextDot(double lat_, double long_, double radius) {
+		double lat2, long2;
+		double phi = 0.0;
+		lat2 = lat_ + Math.cos(phi);
+		long2 = long_ + Math.sin(phi);;
+		while (isInside(lat2, long2) && phi < Math.PI * 2) {
+			phi += 0.1;
+			lat2 = lat_ + Math.cos(phi);
+			long2 = long_ + Math.sin(phi);;
+		}
+		while (!isInside(lat2, long2) && phi < Math.PI * 2) {
+			phi += 0.1;
+			lat2 = lat_ + Math.cos(phi);
+			long2 = long_ + Math.sin(phi);;
+		}
+		return new double[]{lat2, long2};
 	}
 	
 }
