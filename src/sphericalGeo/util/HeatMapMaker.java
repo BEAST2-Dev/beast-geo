@@ -59,7 +59,9 @@ public class HeatMapMaker extends Runnable {
 	public Input<Double> colourRangeInput = new Input<>("colourRange", "size of colour range for oldest tree, "
 			+ "if > 1, colours will be re-used (usefull if oldest tree is much older than the average tree), "
 			+ "if < 1 colours will be unique", 1.0/0.8);
-	
+	final public Input<Integer> burnInPercentageInput = new Input<>("burnin",
+			"percentage of trees to used as burn-in (and will be ignored -- defaul 0)", 0);
+
 	public Input<XMLFile> xmlInput = new Input<>("clade", "Name of XML file containing a single TaxonSet in BEAST XML format. "
 			+ "If specified, the location of the MRCA of a clade is used (and the rootonly flag is ignored).");
 	
@@ -167,6 +169,15 @@ public class HeatMapMaker extends Runnable {
 			return;
 		}
 		System.out.println(" done");
+		
+		int burnin = burnInPercentageInput.get() * trees.size() / 100;
+		if (burnin > 0) {
+			Log.warning("Skipping " + burnin + " trees, leaving " + (trees.size()-burnin) + " trees for processing" );
+			while (burnin > 0) {
+				trees.remove(0);
+				burnin--;
+			}
+		}
 		
 		// get dots
 		System.out.println("Drawing dots...");
