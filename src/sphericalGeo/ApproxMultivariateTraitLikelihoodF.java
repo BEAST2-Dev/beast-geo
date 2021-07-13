@@ -963,6 +963,10 @@ public class ApproxMultivariateTraitLikelihoodF extends GenericTreeLikelihood im
 
 
 	protected boolean geoPriorChanged() {
+		if (taxonNrs == null) {
+			// not initialised yet
+			return true;
+		}
 		MultiGeoPrior multiPrior = multiGeopriorsInput.get();
 		for (int k = 0; k < multiPrior.size(); k++) {
 			int taxonNr = multiPrior.getCladeTopNodeNr(k);
