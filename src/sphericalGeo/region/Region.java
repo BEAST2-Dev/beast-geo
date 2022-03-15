@@ -1,6 +1,10 @@
 package sphericalGeo.region;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 import beast.core.BEASTObject;
 import beast.core.Description;
@@ -92,7 +96,9 @@ public class Region extends BEASTObject {
 		
 		int x = (int)(width * (lon - minLong)/(maxLong-minLong));
 		int y = (int)(height * (lat - minLat)/(maxLat-minLat));
-		if ((image.getRGB(x, y) & 0xFFFFFF) != regionColor) {
+		double size = 0;
+		if (true || (image.getRGB(x, y) & 0xFFFFFF) != regionColor) {
+		//if ((image.getRGB(x, y) & 0xFFFFFF) != regionColor) {
 			double minDist = Double.MAX_VALUE;
 			int minX = 0;
 			int minY = 0;
@@ -105,16 +111,21 @@ public class Region extends BEASTObject {
 							minX = i;
 							minY = j;
 						}
+						size++;
 					}
 				}
 			}
 			
 			lat = minLat + ((minY + 0.5) * (maxLat - minLat) / height);
 			lon = minLong + ((minX + 0.5) * (maxLong - minLong) / width);
+			
+			double c = Math.cos(((maxLat + minLat)/2)*Math.PI/180) / Math.cos(25*Math.PI/180);
+			size = c * (maxLat - minLat) * (maxLong - minLong) * size / (width * height);
 		}
 
 		
-		System.out.println(getID() + "=" + lat + " " + lon);
+		//System.out.println(getID() + "=" + lat + " " + lon );
+		 System.out.println(getID() + "=" + size);
 		return new double[]{lat, lon};
 	}
 

@@ -1,25 +1,32 @@
 package beast.app.beauti;
 
 
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.CellEditorListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -27,7 +34,6 @@ import javax.swing.table.TableCellRenderer;
 import sphericalGeo.ApproxMultivariateTraitLikelihood;
 import sphericalGeo.Transformer;
 import beast.app.beauti.BeautiDoc;
-import beast.app.beauti.GuessPatternDialog;
 import beast.app.draw.BEASTObjectDialog;
 import beast.app.draw.ListInputEditor;
 import beast.app.draw.SmallLabel;
@@ -36,6 +42,7 @@ import beast.app.util.OutFile;
 import beast.core.BEASTInterface;
 import beast.core.Description;
 import beast.core.Input;
+import beast.core.util.Log;
 import beast.evolution.alignment.Alignment;
 import sphericalGeo.AlignmentFromTraitMap;
 import beast.evolution.alignment.TaxonSet;
@@ -378,6 +385,9 @@ public class SLocationInputEditor extends ListInputEditor {
     } // createButtonBox
     
     
+    
+
+    
     private void guess(int column) {
         GuessPatternDialog dlg = new GuessPatternDialog(this, m_sPattern);
         //dlg.setName("GuessPatternDialog");
@@ -406,7 +416,12 @@ public class SLocationInputEditor extends ListInputEditor {
             }
             break;
         }
-    	String [] strs = sTrait.trim().split(",");
+
+        
+        
+        
+        
+        String [] strs = sTrait.trim().split(",");
     	for (String str : strs) {
     		String [] strs2 = str.trim().split("=");
     		String taxon = strs2[0].trim();

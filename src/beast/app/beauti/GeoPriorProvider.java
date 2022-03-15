@@ -293,7 +293,7 @@ public class GeoPriorProvider extends BEASTObjectInputEditor implements PriorPro
             }
             KMLRegion region = new KMLRegion();
             region.setID(taxonSet.getID() + ".region");
-            region.kmlFileInput.setValue(kmlFile, region);
+            region.kmlFileInput.setValue(kmlFile.getPath(), region);
             prior.regionInput.setValue(region, prior);
             
             // set up location parameter for prior
@@ -400,7 +400,9 @@ public class GeoPriorProvider extends BEASTObjectInputEditor implements PriorPro
     public InputEditor createRegionEditor() {
     	Input<?> input = ((GeoPrior) m_beastObject).regionInput;
     	KMLRegion region = (KMLRegion) input.get();
-    	FileInputEditor inputEditor = new FileInputEditor(doc);
+    	
+    	StringInputEditor inputEditor = new StringInputEditor(doc);
+    	//FileInputEditor inputEditor = new FileInputEditor(doc);
     	inputEditor.init(region.kmlFileInput, region, itemNr, ExpandOption.FALSE, true);
     	
         // increase size of newick text editor

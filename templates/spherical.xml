@@ -8,7 +8,13 @@
         <subtemplate id='SLocationTrait' class='sphericalGeo.AlignmentFromTraitMap' mainid='$(n)'
 suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.frequencies,
 				beast.math.distributions.MultivariateNormalDistribution.arg,
-				sphericalGeo.ApproxMultivariateTraitLikelihood.siteModel'>
+				sphericalGeo.ApproxMultivariateTraitLikelihood.siteModel,
+				sphericalGeo.SphericalDiffusionModel.frequencies,
+				sphericalGeo.sitemodel.GeoSiteModel.mutationRate,
+				sphericalGeo.sitemodel.GeoSiteModel.gammaCategoryCount,
+				sphericalGeo.sitemodel.GeoSiteModel.shape,
+				sphericalGeo.sitemodel.GeoSiteModel.proportionInvariant				
+				'>
 <![CDATA[
 	<parameter id="sprecision.s:$(n)" minordimension="1" estimate="true" value="100.0" lower="0.0"/>
 
@@ -21,7 +27,7 @@ suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.freq
 			</traitMap>
 		</data>
 
-		<siteModel spec='SiteModel' id="geoContSiteModel.s:$(n)">
+		<siteModel spec='sphericalGeo.sitemodel.GeoSiteModel' id="geoContSiteModel.s:$(n)">
 			<substModel id="sdiffusionModel.s:$(n)" spec="sphericalGeo.SphericalDiffusionModel" fast='true'>
     		    <precision idref="sprecision.s:$(n)"/>
 			</substModel>

@@ -25,7 +25,7 @@ import org.xml.sax.SAXException;
 
 @Description("Geographical region defined by one or more polygons in a KML file")
 public class KMLRegion extends Region {
-	public Input<File> kmlFileInput = new Input<>("kml", "kml file with polygons over admissable locations.", Validate.REQUIRED);
+	public Input<String> kmlFileInput = new Input<>("kml", "kml file with polygons over admissable locations.", Validate.REQUIRED);
 
 	public KMLRegion() {}
 	public KMLRegion(String kmlFile) throws Exception {initByName("kml", kmlFile);}
@@ -161,7 +161,7 @@ public class KMLRegion extends Region {
 	private List<List<Double>> parseKML() throws SAXException, IOException, ParserConfigurationException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setValidating(false);
-		org.w3c.dom.Document doc = factory.newDocumentBuilder().parse(kmlFileInput.get());
+		org.w3c.dom.Document doc = factory.newDocumentBuilder().parse(new File(kmlFileInput.get()));
 		doc.normalize();
 
 		List<List<Double>> coordinates = new ArrayList<>();
