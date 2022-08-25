@@ -4,11 +4,11 @@ package sphericalGeo;
 
 import java.util.*;
 
-import beast.core.CalculationNode;
-import beast.core.Citation;
-import beast.core.Description;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
+import beast.base.inference.CalculationNode;
+import beast.base.core.Citation;
+import beast.base.core.Description;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
 
 
 @Description(value="Approximate likelihood by MAP approximation of internal states optimised to take sampled nodes in account", 

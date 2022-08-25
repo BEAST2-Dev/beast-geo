@@ -5,17 +5,17 @@ package sphericalGeo;
 
 import java.util.*;
 
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.parameter.RealParameter;
-//import beast.evolution.alignment.AlignmentFromTraitMap;
-import beast.evolution.branchratemodel.BranchRateModel;
-import beast.evolution.likelihood.GenericTreeLikelihood;
-import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.TreeInterface;
-//import beast.evolution.tree.TreeTraitMap;
-import beast.util.Randomizer;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.inference.parameter.RealParameter;
+//import beast.base.evolution.alignment.AlignmentFromTraitMap;
+import beast.base.evolution.branchratemodel.BranchRateModel;
+import beast.base.evolution.likelihood.GenericTreeLikelihood;
+import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.TreeInterface;
+//import beast.base.evolution.tree.TreeTraitMap;
+import beast.base.util.Randomizer;
 
 @Description("Approximate likelihood by particle filter approximation")
 public class PFApproxMultivariateTraitLikelihood extends GenericTreeLikelihood implements LocationProvider {

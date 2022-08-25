@@ -4,16 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import beast.evolution.operators.DistanceProvider;
 import org.apache.commons.math3.util.FastMath;
 
-import beast.core.BEASTObject;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.evolution.alignment.Alignment;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.TreeInterface;
+import beast.base.core.BEASTObject;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.TreeInterface;
+import beastlabs.evolution.operators.DistanceProvider;
 
 @Description("Provide distance between geographical locations -- to be used by AttachOperator")
 public class CircleDistanceProvider extends BEASTObject implements DistanceProvider {

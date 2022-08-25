@@ -36,10 +36,10 @@ import static java.lang.Math.sin;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math3.util.FastMath;
 
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.util.Log;
-import beast.math.distributions.ParametricDistribution;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Log;
+import beast.base.inference.distribution.ParametricDistribution;
 
 @Description("Diffusion model that assumes a normal diffusion process on a sphere and integrates out relaxed clock")
 public class RelaxedSphericalDiffusionModel extends SphericalDiffusionModel {

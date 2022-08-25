@@ -1,5 +1,5 @@
 <beast version='2.0'
-       namespace='beast.app.beauti:beast.core:beast.evolution.branchratemodel:beast.evolution.speciation:beast.evolution.Tree.t:coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution:beast.math.distributions'>
+       namespace='beast.app.beauti:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.evolution.Tree.t:coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.evolution:beast.base.math.distributions'>
 
 
 <mergewith point='aux-partitions-panels'>
@@ -33,7 +33,7 @@ suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.freq
 			</substModel>
 		</siteModel>
 
-        <branchRateModel spec='beast.evolution.branchratemodel.StrictClockModel' id='StrictClock.c:$(n)'>
+        <branchRateModel spec='beast.base.evolution.branchratemodel.StrictClockModel' id='StrictClock.c:$(n)'>
             <clock.rate id='clockRate.c:$(n)' spec='parameter.RealParameter' value='1.0' estimate='false'/>
         </branchRateModel>
 
@@ -47,8 +47,8 @@ suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.freq
     <operator id="sprecisionScaler.s:$(n)" spec="ScaleOperator" parameter="@sprecision.s:$(n)" weight="5" scaleFactor="0.7"/>
 -->
 
-    <plugin id='ClockPrior.c:$(n)' spec='beast.math.distributions.Prior' x='@clockRate.c:$(n)'>
-        <distr spec="beast.math.distributions.Uniform" upper='Infinity'/>
+    <plugin id='ClockPrior.c:$(n)' spec='beast.base.inference.distribution.Prior' x='@clockRate.c:$(n)'>
+        <distr spec="beast.base.inference.distribution.Uniform" upper='Infinity'/>
     </plugin>
 
     <operator id='StrictClockRateScaler.c:$(n)' spec='ScaleOperator' scaleFactor="0.75" weight="3" parameter='@clockRate.c:$(n)'/>

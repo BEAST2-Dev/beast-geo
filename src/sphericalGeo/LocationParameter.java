@@ -1,6 +1,6 @@
 package sphericalGeo;
 
-import beast.core.parameter.RealParameter;
+import beast.base.inference.parameter.RealParameter;
 
 public class LocationParameter extends RealParameter {
 

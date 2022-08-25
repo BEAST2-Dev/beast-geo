@@ -19,12 +19,12 @@ import javax.swing.WindowConstants;
 //import com.itextpdf.text.pdf.PdfContentByte;
 //import com.itextpdf.text.pdf.PdfWriter;
 
-import beast.core.parameter.RealParameter;
-import beast.evolution.alignment.Alignment;
-import beast.evolution.alignment.Sequence;
-import beast.evolution.sitemodel.SiteModel;
-import beast.util.Randomizer;
-import beast.util.TreeParser;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Sequence;
+import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.util.Randomizer;
+import beast.base.evolution.tree.TreeParser;
 
 public class RandomWalkSimulator extends JPanel implements MouseListener, KeyListener {
 	

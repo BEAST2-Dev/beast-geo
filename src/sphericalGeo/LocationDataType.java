@@ -1,7 +1,7 @@
 package sphericalGeo;
 
-import beast.core.Description;
-import beast.evolution.datatype.DataType;
+import beast.base.core.Description;
+import beast.base.evolution.datatype.DataType;
 
 @Description("Datatype for representing geographic locations in 2 dimension, latitude x longitude")
 public class LocationDataType extends DataType.Base {

@@ -1,13 +1,13 @@
 package sphericalGeo;
 
 
-import beast.core.BEASTObject;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.evolution.alignment.distance.Distance;
-import beast.evolution.tree.TreeInterface;
-//import beast.evolution.tree.TreeTraitMap;
+import beast.base.core.BEASTObject;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.evolution.distance.Distance;
+import beast.base.evolution.tree.TreeInterface;
+//import beast.base.evolution.tree.TreeTraitMap;
 
 @Description("Distance between points on a globe") 
 public class GreatCircleDistance extends BEASTObject implements Distance {

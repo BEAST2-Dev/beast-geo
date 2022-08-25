@@ -6,9 +6,9 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import beast.core.BEASTObject;
-import beast.core.Description;
-import beast.util.Randomizer;
+import beast.base.core.BEASTObject;
+import beast.base.core.Description;
+import beast.base.util.Randomizer;
 
 @Description("Defines a geographical region")
 public class Region extends BEASTObject {

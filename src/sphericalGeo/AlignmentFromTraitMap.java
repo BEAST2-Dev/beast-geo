@@ -2,10 +2,10 @@ package sphericalGeo;
 
 import java.util.ArrayList;
 
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.evolution.alignment.Alignment;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.evolution.alignment.Alignment;
 
 
 @Description("Creates and alignment of continuous data, such as a geographic location, from a trait set")

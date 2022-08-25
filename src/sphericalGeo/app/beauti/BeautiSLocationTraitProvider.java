@@ -1,4 +1,4 @@
-package beast.app.beauti;
+package sphericalGeo.app.beauti;
 
 import java.awt.Frame;
 import java.io.BufferedReader;
@@ -16,24 +16,25 @@ import sphericalGeo.AlignmentFromTraitMap;
 import sphericalGeo.ApproxMultivariateTraitLikelihood;
 import sphericalGeo.TraitFunction;
 import sphericalGeo.TreeTraitMap;
-import beast.app.beauti.BeautiAlignmentProvider;
-import beast.app.beauti.BeautiDoc;
-import beast.app.beauti.PartitionContext;
-import beast.app.util.Utils;
-import beast.core.BEASTInterface;
-import beast.core.Description;
-import beast.core.Logger;
-import beast.core.MCMC;
-import beast.core.State;
-import beast.core.StateNode;
-import beast.evolution.alignment.Alignment;
-import beast.evolution.alignment.Taxon;
-import beast.evolution.alignment.TaxonSet;
-import beast.evolution.likelihood.GenericTreeLikelihood;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.TreeWithMetaDataLogger;
-import beast.util.NexusParser;
-import beast.util.TreeParser;
+import beastfx.app.inputeditor.BeautiAlignmentProvider;
+import beastfx.app.inputeditor.BeautiDoc;
+import beast.base.parser.PartitionContext;
+import beastfx.app.util.Utils;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Description;
+import beast.base.core.ProgramStatus;
+import beast.base.inference.Logger;
+import beast.base.inference.MCMC;
+import beast.base.inference.State;
+import beast.base.inference.StateNode;
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Taxon;
+import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.likelihood.GenericTreeLikelihood;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.TreeWithMetaDataLogger;
+import beast.base.parser.NexusParser;
+import beast.base.evolution.tree.TreeParser;
 
 
 /** trait provided for spherical diffusion model **/
@@ -113,7 +114,7 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
 	
 	protected List<BEASTInterface> getTree(BeautiDoc doc) {
 		try {
-            File file = Utils.getLoadFile("Open tree file with fixed tree", new File(Beauti.g_sDir), "Tree file", "tree","tre","txt","nxs");
+            File file = Utils.getLoadFile("Open tree file with fixed tree", new File(ProgramStatus.g_sDir), "Tree file", "tree","tre","txt","nxs");
             if (file != null) {
             	NexusParser parser = new NexusParser();
             	parser.parseFile(file);

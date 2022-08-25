@@ -11,18 +11,18 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import beast.app.beauti.BeautiConfig;
-import beast.app.beauti.BeautiDoc;
-import beast.app.draw.BEASTObjectDialog;
-import beast.app.draw.BEASTObjectPanel;
-import beast.app.treeannotator.TreeAnnotator;
-import beast.app.util.Application;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Runnable;
-import beast.core.util.Log;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
+import beastfx.app.inputeditor.BeautiConfig;
+import beastfx.app.inputeditor.BeautiDoc;
+import beastfx.app.inputeditor.BEASTObjectDialog;
+import beastfx.app.inputeditor.BEASTObjectPanel;
+import beastfx.app.treeannotator.TreeAnnotator;
+import beastfx.app.tools.Application;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.inference.Runnable;
+import beast.base.core.Log;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
 import sphericalGeo.GreatCircleDistance;
 
 @Description("calculates average speed on a posterior set of trees from a phylogeographical analysis")

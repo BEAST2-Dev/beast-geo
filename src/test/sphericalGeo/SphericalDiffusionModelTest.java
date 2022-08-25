@@ -2,7 +2,7 @@ package test.sphericalGeo;
 
 import org.junit.Test;
 
-import beast.core.parameter.RealParameter;
+import beast.base.inference.parameter.RealParameter;
 import sphericalGeo.GreatCircleDistance;
 import sphericalGeo.SphericalDiffusionModel;
 import junit.framework.TestCase;

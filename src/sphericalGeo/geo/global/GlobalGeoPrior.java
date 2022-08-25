@@ -1,4 +1,4 @@
-package beast.geo.global;
+package sphericalGeo.geo.global;
 
 
 import java.lang.reflect.InvocationTargetException;
@@ -6,14 +6,14 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Random;
 
-import beast.core.Description;
-import beast.core.Distribution;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.State;
-import beast.evolution.likelihood.GenericTreeLikelihood;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.TreeInterface;
+import beast.base.core.Description;
+import beast.base.inference.Distribution;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.inference.State;
+import beast.base.evolution.likelihood.GenericTreeLikelihood;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.TreeInterface;
 
 @Description("Prior on global language tree for the global language tree project")
 public class GlobalGeoPrior extends Distribution {

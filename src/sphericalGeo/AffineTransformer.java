@@ -1,9 +1,9 @@
 package sphericalGeo;
 
-import beast.core.BEASTObject;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.parameter.RealParameter;
+import beast.base.core.BEASTObject;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.inference.parameter.RealParameter;
 
 @Description("Transform latitude/longitude through an affine transform. "
 		+ "Rotates around a center point, then scales latitude and longitude")

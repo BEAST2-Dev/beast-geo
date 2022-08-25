@@ -15,16 +15,16 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import beast.app.beauti.BeautiConfig;
-import beast.app.beauti.BeautiDoc;
-import beast.app.draw.BEASTObjectDialog;
-import beast.app.draw.BEASTObjectPanel;
-import beast.app.util.Application;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.Runnable;
-import beast.core.util.Log;
+import beastfx.app.inputeditor.BeautiConfig;
+import beastfx.app.inputeditor.BeautiDoc;
+import beastfx.app.inputeditor.BEASTObjectDialog;
+import beastfx.app.inputeditor.BEASTObjectPanel;
+import beastfx.app.tools.Application;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.inference.Runnable;
+import beast.base.core.Log;
 
 @Description("Creates a map in mercator projection from a KML file")
 public class MapMaker extends Runnable {

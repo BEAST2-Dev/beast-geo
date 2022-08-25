@@ -1,6 +1,6 @@
 package sphericalGeo;
 
-import beast.core.Function;
+import beast.base.core.Function;
 
 public interface LocationProvider extends Function {
 	

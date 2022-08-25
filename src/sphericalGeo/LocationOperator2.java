@@ -6,14 +6,14 @@ import java.util.List;
 import org.apache.commons.math.distribution.NormalDistribution;
 import org.apache.commons.math.distribution.NormalDistributionImpl;
 
-import beast.core.Input;
-import beast.core.Operator;
-import beast.core.Input.Validate;
-import beast.core.parameter.RealParameter;
-import beast.evolution.branchratemodel.BranchRateModel;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.TreeInterface;
-import beast.util.Randomizer;
+import beast.base.core.Input;
+import beast.base.inference.Operator;
+import beast.base.core.Input.Validate;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.evolution.branchratemodel.BranchRateModel;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.TreeInterface;
+import beast.base.util.Randomizer;
 
 public class LocationOperator2 extends Operator {
 	public Input<RealParameter> locationInput = new Input<>("location",

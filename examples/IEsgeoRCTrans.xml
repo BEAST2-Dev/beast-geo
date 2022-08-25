@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='BinaryCovarion' beautistatus='noAutoSetClockRate' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" version="2.0">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='BinaryCovarion' beautistatus='noAutoSetClockRate' namespace="beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" version="2.0">
 
 
 <!-- spherical geography with fixed tree -->
@@ -15,16 +15,16 @@
 
 
     
-<map name="Uniform" >beast.math.distributions.Uniform</map>
-<map name="Exponential" >beast.math.distributions.Exponential</map>
-<map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
-<map name="Normal" >beast.math.distributions.Normal</map>
-<map name="Beta" >beast.math.distributions.Beta</map>
-<map name="Gamma" >beast.math.distributions.Gamma</map>
-<map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
-<map name="prior" >beast.math.distributions.Prior</map>
-<map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
-<map name="OneOnX" >beast.math.distributions.OneOnX</map>
+<map name="Uniform" >beast.base.inference.distribution.Uniform</map>
+<map name="Exponential" >beast.base.inference.distribution.Exponential</map>
+<map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
+<map name="Normal" >beast.base.inference.distribution.Normal</map>
+<map name="Beta" >beast.base.inference.distribution.Beta</map>
+<map name="Gamma" >beast.base.inference.distribution.Gamma</map>
+<map name="LaplaceDistribution" >beast.base.inference.distribution.LaplaceDistribution</map>
+<map name="prior" >beast.base.inference.distribution.Prior</map>
+<map name="InverseGamma" >beast.base.inference.distribution.InverseGamma</map>
+<map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
 
         <taxa id="geo" spec="sphericalGeo.AlignmentFromTraitMap">
             <traitMap id="traitmap.s:geo" spec="sphericalGeo.TreeTraitMap" initByMean="true" randomizelower="-90 -180" randomizeupper="90 180" traitName="location" tree="@Tree.t:IELex">
@@ -136,7 +136,7 @@ Pali=24.53 82.25
 
 <run id="mcmc" spec="MCMC" chainLength="10000000">
     <state id="state" storeEvery="5000">
-        <stateNode id="Tree.t:IELex" spec="beast.util.TreeParser" adjustTipHeights="false" IsLabelledNewick="true" newick="((((((Albanian_Corinth:0.683516115990077,Albanian_Sicily:0.6835161157917731):0.24824136000294783,(Albanian_Gheg:0.5259141956460258,Albanian_Tosk:0.5259141955904121):0.4058432807179554):5.345485845174791,((Ancient_Greek:0.6900160837747871,(Greek:0.5435175411112141,Greek_Lesbos:0.5435175411112141):2.543935295609999):2.20076023251613,(Armenian:2.2537746301696946,Classical_Armenian:0.8114094166937624):3.034438438316186):0.9890302520405081):0.9576784386320272,((((((((((Assamese:1.104841143325252,Oriya:1.1048411432390168):0.3322107120073441,Bengali:1.4370518555410827):0.4955509965567557,((Bihari:1.351444576415708,(Hindi:0.8059843404708369,(Lahnda:0.4646383326097405,Urdu:0.46463833262981):0.34134600785460867):0.5454602367305531):0.33367124609115417,(Gujarati:1.1887077429414643,Marathi:1.188707742952848):0.49640808077873944):0.24748702770704334):0.26524598343658634,(Nepali:1.961357801519197,Sindhi:1.9613578017424853):0.2364910329569616):0.29069874654505856,Sinhalese:2.488547581516584):0.2957533317023997,Kashmiri:2.7843009128970224):0.8135438727804098,Pali:1.0569886496608092):0.7432319024832577,Vedic_Sanskrit:1.3410766894524078):1.2323970180994364,((Avestan:1.2985090567967887,((Ossetic_Digor:0.26156555086657424,Ossetic_Iron:0.2615655508663317):3.0758777026875097,Wakhi:3.3374432560554492):0.45861570325386003):0.04065088228813396,(((((Baluchi:1.5593180251975132,Kurdish:1.559318025410587):0.47567421835529844,(Persian:0.8226701400076185,Tajik:0.8226701400081036):1.2123221033302283):0.5035421107558924,(Pashto:0.756064304836925,Waziri:0.7560643048370159):1.782470048673726):0.6169527753459989,Old_Persian:0.7174488946703907):0.15534220614428618,((Shughni:1.5964565549727316,Sarikoli:1.5964565549727316):1.414506295834877,Sogdian:3.010962851553591):0.29986648449213194):0.5258805045356927):1.7367638660594813):1.4047689246977608,(((((((Belarusian:0.3386409022600455,Ukrainian:0.33864090226000004):0.25114815039955357,Russian:0.5897890525217652):0.2699702433682203,Polish:0.8597592956872894):0.28823431996610294,((Czech:0.448921894006472,Slovak:0.44892189400666144):0.4314799608541929,(Sorbian_Lower:0.19989485156359973,Sorbian_Upper:0.19989485156365278):0.6805070030767552):0.2675917609520899):0.33843789318586115,((((Bulgarian:0.5685932577058944,Macedonian:0.5685932577058944):0.3524335086418432,Serbo-Croatian:0.9210267660339013):0.3281739221555958,Old_Church_Slavonic:0.26886744121135664):0.052393591777649906,Slovenian:1.301594280048424):0.1848372288702247):1.6141472248969266,((Latvian:1.3496085223729701,Lithuanian:1.3496085223729701):0.8501039276447651,Old_Prussian:1.6626373254092564):0.900866283928432):3.576849496327298,(((((Breton:0.727436709527945,Cornish:0.727436709527945):0.8211206922736697,Welsh:1.5485574004764204):1.6576811836217527,((Irish:0.8653101918137474,Scottish_Gaelic:0.8653101918257526):0.6728020867019683,Old_Irish:0.3025402165574633):1.6681263059532887):2.4315348642028978,(((((((Catalan:1.086768073894643,(Portuguese:0.6151662410214204,Spanish:0.615166241025786):0.47160183353827556):0.31132120033436217,((French:0.3135932234660795,Walloon:0.3135932234643514):0.43538465260185544,Provencal:0.7489778760487749):0.6491113984783324):0.15078014370265125,(((Friulian:0.7285659617091694,Romansh:0.7285659617357266):0.305726626457982,Ladin:1.0342925879156837):0.30466540046418444,Italian:1.3389579882403668):0.20991143014611668):0.15594326396042058,((Sardinian_Cagliari:0.5340935199468663,Sardinian_Nuoro:0.534093519972279):0.2375224289284723,Sardinian_Logudoro:0.7716159488809243):0.93319673383636):0.19957831978596507,(Romanian:0.944943477988147,Vlach:0.944943477987662):0.9594475238218098):0.4147941526452392,Latin:0.3150821350651922):2.1135112966488427,(Oscan:1.0770514554295612,Umbrian:1.0634199210044848):1.179370299703927):1.205076996565297):0.23797367343601028,(((((Danish:0.27076160815316447,Swedish:0.27076160815316447):0.176100597232055,Norwegian_Riksmal:0.4468622053864321):0.6391987347473249,((Faroese:0.5602044972506746,Icelandic:0.5602044972482492):0.38892564749155567,Old_Norse:0.1869253170018358):0.1369307953395037):0.7844299826615799,((((Dutch:0.3450458028063489,Flemish:0.3450458028590238):0.29120526764736315,Frisian:0.6362510707828581):0.6875858988797593,((German:0.48220077013829726,Luxembourgish:0.48220077013829726):0.8097359507247651,Old_High_German:0.2628430454424233):0.031900248962320354):0.23528627733172325,(English:1.2160292431168878,Old_English:0.220610041461623):0.34309400368559495):0.31136767567271195):0.6884779167977586,Gothic:0.9103083467305013):3.3167782808040043):0.8016811094771477):0.3008143993975416):0.25667912897537626):0.29464810356443305,(Tocharian_A:0.5374954666515499,Tocharian_B:0.5544043837677839):5.631475591895757):0.693368185192563,(Hittite:1.880458448951443,(Luvian:0.35234001432049,Lycian:1.2815446689853158):1.564923908222681):2.981395389407796);">
+        <stateNode id="Tree.t:IELex" spec="beast.base.evolution.tree.TreeParser" adjustTipHeights="false" IsLabelledNewick="true" newick="((((((Albanian_Corinth:0.683516115990077,Albanian_Sicily:0.6835161157917731):0.24824136000294783,(Albanian_Gheg:0.5259141956460258,Albanian_Tosk:0.5259141955904121):0.4058432807179554):5.345485845174791,((Ancient_Greek:0.6900160837747871,(Greek:0.5435175411112141,Greek_Lesbos:0.5435175411112141):2.543935295609999):2.20076023251613,(Armenian:2.2537746301696946,Classical_Armenian:0.8114094166937624):3.034438438316186):0.9890302520405081):0.9576784386320272,((((((((((Assamese:1.104841143325252,Oriya:1.1048411432390168):0.3322107120073441,Bengali:1.4370518555410827):0.4955509965567557,((Bihari:1.351444576415708,(Hindi:0.8059843404708369,(Lahnda:0.4646383326097405,Urdu:0.46463833262981):0.34134600785460867):0.5454602367305531):0.33367124609115417,(Gujarati:1.1887077429414643,Marathi:1.188707742952848):0.49640808077873944):0.24748702770704334):0.26524598343658634,(Nepali:1.961357801519197,Sindhi:1.9613578017424853):0.2364910329569616):0.29069874654505856,Sinhalese:2.488547581516584):0.2957533317023997,Kashmiri:2.7843009128970224):0.8135438727804098,Pali:1.0569886496608092):0.7432319024832577,Vedic_Sanskrit:1.3410766894524078):1.2323970180994364,((Avestan:1.2985090567967887,((Ossetic_Digor:0.26156555086657424,Ossetic_Iron:0.2615655508663317):3.0758777026875097,Wakhi:3.3374432560554492):0.45861570325386003):0.04065088228813396,(((((Baluchi:1.5593180251975132,Kurdish:1.559318025410587):0.47567421835529844,(Persian:0.8226701400076185,Tajik:0.8226701400081036):1.2123221033302283):0.5035421107558924,(Pashto:0.756064304836925,Waziri:0.7560643048370159):1.782470048673726):0.6169527753459989,Old_Persian:0.7174488946703907):0.15534220614428618,((Shughni:1.5964565549727316,Sarikoli:1.5964565549727316):1.414506295834877,Sogdian:3.010962851553591):0.29986648449213194):0.5258805045356927):1.7367638660594813):1.4047689246977608,(((((((Belarusian:0.3386409022600455,Ukrainian:0.33864090226000004):0.25114815039955357,Russian:0.5897890525217652):0.2699702433682203,Polish:0.8597592956872894):0.28823431996610294,((Czech:0.448921894006472,Slovak:0.44892189400666144):0.4314799608541929,(Sorbian_Lower:0.19989485156359973,Sorbian_Upper:0.19989485156365278):0.6805070030767552):0.2675917609520899):0.33843789318586115,((((Bulgarian:0.5685932577058944,Macedonian:0.5685932577058944):0.3524335086418432,Serbo-Croatian:0.9210267660339013):0.3281739221555958,Old_Church_Slavonic:0.26886744121135664):0.052393591777649906,Slovenian:1.301594280048424):0.1848372288702247):1.6141472248969266,((Latvian:1.3496085223729701,Lithuanian:1.3496085223729701):0.8501039276447651,Old_Prussian:1.6626373254092564):0.900866283928432):3.576849496327298,(((((Breton:0.727436709527945,Cornish:0.727436709527945):0.8211206922736697,Welsh:1.5485574004764204):1.6576811836217527,((Irish:0.8653101918137474,Scottish_Gaelic:0.8653101918257526):0.6728020867019683,Old_Irish:0.3025402165574633):1.6681263059532887):2.4315348642028978,(((((((Catalan:1.086768073894643,(Portuguese:0.6151662410214204,Spanish:0.615166241025786):0.47160183353827556):0.31132120033436217,((French:0.3135932234660795,Walloon:0.3135932234643514):0.43538465260185544,Provencal:0.7489778760487749):0.6491113984783324):0.15078014370265125,(((Friulian:0.7285659617091694,Romansh:0.7285659617357266):0.305726626457982,Ladin:1.0342925879156837):0.30466540046418444,Italian:1.3389579882403668):0.20991143014611668):0.15594326396042058,((Sardinian_Cagliari:0.5340935199468663,Sardinian_Nuoro:0.534093519972279):0.2375224289284723,Sardinian_Logudoro:0.7716159488809243):0.93319673383636):0.19957831978596507,(Romanian:0.944943477988147,Vlach:0.944943477987662):0.9594475238218098):0.4147941526452392,Latin:0.3150821350651922):2.1135112966488427,(Oscan:1.0770514554295612,Umbrian:1.0634199210044848):1.179370299703927):1.205076996565297):0.23797367343601028,(((((Danish:0.27076160815316447,Swedish:0.27076160815316447):0.176100597232055,Norwegian_Riksmal:0.4468622053864321):0.6391987347473249,((Faroese:0.5602044972506746,Icelandic:0.5602044972482492):0.38892564749155567,Old_Norse:0.1869253170018358):0.1369307953395037):0.7844299826615799,((((Dutch:0.3450458028063489,Flemish:0.3450458028590238):0.29120526764736315,Frisian:0.6362510707828581):0.6875858988797593,((German:0.48220077013829726,Luxembourgish:0.48220077013829726):0.8097359507247651,Old_High_German:0.2628430454424233):0.031900248962320354):0.23528627733172325,(English:1.2160292431168878,Old_English:0.220610041461623):0.34309400368559495):0.31136767567271195):0.6884779167977586,Gothic:0.9103083467305013):3.3167782808040043):0.8016811094771477):0.3008143993975416):0.25667912897537626):0.29464810356443305,(Tocharian_A:0.5374954666515499,Tocharian_B:0.5544043837677839):5.631475591895757):0.693368185192563,(Hittite:1.880458448951443,(Luvian:0.35234001432049,Lycian:1.2815446689853158):1.564923908222681):2.981395389407796);">
             <taxonset id="IELex" spec="TaxonSet">
                 <taxon id="Albanian_Corinth" spec="Taxon"/>
                 <taxon id="Albanian_Gheg" spec="Taxon"/>
@@ -245,8 +245,8 @@ Pali=24.53 82.25
     </state>
 
 
-    <distribution id="posterior" spec="util.CompoundDistribution">
-        <distribution id="prior" spec="util.CompoundDistribution">
+    <distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
+        <distribution id="prior" spec="beast.base.inference.CompoundDistribution">
             <prior id="MeanRatePrior.c:geo" name="distribution" x="@ucldMean.c:geo">
                 <Uniform id="Uniform.0" name="distr" upper="Infinity"/>
             </prior>
@@ -258,7 +258,7 @@ Pali=24.53 82.25
             </prior>
                 
 		</distribution>
-        <distribution id="likelihood" spec="util.CompoundDistribution">
+        <distribution id="likelihood" spec="beast.base.inference.CompoundDistribution">
             <distribution id="slocationtreeLikelihood.geo" spec="sphericalGeo.ApproxMultivariateTraitLikelihood" data="@geo" tree="@Tree.t:IELex" location="@location.s:geo">
             <!-- the file TM_WORLD_BORDERS_SIMPL-0.3.shp can be downloaded from http://thematicmapping.org/downloads/TM_WORLD_BORDERS_SIMPL-0.3.zip and extracting the file -->
 	            <transformer id="transformer" shapeFile="TM_WORLD_BORDERS_SIMPL-0.3.shp" 
@@ -270,7 +270,7 @@ Pali=24.53 82.25
                         <parameter id="sprecision.s:geo" lower="0.0" name="precision">100.0</parameter>
                     </substModel>
                 </siteModel>
-                <branchRateModel id="RelaxedClock.c:geo" spec="beast.evolution.branchratemodel.UCRelaxedClockModel" clock.rate="@ucldMean.c:geo" rateCategories="@rateCategories.c:geo" tree="@Tree.t:IELex">
+                <branchRateModel id="RelaxedClock.c:geo" spec="beast.base.evolution.branchratemodel.UCRelaxedClockModel" clock.rate="@ucldMean.c:geo" rateCategories="@rateCategories.c:geo" tree="@Tree.t:IELex">
                     <LogNormal id="LogNormalDistributionModel.c:geo" S="@ucldStdev.c:geo" meanInRealSpace="true" name="distr">
                         <parameter id="RealParameter.02" estimate="false" lower="0.0" name="M" upper="1.0">1.0</parameter>
                     </LogNormal>
@@ -300,7 +300,7 @@ Pali=24.53 82.25
         <log idref="slocationtreeLikelihood.geo"/>
         <log idref="sprecision.s:geo"/>
         <log idref="ucldStdev.c:geo"/>
-        <log id="rate.c:geo" spec="beast.evolution.branchratemodel.RateStatistic" branchratemodel="@RelaxedClock.c:geo" tree="@Tree.t:IELex"/>
+        <log id="rate.c:geo" spec="beast.base.evolution.RateStatistic" branchratemodel="@RelaxedClock.c:geo" tree="@Tree.t:IELex"/>
         <log idref="ucldMean.c:geo"/>
     </logger>
 
@@ -312,7 +312,7 @@ Pali=24.53 82.25
     </logger>
 
     <logger id="treelog.t:IELex" fileName="IELexRCtipsTrans.trees" logEvery="1000" mode="tree">
-        <log id="TreeWithMetaDataLogger.t:IELex" spec="beast.evolution.tree.TreeWithMetaDataLogger" branchratemodel="@RelaxedClock.c:geo" tree="@Tree.t:IELex">
+        <log id="TreeWithMetaDataLogger.t:IELex" spec="beast.base.evolution.tree.TreeWithMetaDataLogger" branchratemodel="@RelaxedClock.c:geo" tree="@Tree.t:IELex">
             <metadata id="location.geo" spec="sphericalGeo.TraitFunction" likelihood="@slocationtreeLikelihood.geo">0.0</metadata>
         </log>
     </logger>

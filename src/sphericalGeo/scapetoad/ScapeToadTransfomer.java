@@ -1,6 +1,7 @@
 package sphericalGeo.scapetoad;
 
 
+
 import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,11 +45,11 @@ import sphericalGeo.scapetoad.core.CartogramGrid;
 import sphericalGeo.scapetoad.core.CartogramLayer;
 import sphericalGeo.scapetoad.core.IOManager;
 import sphericalGeo.scapetoad.gui.AppContext;
-import beast.app.util.OutFile;
-import beast.core.BEASTObject;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.util.Log;
+import beastfx.app.util.OutFile;
+import beast.base.core.BEASTObject;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.core.Log;
 
 public class ScapeToadTransfomer extends BEASTObject implements StatusTracker, Transformer {
 	final static String DEFAULT_ATT_IDENTIFIER = "NAME";

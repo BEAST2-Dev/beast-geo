@@ -1,4 +1,4 @@
-package beast.app.beauti;
+package sphericalGeo.app.beauti;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -17,27 +17,39 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-import beast.app.draw.BEASTObjectInputEditor;
-import beast.app.draw.BEASTObjectPanel;
-import beast.app.draw.InputEditor;
-import beast.app.draw.SmallButton;
-import beast.app.draw.StringInputEditor;
-import beast.app.util.Utils;
-import beast.core.BEASTInterface;
-import beast.core.BEASTObject;
-import beast.core.Distribution;
-import beast.core.Input;
-import beast.core.Logger;
-import beast.core.MCMC;
-import beast.core.Operator;
-import beast.core.State;
-import beast.core.StateNode;
-import beast.core.util.CompoundDistribution;
-import beast.core.util.Log;
-import beast.evolution.alignment.Taxon;
-import beast.evolution.alignment.TaxonSet;
-import beast.evolution.tree.Tree;
-import beast.math.distributions.MRCAPrior;
+import beastfx.app.inputeditor.BeautiDoc;
+import beastfx.app.beauti.PriorProvider;
+import beastfx.app.inputeditor.BEASTObjectInputEditor;
+import beastfx.app.inputeditor.BEASTObjectPanel;
+import beastfx.app.inputeditor.InputEditor;
+import beastfx.app.inputeditor.SmallButton;
+import beastfx.app.inputeditor.StringInputEditor;
+import beastfx.app.inputeditor.TaxonSetDialog;
+import beastfx.app.util.FXUtils;
+import beastfx.app.util.Utils;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.HBox;
+import beast.base.core.BEASTInterface;
+import beast.base.core.BEASTObject;
+import beast.base.inference.Distribution;
+import beast.base.core.Input;
+import beast.base.inference.Logger;
+import beast.base.inference.MCMC;
+import beast.base.inference.Operator;
+import beast.base.inference.State;
+import beast.base.inference.StateNode;
+import beast.base.inference.CompoundDistribution;
+import beast.base.core.Log;
+import beast.base.core.ProgramStatus;
+import beast.base.evolution.alignment.Taxon;
+import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.MRCAPrior;
 import sphericalGeo.ApproxMultivariateTraitLikelihood;
 import sphericalGeo.GeoPrior;
 import sphericalGeo.LocationOperator;
@@ -67,16 +79,16 @@ public class GeoPriorProvider extends BEASTObjectInputEditor implements PriorPro
         m_beastObject = beastObject;
         this.itemNr= itemNr;
 		
-        Box itemBox = Box.createHorizontalBox();
+        HBox itemBox = FXUtils.newHBox();
 
         GeoPrior prior = (GeoPrior) beastObject;
         String text = prior.getID();
 
-        JButton taxonButton = new JButton(text);
+        Button taxonButton = new Button(text);
 //        taxonButton.setMinimumSize(Base.PREFERRED_SIZE);
 //        taxonButton.setPreferredSize(Base.PREFERRED_SIZE);
-        itemBox.add(taxonButton);
-        taxonButton.addActionListener(e -> {
+        itemBox.getChildren().add(taxonButton);
+        taxonButton.setOnAction(e -> {
                 List<?> list = (List<?>) m_input.get();
                 GeoPrior prior2 = (GeoPrior) list.get(itemNr);
                 try {
@@ -111,35 +123,33 @@ public class GeoPriorProvider extends BEASTObjectInputEditor implements PriorPro
             });
 
 
-        itemBox.add((Component) createRegionEditor());
+        itemBox.getChildren().add((Node) createRegionEditor());
 
-        JCheckBox isInsidedBox = new JCheckBox(doc.beautiConfig.getInputLabel(prior, prior.isInsideInput.getName()));
-        isInsidedBox.setName(text+".isInside");
+        CheckBox isInsidedBox = new CheckBox(doc.beautiConfig.getInputLabel(prior, prior.isInsideInput.getName()));
+        isInsidedBox.setId(text+".isInside");
         isInsidedBox.setSelected(prior.isInsideInput.get());
-        isInsidedBox.setToolTipText(prior.isInsideInput.getHTMLTipText());
-        isInsidedBox.addActionListener(new GeoPriorActionListener(prior));
-        itemBox.add(isInsidedBox);
+        isInsidedBox.setTooltip(new Tooltip(prior.isInsideInput.getHTMLTipText()));
+        isInsidedBox.setOnAction(e->new GeoPriorActionListener(prior));
+        itemBox.getChildren().add(isInsidedBox);
         
-        JCheckBox isAllInternaldBox = new JCheckBox(doc.beautiConfig.getInputLabel(prior, prior.allInternalNodesInput.getName()));
-        isAllInternaldBox.setName(text+".allInternalNodes");
+        CheckBox isAllInternaldBox = new CheckBox(doc.beautiConfig.getInputLabel(prior, prior.allInternalNodesInput.getName()));
+        isAllInternaldBox.setId(text+".allInternalNodes");
         isAllInternaldBox.setSelected(prior.allInternalNodesInput.get());
-        isAllInternaldBox.setToolTipText(prior.allInternalNodesInput.getHTMLTipText());
-        isAllInternaldBox.addActionListener(new GeoPriorActionListener2(prior));
-        itemBox.add(isAllInternaldBox);
+        isAllInternaldBox.setTooltip(new Tooltip(prior.allInternalNodesInput.getHTMLTipText()));
+        isAllInternaldBox.setOnAction(e->new GeoPriorActionListener2(prior));
+        itemBox.getChildren().add(isAllInternaldBox);
         
 
         
-        JButton deleteButton = new SmallButton("-", true);
-        deleteButton.setToolTipText("Delete this geo-prior");
-        deleteButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
+        Button deleteButton = new SmallButton("-", true);
+        deleteButton.setTooltip(new Tooltip("Delete this geo-prior"));
+        deleteButton.setOnAction(e -> {
 				Log.warning.println("Trying to delete a geoprior");
 				List<?> list = (List<?>) m_input.get();
-				GeoPrior prior = (GeoPrior) list.get(itemNr);
-				doc.disconnect(prior, "prior", "distribution");
-				doc.disconnect(prior, "tracelog", "log");
-				doc.unregisterPlugin(prior);
+				GeoPrior prior0 = (GeoPrior) list.get(itemNr);
+				doc.disconnect(prior0, "prior", "distribution");
+				doc.disconnect(prior0, "tracelog", "log");
+				doc.unregisterPlugin(prior0);
 				// remove operator and location parameter from state, iff there are no other geo-priors left
 				boolean hasMoreGeoPriors = false;
 				CompoundDistribution priors = (CompoundDistribution) doc.pluginmap.get("prior");
@@ -152,15 +162,15 @@ public class GeoPriorProvider extends BEASTObjectInputEditor implements PriorPro
 				if (!hasMoreGeoPriors) {
 					BEASTInterface operator = doc.pluginmap.get("location.sampler");
 					doc.disconnect(operator, "mcmc", "operator");
-					doc.disconnect(prior.locationInput.get(), "state", "stateNode");
+					doc.disconnect(prior0.locationInput.get(), "state", "stateNode");
 				}
 				refreshPanel();
 			}        	
-        });
-        itemBox.add(Box.createGlue());
-        itemBox.add(deleteButton);
+        );
+        //itemBox.getChildren().add(Box.createGlue());
+        itemBox.getChildren().add(deleteButton);
 
-        add(itemBox);
+        getChildren().add(itemBox);
 	}
 	
 	
@@ -287,7 +297,7 @@ public class GeoPriorProvider extends BEASTObjectInputEditor implements PriorPro
             prior.setID(taxonSet.getID() + ".prior");
             
             // set up a region
-            File kmlFile = Utils.getLoadFile("KML file specifying a region", new File(Beauti.g_sDir), "KML file", "kml");
+            File kmlFile = Utils.getLoadFile("KML file specifying a region", new File(ProgramStatus.g_sDir), "KML file", "kml");
             if (kmlFile == null) {
             	return null;
             }
@@ -406,14 +416,14 @@ public class GeoPriorProvider extends BEASTObjectInputEditor implements PriorPro
     	inputEditor.init(region.kmlFileInput, region, itemNr, ExpandOption.FALSE, true);
     	
         // increase size of newick text editor
-        for (int i = 0; i < inputEditor.getComponentCount(); i++) {
-        	if (inputEditor.getComponent(i) instanceof JTextField) {
-        		((JTextField)inputEditor.getComponent(i)).setColumns(30);
+        for (Node node : inputEditor.getChildren()) {
+        	if (node instanceof TextField) {
+        		((TextField)node).setPrefColumnCount(30);
         	}
-        	if (inputEditor.getComponent(i) instanceof JLabel) {
-        		int fontSize = ((JLabel)inputEditor.getComponent(i)).getFont().getSize();
-        		((JLabel)inputEditor.getComponent(i)).setPreferredSize(new Dimension(40 * fontSize / 13, 20 * fontSize / 13));        		
-        	}
+//        	if (inputEditor.getComponent(i) instanceof Label) {
+//        		int fontSize = ((Label)inputEditor.getComponent(i)).getFont().getSize();
+//        		((Label)inputEditor.getComponent(i)).setPreferredSize(new Dimension(40 * fontSize / 13, 20 * fontSize / 13));        		
+//        	}
         }
 
     	return inputEditor;

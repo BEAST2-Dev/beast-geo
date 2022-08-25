@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
-import beast.core.util.Log;
-import beast.evolution.tree.Tree;
-import beast.util.TreeParser;
+import beast.base.core.Log;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeParser;
 
 public class MemoryFriendlyTreeSet extends TreeSet {
 //    	Tree [] trees;

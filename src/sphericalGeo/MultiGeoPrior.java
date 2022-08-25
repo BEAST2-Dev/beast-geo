@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.State;
-import beast.core.parameter.RealParameter;
-import beast.evolution.operators.MonoCladesMapping;
-import beast.math.distributions.MultiMonophyleticConstraint;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.inference.State;
+import beast.base.inference.parameter.RealParameter;
+import beastlabs.evolution.operators.MonoCladesMapping;
+import beastlabs.math.distributions.MultiMonophyleticConstraint;
 
 /** adapted from MultiMRCAPrors by Joseph Heled **/
 @Description("Set of GeoPriors, efficiently managed")

@@ -1,6 +1,6 @@
 package sphericalGeo;
 
-import beast.core.Description;
+import beast.base.core.Description;
 
 
 @Description("Provides landscape transormation to capture some inhomogenuity in the diffusion process")

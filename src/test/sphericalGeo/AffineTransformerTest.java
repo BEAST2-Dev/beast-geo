@@ -2,7 +2,7 @@ package test.sphericalGeo;
 
 import org.junit.Test;
 
-import beast.util.Randomizer;
+import beast.base.util.Randomizer;
 import sphericalGeo.AffineTransformer;
 import junit.framework.TestCase;
 

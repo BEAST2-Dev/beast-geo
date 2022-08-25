@@ -5,9 +5,9 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Input.Validate;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
 
 @Description("Defines geographical region through a bitmap")
 public class BitmapRegion extends Region {

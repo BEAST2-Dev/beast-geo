@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import beast.app.beauti.BeautiDoc;
-import beast.core.Input.Validate;
+import beastfx.app.inputeditor.BeautiDoc;
+import beast.base.core.Input.Validate;
 
 public class SVGRegion extends KMLRegion {
 	double lat, lon;

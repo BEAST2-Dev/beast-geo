@@ -2,7 +2,7 @@ package sphericalGeo.util.treeset;
 
 import java.io.IOException;
 
-import beast.evolution.tree.Tree;
+import beast.base.evolution.tree.Tree;
 
 abstract public class TreeSet {
 	public abstract boolean hasNext();

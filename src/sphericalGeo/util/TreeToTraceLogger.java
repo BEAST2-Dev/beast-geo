@@ -21,22 +21,21 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import beast.app.treeannotator.TreeSetParser;
-import beast.app.util.Application;
-import beast.app.util.OutFile;
-import beast.app.util.TreeFile;
-import beast.app.util.XMLFile;
-import beast.core.BEASTInterface;
-import beast.core.Description;
-import beast.core.Param;
-import beast.core.Runnable;
-import beast.core.util.Log;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.math.distributions.MRCAPrior;
-import beast.util.TreeParser;
-import beast.util.XMLParser;
-import beast.util.XMLParserException;
+import beastfx.app.tools.Application;
+import beastfx.app.util.OutFile;
+import beastfx.app.util.TreeFile;
+import beastfx.app.util.XMLFile;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Description;
+import beast.base.core.Param;
+import beast.base.inference.Runnable;
+import beast.base.core.Log;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.MRCAPrior;
+import beast.base.evolution.tree.TreeParser;
+import beast.base.parser.XMLParser;
+import beast.base.parser.XMLParserException;
 
 @Description("Creates trace log from a tree log and XML file containing MRCAPriors. "
 		+ "For each MRCAPrior, height and location are logged.")

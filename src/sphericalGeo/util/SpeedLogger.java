@@ -2,11 +2,11 @@ package sphericalGeo.util;
 
 import java.io.PrintStream;
 
-import beast.core.BEASTObject;
-import beast.core.Loggable;
-import beast.core.Param;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
+import beast.base.core.BEASTObject;
+import beast.base.core.Loggable;
+import beast.base.core.Param;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
 import sphericalGeo.GreatCircleDistance;
 import sphericalGeo.LocationProvider;
 

@@ -34,16 +34,16 @@ import org.apache.commons.math.analysis.UnivariateRealFunction;
 import org.apache.commons.math.analysis.integration.TrapezoidIntegrator;
 import org.apache.commons.math.analysis.integration.UnivariateRealIntegrator;
 
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Loggable;
-import beast.core.Input.Validate;
-import beast.core.parameter.RealParameter;
-import beast.evolution.datatype.DataType;
-import beast.evolution.substitutionmodel.EigenDecomposition;
-import beast.evolution.substitutionmodel.SubstitutionModel;
-import beast.evolution.tree.Node;
-import beast.util.Randomizer;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Loggable;
+import beast.base.core.Input.Validate;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.evolution.datatype.DataType;
+import beast.base.evolution.substitutionmodel.EigenDecomposition;
+import beast.base.evolution.substitutionmodel.SubstitutionModel;
+import beast.base.evolution.tree.Node;
+import beast.base.util.Randomizer;
 
 // while FastMath is supposed to be faster, this is not evident in a small timing test.
 //import static org.apache.commons.math3.util.FastMath;

@@ -1,9 +1,10 @@
-package beast.app.beauti;
+package sphericalGeo.app.beauti;
 
-import beast.app.draw.InputEditor.Base;
-import beast.core.BEASTInterface;
-import beast.core.Input;
-import beast.util.TreeParser;
+import beastfx.app.inputeditor.BeautiDoc;
+import beastfx.app.inputeditor.InputEditor.Base;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Input;
+import beast.base.evolution.tree.TreeParser;
 
 public class TreeParserInputEditor extends Base {
 

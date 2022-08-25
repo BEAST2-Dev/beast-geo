@@ -1,4 +1,4 @@
-package beast.app.beauti;
+package sphericalGeo.app.beauti;
 
 
 
@@ -33,20 +33,26 @@ import javax.swing.table.TableCellRenderer;
 
 import sphericalGeo.ApproxMultivariateTraitLikelihood;
 import sphericalGeo.Transformer;
-import beast.app.beauti.BeautiDoc;
-import beast.app.draw.BEASTObjectDialog;
-import beast.app.draw.ListInputEditor;
-import beast.app.draw.SmallLabel;
-import beast.app.util.OutFile;
+import beastfx.app.inputeditor.BeautiDoc;
+import beastfx.app.inputeditor.GuessPatternDialog;
+import beastfx.app.inputeditor.BEASTObjectDialog;
+import beastfx.app.inputeditor.ListInputEditor;
+import beastfx.app.inputeditor.SmallLabel;
+import beastfx.app.util.FXUtils;
+import beastfx.app.util.OutFile;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 //import beast.continuous.SampledMultivariateTraitLikelihood;
-import beast.core.BEASTInterface;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.util.Log;
-import beast.evolution.alignment.Alignment;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Log;
+import beast.base.evolution.alignment.Alignment;
 import sphericalGeo.AlignmentFromTraitMap;
-import beast.evolution.alignment.TaxonSet;
-import beast.evolution.tree.TreeInterface;
+import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.tree.TreeInterface;
 import sphericalGeo.TreeTraitMap;
 import sphericalGeo.scapetoad.ScapeToadTransfomer;
 
@@ -108,14 +114,14 @@ public class SLocationInputEditor extends ListInputEditor {
             m_beastObject = traitData;
             traitSet = traitData.traitInput.get();
             
-            Box box = Box.createVerticalBox();
+            VBox box = FXUtils.newVBox();
 
             if (traitSet != null) {
-                box.add(createButtonBox());
-                box.add(createListBox());
-                box.add(createButtonBox2());
+                box.getChildren().add(createButtonBox());
+                box.getChildren().add(createListBox());
+                box.getChildren().add(createButtonBox2());
             }
-            add(box);
+            getChildren().add(box);
             validateInput();
             // synchronise with table, useful when taxa have been deleted
             convertTableDataToTrait();
@@ -314,12 +320,12 @@ public class SLocationInputEditor extends ListInputEditor {
     /**
      * create box with comboboxes for selection units and trait name *
      */
-    private Box createButtonBox() {
-        Box buttonBox = Box.createHorizontalBox();
+    private HBox createButtonBox() {
+        HBox buttonBox = FXUtils.newHBox();
 
-        JLabel label = new JLabel("Trait: ");
+        Label label = new Label("Trait: ");
         //label.setMaximumSize(new Dimension(1024, 20));
-        buttonBox.add(label);
+        buttonBox.getChildren().add(label);
 
 //        traitEntry = new JTextField(traitSet.m_sTraitName.get());
 //        traitEntry.getDocument().addDocumentListener(new DocumentListener() {
@@ -340,33 +346,21 @@ public class SLocationInputEditor extends ListInputEditor {
 //		});
 //        traitEntry.setColumns(12);
 //        buttonBox.add(traitEntry);
-        buttonBox.add(Box.createHorizontalGlue());
+        //buttonBox.getChildren().add(Box.createHorizontalGlue());
 
-        JButton guessButton = new JButton("Guess latitude");
-        guessButton.setName("Guess latitude");
-        guessButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            	guess(1);
-            }
-        });
-        buttonBox.add(guessButton);
+        Button guessButton = new Button("Guess latitude");
+        guessButton.setId("Guess latitude");
+        guessButton.setOnAction(e->guess(1));
+        buttonBox.getChildren().add(guessButton);
         
-        JButton guessButton2 = new JButton("Guess longitude");
-        guessButton2.setName("Guess longitude");        
-        guessButton2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            	guess(2);
-            }
-        });
-        buttonBox.add(guessButton2);
+        Button guessButton2 = new Button("Guess longitude");
+        guessButton2.setId("Guess longitude");        
+        guessButton2.setOnAction(e->guess(2));
+        buttonBox.getChildren().add(guessButton2);
 
 
-        JButton clearButton = new JButton("Clear");
-        clearButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        Button clearButton = new Button("Clear");
+        clearButton.setOnAction(e-> {
                 try {
                     traitSet.value.setValue("", traitSet);
                 } catch (Exception ex) {
@@ -374,12 +368,12 @@ public class SLocationInputEditor extends ListInputEditor {
                 }
                 refreshPanel();
             }
-        });
-        buttonBox.add(clearButton);
+        );
+        buttonBox.getChildren().add(clearButton);
 
-        m_validateLabel = new SmallLabel("x", Color.orange);
+        m_validateLabel = new SmallLabel("x", "orange");
         m_validateLabel.setVisible(false);
-        buttonBox.add(m_validateLabel);
+        buttonBox.getChildren().add(m_validateLabel);
         
         return buttonBox;
     } // createButtonBox

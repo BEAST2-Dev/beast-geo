@@ -5,20 +5,20 @@ package sphericalGeo;
 
 import java.util.*;
 
-import beast.core.BEASTInterface;
-import beast.core.Citation;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.StateNode;
-import beast.core.StateNodeInitialiser;
-import beast.core.util.Log;
-import beast.evolution.branchratemodel.BranchRateModel;
-import beast.evolution.branchratemodel.StrictClockModel;
-import beast.evolution.likelihood.GenericTreeLikelihood;
-import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.TreeInterface;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Citation;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.inference.StateNode;
+import beast.base.inference.StateNodeInitialiser;
+import beast.base.core.Log;
+import beast.base.evolution.branchratemodel.BranchRateModel;
+import beast.base.evolution.branchratemodel.StrictClockModel;
+import beast.base.evolution.likelihood.GenericTreeLikelihood;
+import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.TreeInterface;
 
 
 @Description("Approximate likelihood by MAP approximation of internal states")

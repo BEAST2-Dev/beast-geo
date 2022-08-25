@@ -10,13 +10,13 @@ import java.util.List;
 
 import sphericalGeo.GreatCircleDistance;
 import sphericalGeo.SphericalDiffusionModel;
-import beast.core.BEASTObject;
-import beast.core.Description;
-import beast.core.util.Log;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.util.NexusParser;
-import beast.util.TreeParser;
+import beast.base.core.BEASTObject;
+import beast.base.core.Description;
+import beast.base.core.Log;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.parser.NexusParser;
+import beast.base.evolution.tree.TreeParser;
 
 @Description("Takes a summary tree and insert single child nodes with locations following "
 		+ "the shortes path on a sphere.")

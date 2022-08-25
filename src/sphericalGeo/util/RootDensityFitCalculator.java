@@ -6,21 +6,21 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import beast.app.util.Application;
-import beast.app.util.XMLFile;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.util.Log;
-import beast.evolution.alignment.TaxonSet;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.math.distributions.MRCAPrior;
+import beastfx.app.tools.Application;
+import beastfx.app.util.XMLFile;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.core.Log;
+import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.MRCAPrior;
 import sphericalGeo.region.KMLRegion;
 import sphericalGeo.util.HeatMapMaker.Dot;
 import sphericalGeo.util.treeset.MemoryFriendlyTreeSet;
 import sphericalGeo.util.treeset.TreeSet;
-import beast.core.Runnable;
+import beast.base.inference.Runnable;
 
 @Description("calculates proportion of root locations from posterior tree set fitting in a region")
 public class RootDensityFitCalculator extends Runnable  {

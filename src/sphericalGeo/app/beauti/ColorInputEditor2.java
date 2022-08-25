@@ -1,4 +1,5 @@
-package beast.app.beauti;
+package sphericalGeo.app.beauti;
+
 
 
 import java.awt.Color;
@@ -12,15 +13,16 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.border.EmptyBorder;
 
-import beast.app.beauti.BeautiDoc;
-import beast.core.BEASTInterface;
-import beast.core.Input;
-import beast.app.draw.InputEditor;
+import beastfx.app.inputeditor.BeautiDoc;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Input;
+import beastfx.app.inputeditor.InputEditor;
+import javafx.scene.control.Button;
 
 public class ColorInputEditor2 extends InputEditor.Base {
 	private static final long serialVersionUID = 1L;
 	
-	JButton button;
+	Button button;
 	
 	public ColorInputEditor2(BeautiDoc doc) {
 		super(doc);
@@ -42,21 +44,14 @@ public class ColorInputEditor2 extends InputEditor.Base {
 
         
         Color color = (Color) m_input.get();
-        button = new JButton("color");
+        button = new Button("color");
         if (color != null) {
         	button.setBackground(color);
         }
-        button.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				editColor();
-			}
-
-		});
-        add(button);
+        button.setOnAction(e->editColor());
+        getChildren().add(button);
         
-        add(Box.createHorizontalGlue());
+        //add(Box.createHorizontalGlue());
         addValidationLabel();
     } // init
 	

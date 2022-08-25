@@ -14,27 +14,26 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import beast.app.beauti.BeautiConfig;
-import beast.app.beauti.BeautiDoc;
-import beast.app.draw.BEASTObjectDialog;
-import beast.app.draw.BEASTObjectPanel;
-import beast.app.util.Application;
-import beast.app.util.ConsoleApp;
-import beast.app.util.OutFile;
-import beast.app.util.Utils;
-import beast.app.util.XMLFile;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Runnable;
-import beast.core.util.Log;
-import beast.evolution.alignment.TaxonSet;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.math.distributions.MRCAPrior;
-import beast.util.NexusParser;
-import beast.util.Randomizer;
-import beast.util.XMLParser;
-import beast.util.XMLParserException;
+import beastfx.app.inputeditor.BeautiConfig;
+import beastfx.app.inputeditor.BeautiDoc;
+import beastfx.app.inputeditor.BEASTObjectDialog;
+import beastfx.app.inputeditor.BEASTObjectPanel;
+import beastfx.app.tools.Application;
+import beastfx.app.util.OutFile;
+import beastfx.app.util.Utils;
+import beastfx.app.util.XMLFile;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.inference.Runnable;
+import beast.base.core.Log;
+import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.MRCAPrior;
+import beast.base.parser.NexusParser;
+import beast.base.util.Randomizer;
+import beast.base.parser.XMLParser;
+import beast.base.parser.XMLParserException;
 
 @Description("Creates heat map of locations with colour representing time")
 public class HeatMapMaker extends Runnable {

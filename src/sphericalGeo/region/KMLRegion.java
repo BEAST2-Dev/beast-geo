@@ -3,11 +3,11 @@ package sphericalGeo.region;
 import java.io.File;
 import java.io.IOException;
 
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.util.Log;
-import beast.util.Randomizer;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.core.Log;
+import beast.base.util.Randomizer;
 
 import java.awt.Color;
 import java.awt.Graphics;
