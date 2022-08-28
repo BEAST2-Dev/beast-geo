@@ -2,65 +2,65 @@ package sphericalGeo.app.beauti;
 
 
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.BufferedReader;
+
+
+import beastfx.app.inputeditor.BEASTObjectDialog;
+import beastfx.app.inputeditor.BeautiDoc;
+import beastfx.app.inputeditor.GuessPatternDialog;
+import beastfx.app.inputeditor.ListInputEditor;
+import beastfx.app.inputeditor.SmallLabel;
+import beastfx.app.util.Alert;
+import beastfx.app.util.FXUtils;
+import beastfx.app.util.OutFile;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.util.StringConverter;
+import javafx.util.converter.DoubleStringConverter;
+import sphericalGeo.AlignmentFromTraitMap;
+import sphericalGeo.ApproxMultivariateTraitLikelihood;
+import sphericalGeo.Transformer;
+import sphericalGeo.TreeTraitMap;
+import sphericalGeo.scapetoad.ScapeToadTransfomer;
+import javafx.event.EventHandler;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.TableColumn.CellEditEvent;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.util.Callback;
+
 import java.io.File;
-import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.EventObject;
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.CellEditorListener;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
 
-import sphericalGeo.ApproxMultivariateTraitLikelihood;
-import sphericalGeo.Transformer;
-import beastfx.app.inputeditor.BeautiDoc;
-import beastfx.app.inputeditor.GuessPatternDialog;
-import beastfx.app.inputeditor.BEASTObjectDialog;
-import beastfx.app.inputeditor.ListInputEditor;
-import beastfx.app.inputeditor.SmallLabel;
-import beastfx.app.util.FXUtils;
-import beastfx.app.util.OutFile;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-//import beast.continuous.SampledMultivariateTraitLikelihood;
 import beast.base.core.BEASTInterface;
+import beast.base.core.BEASTObject;
 import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Log;
 import beast.base.evolution.alignment.Alignment;
-import sphericalGeo.AlignmentFromTraitMap;
 import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.TreeInterface;
-import sphericalGeo.TreeTraitMap;
-import sphericalGeo.scapetoad.ScapeToadTransfomer;
+
 
 
 @Description("Location editor for BEAUti template to set up spherical diffusion models")
 public class SLocationInputEditor extends ListInputEditor {
-	private static final long serialVersionUID = 1L;
-
 	public SLocationInputEditor(BeautiDoc doc) {
 		super(doc);
 	}
@@ -73,10 +73,49 @@ public class SLocationInputEditor extends ListInputEditor {
 	ApproxMultivariateTraitLikelihood likelihood;
 	TreeInterface tree;
     TreeTraitMap traitSet;
+    //JTextField traitEntry;
+    //ComboBox relativeToComboBox;
     String [] sTaxa;
-    Object[][] tableData;
-    JTable table;
+    // Object[][] tableData;
+    
+    
+    
+    public class LocationMap {
+		String taxon;
+    	Double latitude;
+    	Double longitude;
 
+    	LocationMap(String taxon, Double latitude, Double longitude) {
+    		this.taxon = taxon;
+    		this.latitude = latitude;
+    		this.longitude = longitude;
+    	}
+    	
+    	public String getTaxon() {
+			return taxon;
+		}
+		public void setTaxon(String taxon) {
+			this.taxon = taxon;
+		}
+		public Double getLongitude() {
+			return longitude;
+		}
+		public void setLongitude(Double longitude) {
+			this.longitude = longitude;
+		}
+		public Double getLatitude() {
+			return latitude;
+		}
+		public void setLatitude(Double latitude) {
+			this.latitude = latitude;
+		}
+    }
+    TableView<LocationMap> table;
+    ObservableList<LocationMap> taxonMapping;
+
+    //UserDataType dataType;
+
+    //String m_sPattern = ".*(\\d\\d\\d\\d).*";
     String m_sPattern = ".*_(..).*";
 
 	@Override
@@ -114,7 +153,7 @@ public class SLocationInputEditor extends ListInputEditor {
             m_beastObject = traitData;
             traitSet = traitData.traitInput.get();
             
-            VBox box = FXUtils.newVBox();
+            VBox box = new VBox();
 
             if (traitSet != null) {
                 box.getChildren().add(createButtonBox());
@@ -125,12 +164,18 @@ public class SLocationInputEditor extends ListInputEditor {
             validateInput();
             // synchronise with table, useful when taxa have been deleted
             convertTableDataToTrait();
+
+            Button transformButton = new Button("Transform");
+            transformButton.setId("Transform");
+            transformButton.setOnAction(e->transform());
+            buttonBox.getChildren().add(transformButton);
+
         }
     } // init
 
 
 
-    private Component createListBox() {
+    private ScrollPane createListBox() {
     	try {
     		//traitSet.treeInput.get().getTaxaNames();
         	TreeInterface tree = traitSet.treeInput.get();
@@ -141,106 +186,213 @@ public class SLocationInputEditor extends ListInputEditor {
 		}
         sTaxa = traitSet.treeInput.get().getTaxonset().asStringList().toArray(new String[0]);
         String[] columnData = new String[]{"Name", "Latitude", "Longitude"};
-        tableData = new Object[sTaxa.length][3];
+        //tableData = new Object[sTaxa.length][3];
+        
+        taxonMapping = FXCollections.observableArrayList();
+        for (String s : sTaxa) {
+        	taxonMapping.add(new LocationMap(s, Double.NaN, Double.NaN));
+        }
         convertTraitToTableData();
+
         // set up table.
         // special features: background shading of rows
         // custom editor allowing only Date column to be edited.
-        table = new JTable(tableData, columnData) {
-            private static final long serialVersionUID = 1L;
+        table = new TableView<>();        
+        table.setPrefWidth(1024);
+        table.setEditable(true);
+        table.setItems(taxonMapping);
 
-            // method that induces table row shading
-            @Override
-            public Component prepareRenderer(TableCellRenderer renderer, int Index_row, int Index_col) {
-                Component comp = super.prepareRenderer(renderer, Index_row, Index_col);
-                //even index, selected or not selected
-                if (isCellSelected(Index_row, Index_col)) {
-                    comp.setBackground(Color.lightGray);
-                } else if (Index_row % 2 == 0 && !isCellSelected(Index_row, Index_col)) {
-                    comp.setBackground(new Color(237, 243, 255));
-                } else {
-                    comp.setBackground(Color.white);
-                }
-                return comp;
-            }
-        };
+        TableColumn<LocationMap, String> col1 = new TableColumn<>("Taxon");
+        col1.setPrefWidth(700);
+        col1.setEditable(false);
+        col1.setCellValueFactory(
+        	    new PropertyValueFactory<LocationMap,String>("Taxon")
+        	);
+        table.getColumns().add(col1);        
 
-        // set up editor that makes sure only doubles are accepted as entry
-        // and only the Date column is editable.
-        table.setDefaultEditor(Object.class, new TableCellEditor() {
-            JTextField m_textField = new JTextField();
-            int m_iRow, m_iCol;
+        TableColumn<LocationMap, Double> col2 = new TableColumn<>("Latitude");
+        col2.setPrefWidth(100);
+        col2.setEditable(true);
+        col2.setCellValueFactory(
+        	    new PropertyValueFactory<LocationMap,Double>("Latitude")
+        	);
+        col2.setCellFactory(new Callback<TableColumn<LocationMap, Double>,TableCell<LocationMap, Double>>() {
+			@Override
+			public TableCell<LocationMap, Double> call(TableColumn<LocationMap, Double> param) {
+				StringConverter<Double> sc = new DoubleStringConverter();
+				TextFieldTableCell<LocationMap, Double> tc = new TextFieldTableCell<LocationMap, Double>(sc) {
+                    @Override
+                    public void updateItem(Double item, boolean empty) {
+                      super.updateItem(item, empty);
+                      if (!isEmpty()) {
+                        if (!Double.isNaN(item)) { 
+                        	this.setTextFill(Color.GREEN);
+                        } else { 
+                        	this.setTextFill(Color.RED);
+                        }
+                        setText(String.valueOf(item));
+                      }
+                    }
+                  };
+                  tc.setConverter(sc);
+                  return tc;
+              }
+		});
+        col2.setOnEditCommit(
+                new EventHandler<CellEditEvent<LocationMap, Double>>() {
+  					@Override
+  					public void handle(CellEditEvent<LocationMap, Double> event) {
+  						Double newValue = event.getNewValue();
+  						LocationMap location = event.getRowValue();
+  						location.setLatitude(newValue);
+  						convertTableDataToTrait();
+  						validateInput();
+  						table.refresh();
+  					}
+  				}                
+            );
 
-            @Override
-            public boolean stopCellEditing() {
-                table.removeEditor();
-                String sText = m_textField.getText();
-                if (sText == "") {
-                	return false;
-                }
-                tableData[m_iRow][m_iCol] = sText;
-                convertTableDataToTrait();
-                convertTraitToTableData();
-                validateInput();
-                return true;
-            }
-
-            @Override
-            public boolean isCellEditable(EventObject anEvent) {
-                return table.getSelectedColumn() >= 1;
-            }
-
-
-            @Override
-            public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int iRow, int iCol) {
-                if (!isSelected) {
-                    return null;
-                }
-                m_iRow = iRow;
-                m_iCol = iCol;
-                m_textField.setText((String) value);
-                return m_textField;
-            }
-
-            @Override
-            public boolean shouldSelectCell(EventObject anEvent) {
-                return false;
-            }
-
-            @Override
-            public void removeCellEditorListener(CellEditorListener l) {
-            }
-
-            @Override
-            public Object getCellEditorValue() {
-                return null;
-            }
-
-            @Override
-            public void cancelCellEditing() {
-            }
-
-            @Override
-            public void addCellEditorListener(CellEditorListener l) {
-            }
-
-        });
-        table.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        table.setRowHeight(24);
-        table.getColumnModel().getColumn(0).setPreferredWidth(300);
-        table.getColumnModel().getColumn(1).setPreferredWidth(75);
-        table.getColumnModel().getColumn(2).setPreferredWidth(75);
-        JScrollPane scrollPane = new JScrollPane(table);
+        table.getColumns().add(col2);
+        
+        TableColumn<LocationMap, Double> col3 = new TableColumn<>("Longitude");
+        col3.setPrefWidth(100);
+        col3.setEditable(true);
+        col3.setCellValueFactory(
+        	    new PropertyValueFactory<LocationMap,Double>("Longitude")
+        	);
+        col3.setCellFactory(new Callback<TableColumn<LocationMap, Double>,TableCell<LocationMap, Double>>() {
+			@Override
+			public TableCell<LocationMap, Double> call(TableColumn<LocationMap, Double> param) {
+				StringConverter<Double> sc = new DoubleStringConverter();
+				TextFieldTableCell<LocationMap, Double> tc = new TextFieldTableCell<LocationMap, Double>(sc) {
+                    @Override
+                    public void updateItem(Double item, boolean empty) {
+                      super.updateItem(item, empty);
+                      if (!isEmpty()) {
+                        if (!Double.isNaN(item)) { 
+                        	this.setTextFill(Color.GREEN);
+                        } else { 
+                        	this.setTextFill(Color.RED);
+                        }
+                        setText(String.valueOf(item));
+                      }
+                    }
+                  };
+                  tc.setConverter(sc);
+                  return tc;
+              }
+		});
+        col3.setOnEditCommit(
+                new EventHandler<CellEditEvent<LocationMap, Double>>() {
+  					@Override
+  					public void handle(CellEditEvent<LocationMap, Double> event) {
+  						Double newValue = event.getNewValue();
+  						LocationMap location = event.getRowValue();
+  						location.setLongitude(newValue);
+  						convertTableDataToTrait();
+  						validateInput();
+  						table.refresh();
+  					}
+  				}                
+            );
+        table.getColumns().add(col3);   
+        
+//        table = new Table(tableData, columnData) {
+//            private static final long serialVersionUID = 1L;
+//
+//            // method that induces table row shading
+//            @Override
+//            public Component prepareRenderer(TableCellRenderer renderer, int Index_row, int Index_col) {
+//                Component comp = super.prepareRenderer(renderer, Index_row, Index_col);
+//                //even index, selected or not selected
+//                if (isCellSelected(Index_row, Index_col)) {
+//                    comp.setBackground(Color.lightGray);
+//                } else if (Index_row % 2 == 0 && !isCellSelected(Index_row, Index_col)) {
+//                    comp.setBackground(new Color(237, 243, 255));
+//                } else {
+//                    comp.setBackground(Color.white);
+//                }
+//                return comp;
+//            }
+//        };
+//
+//        // set up editor that makes sure only doubles are accepted as entry
+//        // and only the Date column is editable.
+//        table.setDefaultEditor(Object.class, new TableCellEditor() {
+//            JTextField m_textField = new JTextField();
+//            int m_iRow, m_iCol;
+//
+//            @Override
+//            public boolean stopCellEditing() {
+//                table.removeEditor();
+//                String sText = m_textField.getText();
+//                if (sText == "") {
+//                	return false;
+//                }
+//                tableData[m_iRow][m_iCol] = sText;
+//                convertTableDataToTrait();
+//                convertTraitToTableData();
+//                validateInput();
+//                return true;
+//            }
+//
+//            @Override
+//            public boolean isCellEditable(EventObject anEvent) {
+//                return table.getSelectedColumn() >= 1;
+//            }
+//
+//
+//            @Override
+//            public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int iRow, int iCol) {
+//                if (!isSelected) {
+//                    return null;
+//                }
+//                m_iRow = iRow;
+//                m_iCol = iCol;
+//                m_textField.setText((String) value);
+//                return m_textField;
+//            }
+//
+//            @Override
+//            public boolean shouldSelectCell(EventObject anEvent) {
+//                return false;
+//            }
+//
+//            @Override
+//            public void removeCellEditorListener(CellEditorListener l) {
+//            }
+//
+//            @Override
+//            public Object getCellEditorValue() {
+//                return null;
+//            }
+//
+//            @Override
+//            public void cancelCellEditing() {
+//            }
+//
+//            @Override
+//            public void addCellEditorListener(CellEditorListener l) {
+//            }
+//
+//        });
+//        table.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
+//        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+//        table.setRowHeight(24);
+//        table.getColumnModel().getColumn(0).setPreferredWidth(300);
+//        table.getColumnModel().getColumn(1).setPreferredWidth(75);
+//        table.getColumnModel().getColumn(2).setPreferredWidth(75);
+        ScrollPane scrollPane = new ScrollPane(table);
         return scrollPane;
     } // createListBox
 
     /* synchronise table with data from traitSet Plugin */
     private void convertTraitToTableData() {
-        for (int i = 0; i < tableData.length; i++) {
-            tableData[i][0] = sTaxa[i];
-            tableData[i][1] = "";
-            tableData[i][2] = "";
+        for (int i = 0; i < taxonMapping.size(); i++) {
+        	LocationMap location = taxonMapping.get(i);
+        	location.taxon = sTaxa[i];
+        	location.latitude = Double.NaN;
+        	location.longitude = Double.NaN;
         }
         String trait = traitSet.value.get();
         if (trait == null || trait.trim().length() == 0) {
@@ -263,32 +415,44 @@ public class SLocationInputEditor extends ListInputEditor {
             	System.err.println(sTaxonID);
 //                throw new Exception("Trait (" + sTaxonID + ") is not a known taxon. Spelling error perhaps?");
             } else {
-	            tableData[iTaxon][0] = sTaxonID;
+            	LocationMap location = taxonMapping.get(iTaxon);
+            	location.taxon = sTaxonID;
 	            String [] sStrs2 = value.trim().split("\\s+");
 	            if (sStrs2.length == 2) {
-	            	tableData[iTaxon][1] = sStrs2[0];
-	            	tableData[iTaxon][2] = sStrs2[1];
+	            	location.latitude = parseDouble(sStrs2[0]);
+	            	location.longitude = parseDouble(sStrs2[1]);
 	            } else {
 	            	if (Character.isSpace(sStrs[1].charAt(0))) {
-	            		tableData[iTaxon][1] = "";
-		            	tableData[iTaxon][2] = sStrs2[0];
+	            		location.latitude = Double.NaN;
+	            		location.longitude = parseDouble(sStrs2[0]);
 	            	} else {
-		            	tableData[iTaxon][1] = sStrs2[0];
-		            	tableData[iTaxon][2] = "";
+	            		location.latitude = parseDouble(sStrs2[0]);
+	            		location.longitude = Double.NaN;
 	            	}
 	            }
             }
         }
 
         if (table != null) {
-            for (int i = 0; i < tableData.length; i++) {
-                table.setValueAt(tableData[i][1], i, 1);
-                table.setValueAt(tableData[i][2], i, 2);
-            }
+        	table.refresh();
         }
+//        if (table != null) {
+//            for (int i = 0; i < taxonMapping.size(); i++) {
+//                table.setValueAt(tableData[i][1], i, 1);
+//                table.setValueAt(tableData[i][2], i, 2);
+//            }
+//        }
     } // convertTraitToTableData
 
-    private int indexOf(String sTaxonID) {
+    private Double parseDouble(String string) {
+		try {
+			return Double.parseDouble(string);
+		} catch (NumberFormatException e) {
+			return Double.NaN;
+		}
+	}
+
+	private int indexOf(String sTaxonID) {
 		for (int i = 0; i < sTaxa.length; i++) {
 			if (sTaxa[i].equals(sTaxonID)) {
 				return i;
@@ -302,10 +466,10 @@ public class SLocationInputEditor extends ListInputEditor {
      */
     void convertTableDataToTrait() {
         String sTrait = "";
-        //Set<String> values = new HashSet<>(); 
-        for (int i = 0; i < tableData.length; i++) {
-            sTrait += sTaxa[i] + "=" + tableData[i][1] + " " + tableData[i][2];
-            if (i < tableData.length - 1) {
+        //Set<String> values = new HashSet<String>(); 
+        for (int i = 0; i < taxonMapping.size(); i++) {
+            sTrait += sTaxa[i] + "=" + taxonMapping.get(i).latitude + " " + taxonMapping.get(i).longitude;
+            if (i < taxonMapping.size() - 1) {
                 sTrait += ",\n";
             }
         }
@@ -346,7 +510,7 @@ public class SLocationInputEditor extends ListInputEditor {
 //		});
 //        traitEntry.setColumns(12);
 //        buttonBox.add(traitEntry);
-        //buttonBox.getChildren().add(Box.createHorizontalGlue());
+        // buttonBox.add(Box.createHorizontalGlue());
 
         Button guessButton = new Button("Guess latitude");
         guessButton.setId("Guess latitude");
@@ -367,8 +531,7 @@ public class SLocationInputEditor extends ListInputEditor {
                     // TODO: handle exception
                 }
                 refreshPanel();
-            }
-        );
+        });
         buttonBox.getChildren().add(clearButton);
 
         m_validateLabel = new SmallLabel("x", "orange");
@@ -378,9 +541,6 @@ public class SLocationInputEditor extends ListInputEditor {
         return buttonBox;
     } // createButtonBox
     
-    
-    
-
     
     private void guess(int column) {
         GuessPatternDialog dlg = new GuessPatternDialog(this, m_sPattern);
@@ -410,157 +570,146 @@ public class SLocationInputEditor extends ListInputEditor {
             }
             break;
         }
-
-        
-        
-        
-        
-        String [] strs = sTrait.trim().split(",");
+    	String [] strs = sTrait.trim().split(",");
     	for (String str : strs) {
     		String [] strs2 = str.trim().split("=");
     		String taxon = strs2[0].trim();
     		String value = strs2[1].trim();
-    		for (int i = 0; i < tableData.length; i++) {
-    			if (tableData[i][0].equals(taxon)) {
-    				if (value.contains("\t")) {
-    					String [] values = value.split("\\t");
-    					tableData[i][1] = values[0];
-    					tableData[i][2] = values[1];    					
+    		for (int i = 0; i < taxonMapping.size(); i++) {
+    			if (taxonMapping.get(i).taxon.equals(taxon)) {
+    				if (column == 1) {
+    					taxonMapping.get(i).latitude = parseDouble(value);
     				} else {
-    					tableData[i][column] = value;
+    					taxonMapping.get(i).longitude = parseDouble(value);
     				}
     				break;
     			}
     		}
     	}
         convertTableDataToTrait();
+        if (table != null) {
+        	table.refresh();
+        }
         validateInput();
         //convertTraitToTableData();
         repaint();
     }
 	
 
-    private Box createButtonBox2() {
-        Box buttonBox = Box.createHorizontalBox();
+    private HBox createButtonBox2() {
+        HBox buttonBox = FXUtils.newHBox();
 
-        JButton transformButton = new JButton("Transform");
-        transformButton.setName("Transform");
-        transformButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            	transform();
-            }
-        });
-        buttonBox.add(transformButton);
+        // buttonBox.add(Box.createHorizontalGlue());
 
-        buttonBox.add(Box.createHorizontalGlue());
-
-        JButton manipulateButton = new JButton("Manipulate latitude");
-        manipulateButton.setName("Manipulate latitude");
-        manipulateButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            	manipulate(1);
-            }
-        });
-        buttonBox.add(manipulateButton);
+        Button manipulateButton = new Button("Manipulate latitude");
+        manipulateButton.setId("Manipulate latitude");
+        manipulateButton.setOnAction(e->manipulate(1));
+        buttonBox.getChildren().add(manipulateButton);
         
-        JButton manipulateButton2 = new JButton("Manipulate longitude");
-        manipulateButton2.setName("Manipulate longitude");        
-        manipulateButton2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            	manipulate(2);
-            }
-        });
-        buttonBox.add(manipulateButton2);
+        Button manipulateButton2 = new Button("Manipulate longitude");
+        manipulateButton2.setId("Manipulate longitude");        
+        manipulateButton2.setOnAction(e->manipulate(2));
+        buttonBox.getChildren().add(manipulateButton2);
         return buttonBox;
     } // createButtonBox2
     
     
     // a JavaScript engine
-    static ScriptEngine m_engine;
-    {
-		// create a script engine manager
-	    ScriptEngineManager factory = new ScriptEngineManager();
-	    // create a JavaScript engine
-	    m_engine = factory.getEngineByName("JavaScript");
-    }
+    //static ScriptEngine m_engine = null;
+    
+//    private void initEngine() {
+//		// create a script engine manager
+//	    ScriptEngineManager factory = new ScriptEngineManager();
+//	    // create a JavaScript engine
+//	    m_engine = factory.getEngineByName("nashorn");
+//    }
 
     private void manipulate(int column) {
 		String operatee = (column == 1 ? "latitude" : "longitude");
-		String formula = JOptionPane.showInputDialog(this, "<html>Give a formula with $x as the " + operatee + 
-				" e.g., -$x to make values negative<br>" +
-				"180+$x to add 180 to " + operatee + "<br>" +
-				"$x*2+10 to multiply by 2 and add 10<br>" +
-				"max($x,100) to get the maximum of " + operatee + " and 100", "Manipulate " + operatee, JOptionPane.OK_CANCEL_OPTION);
+		String formula = (String) Alert.showInputDialog(null, "Give a formula with $x as the " + operatee + 
+				" e.g., -$x to make values negative\n" +
+				"180+$x to add 180 to " + operatee + "\n" +
+				"$x*2+10 to multiply by 2 and add 10\n" +
+				"max($x,100) to get the maximum of " + operatee + " and 100", "Manipulate " + operatee, Alert.QUESTION_MESSAGE, "$x");
 		if (formula == null || formula.trim().length() == 0) {
 			return;
 		}
 		
-		for (int i = 0; i < tableData.length; i++) {
-			String value = tableData[i][column].toString();
+		for (int i = 0; i < taxonMapping.size(); i++) {
+			String value = (column == 1 ?
+					taxonMapping.get(i).latitude.toString():
+					taxonMapping.get(i).longitude.toString()
+					);
 			try {
 				value = Double.parseDouble(value) + "";
 			} catch (Exception e) {
 				value = "0";
 			}
-			String newValue = value(formula, value);
-			tableData[i][column] = newValue;
+			double newValue = value(formula, value);
+			if (column == 1) {
+					taxonMapping.get(i).latitude = newValue;
+			} else {
+					taxonMapping.get(i).longitude = newValue;
+			}
 		}
 		convertTableDataToTrait();
 		validateInput();
-		repaint();
+		table.refresh();
 	}
 
-	String value(String formula, String value) {
-		String sFormula = "with (Math) {" + formula + "}";
+	double value(String sFormula, String value) {
+//		String sFormula = "with (Math) {" + formula + "}";
 		sFormula = sFormula.replaceAll("\\$x", "("+value+")");
-		System.err.println("parsing " + sFormula);
-		try {
-			Object o = m_engine.eval(sFormula);
-			String sValue = o.toString();
-			return sValue;
-		} catch (javax.script.ScriptException es) {
-			return es.getMessage();
-		}
+		Log.debug.print("parsing " + sFormula);
+//		try {
+//			if (m_engine == null) {
+//				initEngine();
+//			}
+//			Object o = m_engine.eval(sFormula);
+//			String sValue = o.toString();
+			double s = ScriptUtil.eval(sFormula);
+			Log.debug.println(" = " + s);
+			return s;
+//		} catch (javax.script.ScriptException es) {
+//			return es.getMessage();
+//		}
 	}
 
-	private void transform() {
-		ScapeToadTransfomer transformer = (ScapeToadTransfomer) likelihood.transformerInput.get();
-		if (transformer == null) {
-			transformer = new ScapeToadTransfomer();
-			transformer.setID("transform" + likelihood.getID());
-			likelihood.transformerInput.setValue(transformer, likelihood);
-			transformer.cartogramFileInput.setValue(new OutFile("cartogram.ser"), transformer);
-		}
-		
-		
-		BEASTObjectDialog dlg = new BEASTObjectDialog(transformer, Transformer.class, doc);
-		if (dlg.showDialog()) {
+    private void transform() {
+        ScapeToadTransfomer transformer = (ScapeToadTransfomer) likelihood.transformerInput.get();
+        if (transformer == null) {
+            transformer = new ScapeToadTransfomer();
+            transformer.setID("transform" + likelihood.getID());
+            likelihood.transformerInput.setValue(transformer, likelihood);
+            transformer.cartogramFileInput.setValue(new OutFile("cartogram.ser"), transformer);
+        }
+        
+        
+        BEASTObjectDialog dlg = new BEASTObjectDialog(transformer, Transformer.class, doc);
+        if (dlg.showDialog()) {
             dlg.accept(transformer, doc);
         }
-		if (transformer.weightIdentifiedInput.get() != null && transformer.weightIdentifiedInput.get().matches("^\\s*$")) {
-			transformer.weightIdentifiedInput.setValue(null, transformer);
-		}
-		File shapeFile = transformer.shapeFileInput.get();
-		if (shapeFile == null || shapeFile.getName().equals("[[none]]")) {
-			likelihood.transformerInput.setValue(null, likelihood);
-		}
-	}
+        if (transformer.weightIdentifiedInput.get() != null && transformer.weightIdentifiedInput.get().matches("^\\s*$")) {
+            transformer.weightIdentifiedInput.setValue(null, transformer);
+        }
+        File shapeFile = transformer.shapeFileInput.get();
+        if (shapeFile == null || shapeFile.getName().equals("[[none]]")) {
+            likelihood.transformerInput.setValue(null, likelihood);
+        }
+    }
 
-    
+
 	@Override
 	public void validateInput() {
 		// check all values are specified
-		if (tableData == null) {
+		if (taxonMapping == null) {
 			return;
 		}
-        for (int i = 0; i < tableData.length; i++) {
-        	if (tableData[i][1].toString().trim().length() == 0 || tableData[i][2].toString().trim().length() == 0) {
+        for (int i = 0; i < taxonMapping.size(); i++) {
+        	if (Double.isNaN(taxonMapping.get(i).latitude) || Double.isNaN(taxonMapping.get(i).longitude)) {
         		m_validateLabel.setVisible(true);
-        		m_validateLabel.setToolTipText("trait for " + tableData[i][0] + " needs to be specified");
-        		m_validateLabel.repaint();
+        		m_validateLabel.setTooltip(new Tooltip("trait for " + taxonMapping.get(i).taxon + " needs to be specified"));
+        		// m_validateLabel.repaint();
         		return;
         	}
         }

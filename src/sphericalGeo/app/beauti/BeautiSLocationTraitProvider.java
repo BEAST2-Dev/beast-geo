@@ -190,7 +190,7 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
 
 	
 	@Override
-	protected int matches(Alignment alignment) {
+	public int matches(Alignment alignment) {
 		for (Object o : alignment.getOutputs()) {
 			BEASTInterface  output = (BEASTInterface) o;
 			if (output instanceof sphericalGeo.ApproxMultivariateTraitLikelihood) {
@@ -202,7 +202,7 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
 	
 	
 	@Override
-	void editAlignment(Alignment alignment, BeautiDoc doc) {
+	public void editAlignment(Alignment alignment, BeautiDoc doc) {
 		SLocationInputEditor editor = new SLocationInputEditor(doc);
 		ApproxMultivariateTraitLikelihood likelihood = null;
 		for (Object o : alignment.getOutputs()) {

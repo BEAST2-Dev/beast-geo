@@ -25,6 +25,7 @@ import beastfx.app.inputeditor.InputEditor;
 import beastfx.app.inputeditor.SmallButton;
 import beastfx.app.inputeditor.StringInputEditor;
 import beastfx.app.inputeditor.TaxonSetDialog;
+import beastfx.app.util.Alert;
 import beastfx.app.util.FXUtils;
 import beastfx.app.util.Utils;
 import javafx.scene.Node;
@@ -99,8 +100,8 @@ public class GeoPriorProvider extends BEASTObjectInputEditor implements PriorPro
                     TaxonSetDialog dlg = new TaxonSetDialog(taxonset, candidates, doc);
                     if (dlg.showDialog()) {
         	            if (dlg.taxonSet.taxonsetInput.get().size() == 0) {
-        	            	JOptionPane.showMessageDialog(doc.beauti, "At least one taxon should be included in the taxon set",
-        	            			"Error specifying taxon set", JOptionPane.ERROR_MESSAGE);
+        	            	Alert.showMessageDialog(null, "At least one taxon should be included in the taxon set",
+        	            			"Error specifying taxon set", Alert.ERROR_MESSAGE);
         	            	taxonset.taxonsetInput.get().addAll(originalTaxa);
         	            	return;
         	            }
@@ -256,7 +257,7 @@ public class GeoPriorProvider extends BEASTObjectInputEditor implements PriorPro
             }
                         
             if (trees.size() == 0) {
-            	JOptionPane.showMessageDialog(this, "Could not find a spherical geography partition\nNo prior will be added.");
+            	Alert.showMessageDialog(this, "Could not find a spherical geography partition\nNo prior will be added.");
             	return null;
             }
 
@@ -282,8 +283,8 @@ public class GeoPriorProvider extends BEASTObjectInputEditor implements PriorPro
             }
             taxonSet = dlg.taxonSet;
             if (taxonSet.taxonsetInput.get().size() == 0) {
-            	JOptionPane.showMessageDialog(doc.beauti, "At least one taxon should be included in the taxon set",
-            			"Error specifying taxon set", JOptionPane.ERROR_MESSAGE);
+            	Alert.showMessageDialog(null, "At least one taxon should be included in the taxon set",
+            			"Error specifying taxon set", Alert.ERROR_MESSAGE);
             	return null;
             }
             int i = 1;
