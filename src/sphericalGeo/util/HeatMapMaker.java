@@ -396,7 +396,6 @@ public class HeatMapMaker extends Runnable {
         }
     }
 
-    static ConsoleApp app;
 	public static void main(String[] args) throws Exception {
 		HeatMapMaker heatMapMaker = new HeatMapMaker();
 	
@@ -407,26 +406,12 @@ public class HeatMapMaker extends Runnable {
 			doc.beautiConfig.initAndValidate();
 			
 			// suppress a few inputs that we don't want to expose to the user
-			doc.beautiConfig.suppressBEASTObjects.add(heatMapMaker.getClass().getName() + ".mcmc");
-			doc.beautiConfig.suppressBEASTObjects.add(heatMapMaker.getClass().getName() + ".value");
-			doc.beautiConfig.suppressBEASTObjects.add(heatMapMaker.getClass().getName() + ".hosts");
-		
-			// create panel with entries for the application
-			BEASTObjectPanel panel = new BEASTObjectPanel(heatMapMaker, heatMapMaker.getClass(), doc);
-			
-			// wrap panel in a dialog
-			BEASTObjectDialog dialog = new BEASTObjectDialog(panel, null);
-	
-			// show the dialog
-			if (dialog.showDialog()) {
-				dialog.accept(heatMapMaker, doc);
-				// create a console to show standard error and standard output
-				//ConsoleApp 
-				app = new ConsoleApp("HeatMapMaker", "Heat Map Maker: " + heatMapMaker.treesetInput.get().getPath(), null);
-				heatMapMaker.initAndValidate();
-				heatMapMaker.run();
-			}
-			System.out.println("All done");
+			String className = heatMapMaker.getClass().getName();
+			String [] suppressedInputs = new String [] {
+					className + ".mcmc",
+					className + ".value",
+					className + ".hosts"};
+			new Application(heatMapMaker, suppressedInputs, "Heatmap maker", args);
 			return;
 		}
 

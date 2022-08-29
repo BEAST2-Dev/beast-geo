@@ -34,6 +34,7 @@ import beast.base.evolution.tree.Node;
 import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.MRCAPrior;
 import beast.base.evolution.tree.TreeParser;
+import beast.base.parser.NexusParser;
 import beast.base.parser.XMLParser;
 import beast.base.parser.XMLParserException;
 
@@ -119,12 +120,16 @@ public class TreeToTraceLogger extends Runnable {
     	public FastTreeSet(String inputFileName, int burninPercentage) throws IOException  {
             Log.warning.println("0              25             50             75            100");
             Log.warning.println("|--------------|--------------|--------------|--------------|");
-    		TreeSetParser parser = new TreeSetParser(burninPercentage, false);
-	      	Node [] roots = parser.parseFile(inputFileName);
-	      	trees = new Tree[roots.length];
-	      	int i = 0;
-	      	for (Node root : roots) {
-	      		trees[i++] = new Tree(root);
+            NexusParser parser = new NexusParser();
+	      	parser.parseFile(new File(inputFileName));
+	      	List<Tree> treesInFile = parser.trees;
+	      	
+	      	int n0 = treesInFile.size();
+	      	int start = n0 * burninPercentage / 100;
+	      	int n = n0 - start;
+	      	trees = new Tree[n];
+	      	for (int i = start; i < n0; i++) {
+	      		trees[i-start] = treesInFile.get(i);
 	      	}
 		}
 

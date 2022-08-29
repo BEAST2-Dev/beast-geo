@@ -164,12 +164,6 @@ public class SLocationInputEditor extends ListInputEditor {
             validateInput();
             // synchronise with table, useful when taxa have been deleted
             convertTableDataToTrait();
-
-            Button transformButton = new Button("Transform");
-            transformButton.setId("Transform");
-            transformButton.setOnAction(e->transform());
-            buttonBox.getChildren().add(transformButton);
-
         }
     } // init
 
@@ -610,6 +604,11 @@ public class SLocationInputEditor extends ListInputEditor {
         manipulateButton2.setId("Manipulate longitude");        
         manipulateButton2.setOnAction(e->manipulate(2));
         buttonBox.getChildren().add(manipulateButton2);
+
+        Button transformButton = new Button("Transform");
+        transformButton.setId("Transform");
+        transformButton.setOnAction(e->transform());
+        buttonBox.getChildren().add(transformButton);
         return buttonBox;
     } // createButtonBox2
     

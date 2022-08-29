@@ -1,6 +1,8 @@
-<package name='GEO_SPHERE' version='1.3.1'>
-	<depends on='beast2' atleast='2.6.0'/>
-	<depends on='BEASTLabs' atleast='1.9.0'/>
+<package name='GEO_SPHERE' version='1.4.0'>
+        <depends on='BEAST.base' atleast='2.7.0'/>
+        <depends on='BEAST.app' atleast='2.7.0'/>
+        <depends on='BEASTLabs' atleast='2.0.0'/>
+
     <packageapp description="HeatMapMaker"
               class="sphericalGeo.util.HeatMapMaker"
               args=""
@@ -16,4 +18,52 @@
               args=""
               icon="sphericalGeo/util/heatmapicon.png"
             />
+
+    <service type="beast.base.core.BEASTInterface">
+        <provider classname="sphericalGeo.AffineTransformer"/>
+        <provider classname="sphericalGeo.AlignmentFromTraitMap"/>
+        <provider classname="sphericalGeo.app.beauti.BeautiSLocationTraitProvider"/>
+        <provider classname="sphericalGeo.ApproxMultivariateTraitLikelihood"/>
+        <provider classname="sphericalGeo.ApproxMultivariateTraitLikelihood2"/>
+        <provider classname="sphericalGeo.ApproxMultivariateTraitLikelihoodF"/>
+        <provider classname="sphericalGeo.ApproxMultivariateTraitLikelihoodF2"/>
+        <provider classname="sphericalGeo.CircleDistanceProvider"/>
+        <provider classname="sphericalGeo.geo.global.GlobalGeoPrior"/>
+        <provider classname="sphericalGeo.GeoPrior"/>
+        <provider classname="sphericalGeo.GreatCircleDistance"/>
+        <provider classname="sphericalGeo.LocationDataType"/>
+        <provider classname="sphericalGeo.LocationOperator"/>
+        <provider classname="sphericalGeo.LocationOperator2"/>
+        <provider classname="sphericalGeo.LocationOperatorF"/>
+        <provider classname="sphericalGeo.LocationParameter"/>
+        <provider classname="sphericalGeo.MultiGeoPrior"/>
+        <provider classname="sphericalGeo.PFApproxMultivariateTraitLikelihood"/>
+        <provider classname="sphericalGeo.region.BitmapRegion"/>
+        <provider classname="sphericalGeo.region.KMLRegion"/>
+        <provider classname="sphericalGeo.region.Region"/>
+        <provider classname="sphericalGeo.region.SVGRegion"/>
+        <provider classname="sphericalGeo.RelaxedSphericalDiffusionModel"/>
+        <provider classname="sphericalGeo.scapetoad.ScapeToadTransfomer"/>
+        <provider classname="sphericalGeo.sitemodel.GeoSiteModel"/>
+        <provider classname="sphericalGeo.SphericalDiffusionModel"/>
+        <provider classname="sphericalGeo.TraitFunction"/>
+        <provider classname="sphericalGeo.TreeTraitMap"/>
+        <provider classname="sphericalGeo.util.AverageSpeedCalculator"/>
+        <provider classname="sphericalGeo.util.CirclePathMaker"/>
+        <provider classname="sphericalGeo.util.GeoTreeMerger"/>
+        <provider classname="sphericalGeo.util.HeatMapMaker"/>
+        <provider classname="sphericalGeo.util.MapMaker"/>
+        <provider classname="sphericalGeo.util.RootDensityFitCalculator"/>
+        <provider classname="sphericalGeo.util.SpeedAnnotator"/>
+        <provider classname="sphericalGeo.util.SpeedLogger"/>
+        <provider classname="sphericalGeo.util.SphericalDiffusionSimulator"/>
+        <provider classname="sphericalGeo.util.TreeToSVG"/>
+        <provider classname="sphericalGeo.util.TreeToTraceLogger"/>
+    </service>
+
+    <service type="beast.base.evolution.datatype.DataType">
+        <provider classname="sphericalGeo.LocationDataType"/>
+    </service>
+
+
 </package>

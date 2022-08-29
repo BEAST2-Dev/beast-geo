@@ -307,7 +307,7 @@ Pali=24.53 82.25
     </logger>
 
     <logger id="treelog.t:IELex" fileName="IELexRCtipsTrans2.trees" logEvery="1000" mode="tree">
-        <log id="TreeWithMetaDataLogger.t:IELex" spec="beast.base.evolution.tree.TreeWithMetaDataLogger" branchratemodel="@RelaxedClock.c:geo" tree="@Tree.t:IELex">
+        <log id="TreeWithMetaDataLogger.t:IELex" spec="beast.base.evolution.TreeWithMetaDataLogger" branchratemodel="@RelaxedClock.c:geo" tree="@Tree.t:IELex">
             <metadata id="location.geo" spec="sphericalGeo.TraitFunction" likelihood="@slocationtreeLikelihood.geo">0.0</metadata>
         </log>
     </logger>

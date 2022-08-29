@@ -16,10 +16,14 @@ import sphericalGeo.AlignmentFromTraitMap;
 import sphericalGeo.ApproxMultivariateTraitLikelihood;
 import sphericalGeo.TraitFunction;
 import sphericalGeo.TreeTraitMap;
+import beastfx.app.beauti.ThemeProvider;
 import beastfx.app.inputeditor.BeautiAlignmentProvider;
 import beastfx.app.inputeditor.BeautiDoc;
 import beast.base.parser.PartitionContext;
 import beastfx.app.util.Utils;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import beast.base.core.BEASTInterface;
 import beast.base.core.Description;
 import beast.base.core.ProgramStatus;
@@ -210,16 +214,19 @@ public class BeautiSLocationTraitProvider extends BeautiAlignmentProvider {
 			if (output instanceof ApproxMultivariateTraitLikelihood) {
 				likelihood = (ApproxMultivariateTraitLikelihood) output;
 				editor.initPanel(likelihood);
-		        JOptionPane optionPane = new JOptionPane(editor, JOptionPane.PLAIN_MESSAGE,
-		                JOptionPane.CLOSED_OPTION, null, new String[]{"Close"}, "Close");
-		        optionPane.setBorder(new EmptyBorder(12, 12, 12, 12));
+				
+				
+				Dialog dlg = new Dialog();
+				DialogPane pane = new DialogPane();
+				pane.setContent(editor);
+				pane.getButtonTypes().add(ButtonType.CLOSE);
+				dlg.setDialogPane(pane);
+				dlg.setTitle("Location trait editor");
+		    	pane.setId("LocationTraitEditor");
+		        dlg.setResizable(true);
+		    	ThemeProvider.loadStyleSheet(dlg.getDialogPane().getScene());
+		        dlg.showAndWait();
 
-		        final JDialog dialog = optionPane.createDialog(Frame.getFrames()[0], "Location trait editor");
-		    	dialog.setName("LocationTraitEditor");
-		        // dialog.setResizable(true);
-		        dialog.pack();
-
-		        dialog.setVisible(true);
 		        editor.convertTableDataToTrait();
 		        try {
 			        // TODO: any post-processing...

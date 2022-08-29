@@ -8,19 +8,20 @@
 	</description>
 
 	<!-- set global properties for this build -->
-	<property name="srcGEO" location="src" />
-	<property name="buildGEO" location="build" />
-	<property name="libGEO" location="lib" />
-	<property name="release_dir" value="release" />
+	<property name="GEO_DIR" location="../beast-geo" />
+	<property name="srcGEO" location="${GEO_DIR}/src" />
+	<property name="buildGEO" location="${GEO_DIR}/build" />
+	<property name="libGEO" location="${GEO_DIR}/lib" />
+	<property name="release_dir" value="${GEO_DIR}/release" />
 	<property name="distGEO" location="${buildGEO}/dist" />
 	<property name="beast2path" location="../beast2" />
 	<property name="libBeast2" location="${beast2path}/lib" />
 	<property name="srcBeast2" location="${beast2path}/src" />
 	<property name="beast_classic_path" location="../beast-classic/build" />
 	<property name="beast2classpath" location="${beast2path}/build" />
-	<property name="beastLabsPath" location="../BEASTLabs/build" />
-	<property name="Add_on_dir" value="${release_dir}/add-on" />
-        <property name="version" value="1.3.1" />
+    <property name="beastappclasspath" location="../BeastFX/build" />
+    <property name="BEASTLabsclasspath" location="../BEASTLabs/build" />
+ 	<property name="Add_on_dir" value="${release_dir}/add-on" />
 
     <import file="${beast2path}/build.xml" />
 
@@ -35,22 +36,30 @@
    		<fileset dir="${libGEO}" includes="Jama-1.0.1.jar"/>
    		<fileset dir="${libGEO}" includes="jdom.jar"/>
    		<fileset dir="${libGEO}" includes="xerces.jar"/>
-		<fileset dir="${libBeast2}" includes="junit-4.8.2.jar"/>
-		<fileset dir="${libBeast2}" includes="fest.jar"/>
-		<fileset dir="${libBeast2}" includes="jam.jar"/>
-		<fileset dir="${libBeast2}" includes="colt.jar"/>
-		<fileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar"/>
-                <fileset dir="${libBeast2}" includes="antlr-runtime-4.7.jar"/>
-		<!--fileset dir="${libBeast2}" includes="itextpdf-5.2.1.jar" /-->
-		<fileset dir="${libBeast2}" includes="beagle.jar"/>
+
+        <fileset dir="${libBeast2}" includes="antlr-runtime-4.10.1.jar"/>
+        <fileset dir="${libBeast2}" includes="beagle.jar"/> 
+        <fileset dir="${libBeast2}" includes="colt.jar"/> 
+        <fileset dir="${libBeast2}" includes="jam.jar"/>
+		<fileset dir="${libBeast2}" includes="commons-math3-3.6.1.jar"/>
+
 		<pathelement path="${beast2classpath}"/>
-		<pathelement path="${beastLabsPath}"/>
-		<!--pathelement path="${beast_classic_path}"/-->
+		<pathelement path="${beastappclasspath}"/>
+		<pathelement path="${BEASTLabsclasspath}"/>
 	</path>
 
 	<!-- start -->
 	<target name="initGEO">
 		<echo message="${ant.project.name}: ${ant.file}" />
+		<available file="${GEO_DIR}/version.xml" property="versionAvailable"/>
+        <fail unless="versionAvailable">
+              ** Required file version.xml does not exist. **
+            </fail>
+
+        <!-- Read package name and version from xml file -->
+            <xmlproperty file="${GEO_DIR}/version.xml" prefix="fromVersionFile" />
+        <property name="GEOversion" value="${fromVersionFile.package(version)}" />
+
 	</target>
 
 	<target name="cleanGEO">
@@ -89,9 +98,11 @@
 		       fork="true"
 		       memoryinitialsize="256m"
 		       memorymaximumsize="256m">
-			<include name="**/**" />
+			<include name="sphericalGeo/**" />
 			<!-- compile JUnit test classes -->
+			<!--
 			<include name="test/beast/**" />
+		-->
 		</javac>
         <copy todir="${buildGEO}">
             <fileset dir="${srcGEO}" includes="**/*.properties" />
@@ -105,26 +116,6 @@
 		<!-- Create the distribution directory -->
 		<mkdir dir="${distGEO}" />
 
-		<!-- Put everything in ${buildGEO} into the beast.jar file -->
-		<jar jarfile="${distGEO}/GEO.jar">
-			<manifest>
-				<attribute name="Built-By" value="${user.name}" />
-				<attribute name="Main-Class" value="${main_class_BEAST}" />
-			</manifest>
-			<fileset dir="${buildGEO}">
-				<include name="**/*.class" />
-			</fileset>
-			<fileset dir="${beast2classpath}">
-				<include name="beast/**/*.class" />
-				<include name="beast/**/*.properties" />
-				<include name="beast/**/*.png" />
-				<include name="beagle/**/*.class" />
-				<include name="org/**/*.class" />
-			</fileset>
-			<fileset dir="${beastLabsPath}">
-				<include name="**/*.class" />
-			</fileset>
-		</jar>
 		<jar jarfile="${distGEO}/GEO.src.jar">
 			<fileset dir="${srcGEO}">
 				<include name="**/*.java" />
@@ -194,7 +185,7 @@
 		<mkdir dir="${Add_on_dir}/lib" />
 		<mkdir dir="${Add_on_dir}/examples" />
 		<mkdir dir="${Add_on_dir}/examples/nexus" />
-		<mkdir dir="${Add_on_dir}/templates" />
+		<mkdir dir="${Add_on_dir}/fxtemplates" />
 
 		<copy todir="${Add_on_dir}">
 			<fileset file="version.xml"/>
@@ -205,8 +196,8 @@
 		<copy todir="${Add_on_dir}/examples/nexus">
 			<fileset dir="examples/nexus" />
 		</copy>
-		<copy todir="${Add_on_dir}/templates">
-			<fileset dir="templates" />
+		<copy todir="${Add_on_dir}/fxtemplates">
+			<fileset dir="fxtemplates" />
 		</copy>
 		<copy todir="${Add_on_dir}/lib">
 			<fileset dir="lib" />
@@ -222,17 +213,17 @@
 		<copy todir="${Add_on_dir}">
 			<fileset dir="${distGEO}" includes="GEO.src.jar" />
 		</copy>
-		<copy todir="${Add_on_dir}/templates">
-			<fileset file="templates/GEO.xml" />
-			<fileset file="templates/AutoPartition.xml" />
+		<copy todir="${Add_on_dir}/fxtemplates">
+			<fileset file="fxtemplates/GEO.xml" />
+			<fileset file="fxtemplates/AutoPartition.xml" />
 		</copy>
 
-		<jar jarfile="${distGEO}/GEO_SPHERE.addon.v${version}.zip">
+		<jar jarfile="${distGEO}/GEO_SPHERE.addon.v${GEOversion}.zip">
 			<fileset dir="${Add_on_dir}">
 				<include name="**/*" />
 			</fileset>
         </jar>
-		<echo message="Add-on version ${version} release is finished." />
+		<echo message="Add-on version ${GEOversion} release is finished." />
 	</target>
 
 </project>

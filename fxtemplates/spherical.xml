@@ -3,7 +3,7 @@
 
 
 <mergewith point='aux-partitions-panels'>
-		<alignmentProvider id="Add Spherical Geography" spec='BeautiSLocationTraitProvider' template='@SLocationTrait'/>
+		<alignmentProvider id="Add Spherical Geography" spec='sphericalGeo.app.beauti.BeautiSLocationTraitProvider' template='@SLocationTrait'/>
 
         <subtemplate id='SLocationTrait' class='sphericalGeo.AlignmentFromTraitMap' mainid='$(n)'
 suppressInputs='beast.evolution.substitutionmodel.LocationSubstitutionModel.frequencies,
