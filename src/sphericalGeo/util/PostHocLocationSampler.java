@@ -17,7 +17,6 @@ import beast.base.evolution.TreeWithMetaDataLogger;
 import beast.base.evolution.branchratemodel.BranchRateModel;
 import beast.base.evolution.likelihood.GenericTreeLikelihood;
 import beast.base.evolution.tree.Tree;
-import beast.base.inference.CalculationNode;
 import beast.base.inference.Distribution;
 import beast.base.inference.Runnable;
 import beast.base.inference.State;
@@ -59,6 +58,7 @@ public class PostHocLocationSampler extends Runnable {
 	private State state;
 	private Distribution posterior;
 	private TreeWithMetaDataLogger treeLogger;
+	private PostHocBranchRateModel clockModel;
 	
 	@Override
 	public void run() throws Exception {
@@ -153,6 +153,11 @@ public class PostHocLocationSampler extends Runnable {
 			throw new IllegalArgumentException("Could not find state in XML.");
 		}
 		
+		if (clockModel == null) {
+			throw new IllegalArgumentException("Could not find PostHocBranchRateModel in XML. "
+					+ "Perhaps you need to replace the relaxed clock with PostHocBranchRateModel.");
+		}
+		
 		Input<?> logAverageInput = ((BEASTInterface)locationProvider).getInput("logAverage");
 		logAverageInput.set(false);
 	}
@@ -180,6 +185,9 @@ public class PostHocLocationSampler extends Runnable {
 			}
 			if (o2 instanceof TreeWithMetaDataLogger) {
 				treeLogger = (TreeWithMetaDataLogger) o2;
+			}
+			if (o2 instanceof PostHocBranchRateModel) {
+				clockModel = (PostHocBranchRateModel) o2;
 			}
 			if (!done.contains(o2)) {
 				traverse(o2, done);
