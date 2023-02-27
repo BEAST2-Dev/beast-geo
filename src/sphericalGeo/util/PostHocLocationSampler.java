@@ -33,7 +33,7 @@ import sphericalGeo.SphericalDiffusionModel;
 import sphericalGeo.util.treeset.MemoryFriendlyTreeSet;
 
 @Description("Post Hoc Location Sampler produces location sample from posterior tree and trace sample")
-public class PostHocLocationSampler extends Runnable {
+public class PostHocLocationSampler extends beast.core.Runnable {
 	final public Input<XMLFile> xmlInput = new Input<>("xml", "BEAST XML file containing a spherical diffusion analysis",
 			new XMLFile("[[none]]"));
 	final public Input<TreeFile> treeInput = new Input<>("tree", "tree file containing posterior sample of above XML",
@@ -57,7 +57,8 @@ public class PostHocLocationSampler extends Runnable {
 	private Tree tree;
 	private State state;
 	private Distribution posterior;
-	private TreeWithMetaDataLogger treeLogger;
+	private TreeWithMetaDataLogger
+	treeLogger;
 	private PostHocBranchRateModel clockModel;
 	
 	@Override
@@ -91,22 +92,38 @@ public class PostHocLocationSampler extends Runnable {
 			tree.assignFrom(tree2);
 			if (precisionIndex >= 0) {
 				precision.setValue(trace.getTrace(precisionIndex)[k]);
-			} else {
+			}
+			if (clockRateIndex >= 0){
 				clockRate.setValue(trace.getTrace(clockRateIndex)[k]);
 			}
 			state.robustlyCalcPosterior(posterior);
 			state.acceptCalculationNodes();
             state.setEverythingDirty(false);
 
-			treeLogger.log(k, out);
+            if (k == 0) {
+            	tree2.init(out);
+    			out.println();
+            }
+			treeLogger.log((long)k, out);
+			out.println();
 			k++;
+			if (k % 10 != 0) {
+				Log.warning.print('.');
+			} else {
+				Log.warning.print('|');
+				if (k % 100 == 0) {
+					Log.warning.println(k);
+				}
+			}
 		}
+		tree.close(out);
 
 
 		
 		if (!outputInput.get().getName().equals("[[none]]")) {
 			out.close();
 		}
+		Log.warning("Done");
 	}
 
 	private void parseTrace() throws IOException {
@@ -114,21 +131,37 @@ public class PostHocLocationSampler extends Runnable {
 		List<String> labels = trace.getLabels();
 		precisionIndex = -1;
 		clockRateIndex = -1;
+		String precision2 = sanitise(precision.getID());
+		String precision3 = precision2.replaceAll("\\.geo", "");
+		String clockRate2 = sanitise(clockRate.getID());
+		String clockRate3 = clockRate2.replaceAll("\\.geo", "");
 		for (int i = 0; i < labels.size(); i++) {
 			String label = labels.get(i);
-			if (precision.getID().startsWith(label)) {
-				precisionIndex = i;
+			if (precision.getID().equals(label) || precision2.equals(label)|| precision3.equals(label)) {
+				precisionIndex = i + 1;
 			}
-			if (clockRate.getID().startsWith(label)) {
-				clockRateIndex = i;
+			if (clockRate.getID().equals(label) || clockRate2.equals(label)|| clockRate3.equals(label)) {
+				clockRateIndex = i + 1;
 			}
 		}
 		if (precisionIndex < 0 && clockRateIndex < 0) {
 			throw new IllegalArgumentException("Trace file should contain one of presicion and clock rate, but could not find either");
 		}
-		if (precisionIndex >= 0 && clockRateIndex >= 0) {
-			throw new IllegalArgumentException("Trace file should contain one of presicion and clock rate, but found both");
-		}
+//		if (precisionIndex >= 0 && clockRateIndex >= 0) {
+//			throw new IllegalArgumentException("Trace file should contain one of presicion and clock rate, but found both");
+//		}
+	}
+
+	private String sanitise(String id) {
+    	// remove clock/site/tree info
+    	id = id.replaceAll("\\.c:", ".");
+    	id = id.replaceAll("\\.t:", ".");
+    	id = id.replaceAll("\\.s:", ".");
+    	// remove trailing dots on labels
+    	id = id.replaceAll("\\.\\.", ".");
+    	id = id.replaceAll("\\.\t", "\t");
+    	id = id.replaceAll("\\.$", "");
+		return id;
 	}
 
 	private void parseXML() throws SAXException, IOException, ParserConfigurationException, XMLParserException {
@@ -159,7 +192,10 @@ public class PostHocLocationSampler extends Runnable {
 		}
 		
 		Input<?> logAverageInput = ((BEASTInterface)locationProvider).getInput("logAverage");
-		logAverageInput.set(false);
+		if ((Boolean)logAverageInput.get()) {
+			logAverageInput.set(false);
+			((BEASTInterface)locationProvider).initAndValidate();
+		}
 	}
 
 	private void traverse(BEASTInterface o, HashSet<BEASTInterface> done) {
