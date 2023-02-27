@@ -46,7 +46,7 @@ public class GeoPrior extends Distribution {
 	
 	boolean isRoot;
 	boolean isTip = false;
-	public boolean allInternalNodes = false;
+	boolean allInternalNodes = false;
 	
     // number of taxa in taxon set
     int nrOfTaxa = -1;

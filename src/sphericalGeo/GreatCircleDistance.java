@@ -24,6 +24,7 @@ public class GreatCircleDistance extends BEASTObject implements Distance {
 		tree = trait.treeInput.get();
 	}
 
+	// returns distance in km
 	@Override
 	public double pairwiseDistance(int taxon1, int taxon2) {
 		double [] loc1 = trait.getTrait(tree, tree.getNode(taxon1));
@@ -31,6 +32,7 @@ public class GreatCircleDistance extends BEASTObject implements Distance {
 		return pairwiseDistance(loc1, loc2);
 	}
 	
+	// returns distance in km
 	public static double pairwiseDistance(double [] start, double [] end) {
 		if (start[0] == end[0] && start[1] == end[1]) {
 			return 0.0;
