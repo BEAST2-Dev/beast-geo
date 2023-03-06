@@ -2,11 +2,11 @@ package sphericalGeo.util;
 
 import beast.base.core.Description;
 import beast.base.core.Input;
-import beast.base.evolution.branchratemodel.UCRelaxedClockModel;
+import beast.base.evolution.branchratemodel.StrictClockModel;
 import beast.base.evolution.tree.Node;
 
 @Description("Branch rate model that reads branch rates from the tree -- to be used in combination with PostHocLoationSampler")
-public class PostHocBranchRateModel extends UCRelaxedClockModel {
+public class PostHocBranchRateModel extends StrictClockModel {
 	final public Input<String> tagInput = new Input<>("tag","meta data tag used in node for the branch rate","rate");
 
 	String tag;
