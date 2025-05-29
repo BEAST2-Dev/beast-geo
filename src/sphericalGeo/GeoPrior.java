@@ -368,8 +368,12 @@ public class GeoPrior extends Distribution {
     
     @Override
     public void init(PrintStream out) {
-        out.print(getID() + ".latitude\t");
-        out.print(getID() + ".longitude\t");
+    	if (allInternalNodes) {
+    		out.print(getID() + "\t");
+    	} else {
+    		out.print(getID() + ".latitude\t");
+    		out.print(getID() + ".longitude\t");
+    	}
     }
     
     @Override
@@ -377,6 +381,10 @@ public class GeoPrior extends Distribution {
 		if (!initialised) {
 			initialise();
 		}
+    	if (allInternalNodes) {
+    		out.print(logP + "\t");
+    		return;
+    	}
 		double[] location = new double[2];
 		this.location.getMatrixValues1(taxonNr, location);
         out.print(location[0] + "\t");
